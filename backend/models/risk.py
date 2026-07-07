@@ -74,4 +74,4 @@ class RiskAnalysis(BaseModel):
     news_id: str
     headline: str
     published_date: datetime
-    assessment: RiskAssessment
+    assessment: RiskAssessment 
