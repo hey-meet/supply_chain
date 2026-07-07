@@ -1,4 +1,4 @@
-from mistralai import Mistral
+from mistralai.client import Mistral
 
 from backend.config.settings import settings
 from backend.providers.base import BaseLLMProvider
@@ -8,7 +8,9 @@ class MistralProvider(BaseLLMProvider):
     """Mistral AI provider."""
 
     def __init__(self):
-        self.client = Mistral(api_key=settings.MISTRAL_API_KEY)
+        self.client = Mistral(
+            api_key=settings.MISTRAL_API_KEY,
+        )
 
     def generate(self, prompt: str) -> str:
         """Generate a response using Mistral."""
