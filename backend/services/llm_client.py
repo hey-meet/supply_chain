@@ -21,5 +21,17 @@ class LLMClient:
             )
 
     def generate(self, prompt: str) -> str:
-        """Generate a response using the active provider."""
-        return self.provider.generate(prompt)
+        """
+        Generate a response using the configured provider.
+
+        Raises:
+            RuntimeError: If the provider request fails.
+        """
+
+        try:
+            return self.provider.generate(prompt)
+
+        except Exception as exc:
+            raise RuntimeError(
+                f"LLM generation failed: {exc}"
+            ) from exc
