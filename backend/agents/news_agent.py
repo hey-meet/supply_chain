@@ -52,7 +52,7 @@ class NewsIntelligenceAgent:
         seen_urls = set()
 
         for article in articles:
-            url = article.url.strip()
+            url = str(article.url)
 
             if url in seen_urls:
                 continue
@@ -83,8 +83,7 @@ class NewsIntelligenceAgent:
         Normalize metadata into a consistent format.
         """
 
-        article.url = article.url.strip()
-
+        # HttpUrl is already validated by Pydantic.
         article.score = float(article.score or 0.0)
 
         if article.published_date:
