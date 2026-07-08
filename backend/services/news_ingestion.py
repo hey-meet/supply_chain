@@ -87,6 +87,20 @@ def extract_keywords(text: str, top_n: int = 5) -> list[str]:
 # -----------------------------------------------------------------------
 # STEP 4: Extract location from cleaned text
 # -----------------------------------------------------------------------
+_KNOWN_LOCATIONS = [
+    # Countries
+    "India", "China", "Taiwan", "USA", "United States", "Vietnam",
+    "Bangladesh", "Indonesia", "Japan", "South Korea", "Germany",
+    "Brazil", "Russia", "Ukraine", "Egypt","Amarica", "Australia", "Canada", "France", "Italy", "Spain",
+    # Indian states (common supply chain / manufacturing hubs)
+    "Gujarat", "Maharashtra", "Rajasthan", "Tamil Nadu", "Karnataka",
+    "Bihar", "Punjab", "Haryana", "Madhya Pradesh", "West Bengal",
+    "Odisha", "Andhra Pradesh", "Uttar Pradesh",
+    # Major cities / ports
+    "Mumbai", "Chennai", "Kolkata", "Delhi", "Bengaluru", "Surat",
+    "Kandla", "Mundra", "Visakhapatnam", "Shanghai", "Singapore",
+    "Rotterdam", "Los Angeles", "Suez", "Panama",
+]
 def extract_location(text: str) -> str | None:
     """
     Extracts a location from the input text using a simple regex pattern.
@@ -97,7 +111,13 @@ def extract_location(text: str) -> str | None:
     Returns:
         str | None: The extracted location if found, otherwise None.
     """
-    
+    if not text:
+        return None
+ 
+    for location in _KNOWN_LOCATIONS:
+        pattern = r"\b" + re.escape(location) + r"\b"
+        if re.search(pattern, text, re.IGNORECASE):
+            return location
     return None
 
 # -----------------------------------------------------------------------
