@@ -1,6 +1,12 @@
+import json
 import os
 import re
 from urllib.parse import urlparse
+
+try:
+    from backend.services.search_service import search_service
+except ModuleNotFoundError:
+    from search_service import search_service
 
 # -----------------------------------------------------------------------
 # STEP 1: Clean & preprocess article text
@@ -101,6 +107,7 @@ _KNOWN_LOCATIONS = [
     "Kandla", "Mundra", "Visakhapatnam", "Shanghai", "Singapore",
     "Rotterdam", "Los Angeles", "Suez", "Panama",
 ]
+
 def extract_location(text: str) -> str | None:
     """
     Extracts a location from the input text using a simple regex pattern.
@@ -148,6 +155,34 @@ def build_structured_article(raw_article: dict) -> dict:
     }
 
 
+def extract_articles_from_search_result(search_result: dict | None) -> list[dict]:
+    """Normalize Tavily-style search responses into a list of article dictionaries."""
+    if not isinstance(search_result, dict):
+        return []
+
+    if isinstance(search_result.get("articles"), list):
+        return search_result["articles"]
+
+    results = search_result.get("results")
+    if not isinstance(results, list):
+        return []
+
+    normalized_articles = []
+    for item in results:
+        if not isinstance(item, dict):
+            continue
+        normalized_articles.append(
+            {
+                "title": item.get("title", ""),
+                "content": item.get("content") or item.get("snippet") or item.get("raw_content") or "",
+                "url": item.get("url", ""),
+                "published_date": item.get("published_date"),
+            }
+        )
+
+    return normalized_articles
+
+
 def process_raw_articles(raw_articles: list[dict]) -> list[dict]:
     """
     Processes a list of raw articles and returns a list of structured articles.
@@ -171,6 +206,18 @@ if __name__ == "__main__":
         }
     ]
  
-    processed = process_raw_articles(sample_raw_articles)
-    for article in processed:
-        print(article)
+    try:
+        search_result = search_service.search_logistics_news(max_results=5)
+    except Exception as exc:
+        print(f"Search failed: {exc}")
+        raise SystemExit(1) from exc
+
+    processed = process_raw_articles(extract_articles_from_search_result(search_result))
+    if not processed:
+        print("No articles returned.")
+    else:
+        for article in processed:
+            print("\n----- STRUCTURED NEWS OBJECTS -----")
+            print(json.dumps(article, indent=2))
+            print("------------------------------------\n")
+            # print(article)
