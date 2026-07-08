@@ -9,6 +9,29 @@ from backend.api.schemas import SystemStatusResponse
 # Append to backend/tests/test_api_v1.py
 from fastapi.testclient import TestClient
 from backend.main import app
+# Append to backend/tests/test_api_v1.py
+def test_telemetry_sanitization_and_bounds():
+    """Ensure data layers strip illegal characters and reject corrupt GPS bounds."""
+    # Test valid input with messy spacing and invalid symbols
+    payload = {
+        "tracking_id": "  CONT-12345!@#  ",
+        "origin_country": "IND",
+        "latitude": 18.5204,
+        "longitude": 73.8567
+    }
+    response = client.post("/api/v1/telemetry/validate", json=payload)
+    assert response.status_code == 201
+    assert response.json()["sanitized_tracking_id"] == "CONT-12345"
+
+    # Test out-of-bounds latitude
+    bad_payload = payload.copy()
+    bad_payload["latitude"] = 120.0  # Invalid latitude
+    bad_response = client.post("/api/v1/telemetry/validate", json=bad_payload)
+    assert bad_response.status_code == 422  # Unprocessable Entity
+
+
+
+
 
 client = TestClient(app)
 
