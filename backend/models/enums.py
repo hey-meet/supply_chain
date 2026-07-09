@@ -2,9 +2,7 @@ from enum import Enum
 
 
 class SeverityLevel(str, Enum):
-    """
-    Severity assigned by the Risk Classification Agent.
-    """
+    """Severity assigned by the Risk Classification Agent."""
 
     LOW = "low"
     MEDIUM = "medium"
@@ -13,27 +11,32 @@ class SeverityLevel(str, Enum):
 
 
 class RiskCategory(str, Enum):
-    """
-    Supply chain disruption categories.
-    """
+    """Supported supply chain disruption categories."""
 
-    WEATHER = "weather"
-    LOGISTICS = "logistics"
+    RAW_MATERIAL_SHORTAGE = "raw_material_shortage"
     TRANSPORTATION = "transportation"
-    SUPPLIER = "supplier"
-    PORT = "port"
-    RAW_MATERIAL = "raw_material"
-    ENERGY = "energy"
-    LABOR = "labor"
+    WEATHER = "weather"
+    PORT_CONGESTION = "port_congestion"
+    SUPPLIER_FAILURE = "supplier_failure"
     REGULATORY = "regulatory"
+    LABOR_STRIKE = "labor_strike"
+    ENERGY = "energy"
+    PRICE_FLUCTUATION = "price_fluctuation"
     GEOPOLITICAL = "geopolitical"
     OTHER = "other"
 
 
+class BusinessImpact(str, Enum):
+    """Estimated business impact."""
+
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    SEVERE = "severe"
+
+
 class AgentStatus(str, Enum):
-    """
-    Overall status returned by AI agents.
-    """
+    """Overall status returned by AI agents."""
 
     SUCCESS = "success"
     FAILED = "failed"
