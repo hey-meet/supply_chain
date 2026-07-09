@@ -178,15 +178,4 @@ def classify_articles_to_json(raw_articles: list[dict]) -> str:
     """Return the classification results as a pretty JSON string."""
     results = classify_articles(raw_articles)
     return json.dumps(results, indent=2,  ensure_ascii=False)
-
-
-# -----------------------------------------------------------------------
-# STEP 6: Quick manual test when running this file directly
-# -----------------------------------------------------------------------
-if __name__ == "__main__":
-    # This block only runs if you execute:
-    #   python disruption_classifier.py
-    raw_articles = search_service.search_weather_news(max_results=5)  # Replace with actual search function
-    results = classify_articles_to_json(raw_articles)
-    print(results)
     
