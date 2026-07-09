@@ -69,13 +69,8 @@ def test_process_raw_articles():
 
 
 def test_extract_articles_from_search_result_uses_results_field():
-    search_result = {
-        "results": [
-            {"title": "Rain disrupts port", "content": "Heavy rains hit the port", "url": "https://example.com/1", "published_date": "2026-07-01"}
-        ]
-    }
-
-    articles = extract_articles_from_search_result(search_result)
+    
+    articles = extract_articles_from_search_result(SAMPLE_RAW_ARTICLES)
     assert len(articles) == 1
     assert articles[0]["title"] == "Rain disrupts port"
 
