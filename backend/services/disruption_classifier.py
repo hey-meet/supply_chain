@@ -151,3 +151,42 @@ def _normalize_raw_articles(raw_articles):
 
     return []
 
+# -----------------------------------------------------------------------
+# STEP 5: Public function — the full pipeline, starting from raw articles
+# -----------------------------------------------------------------------
+def classify_articles(raw_articles: list[dict]) -> list[dict]:
+    """
+    Runs the FULL pipeline, starting from raw articles all the way to
+    structured classification output:
+
+        Raw articles -> news_ingestion (clean + structure) -> classify_article()
+
+    Args:
+        raw_articles (list[dict]): Raw articles, each shaped like:
+            {"title": ..., "url": ..., "content": ..., "published_date": ...}
+
+    Returns:
+        list[dict]: A list of structured classification results, one per
+        article.
+    """
+    normalized_articles = _normalize_raw_articles(raw_articles)
+    structured_articles = process_raw_articles(normalized_articles)
+    return [classify_article(article) for article in structured_articles]
+
+
+def classify_articles_to_json(raw_articles: list[dict]) -> str:
+    """Return the classification results as a pretty JSON string."""
+    results = classify_articles(raw_articles)
+    return json.dumps(results, indent=2)
+
+
+# -----------------------------------------------------------------------
+# STEP 6: Quick manual test when running this file directly
+# -----------------------------------------------------------------------
+if __name__ == "__main__":
+    # This block only runs if you execute:
+    #   python disruption_classifier.py
+    raw_articles = search_service.search_weather_news(max_results=5)  # Replace with actual search function
+    results = classify_articles_to_json(raw_articles)
+    print(results)
+    
