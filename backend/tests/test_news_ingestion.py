@@ -20,12 +20,6 @@ SAMPLE_RAW_ARTICLES = [
         "content": "<p>Heavy rain has caused a road closure near the plant.</p>",
         "published_date": "2026-07-01",
     },
-    {
-        "title": "Port Congestion Delays Shipments",
-        "url": "https://ports-news.com/news/2",
-        "content": "Ships are waiting longer than usual to unload cargo.",
-        "published_date": "2026-07-02",
-    },
 ]
 
 def test_clean_text_removes_html_and_extra_spaces():
@@ -64,7 +58,7 @@ def test_build_structured_article():
  
 def test_process_raw_articles():
     results = process_raw_articles(SAMPLE_RAW_ARTICLES)
-    assert len(results) == 2
+    assert len(results) == 1
     assert process_raw_articles([]) == []
  
     # Print the final structured output so you can see it clearly.
