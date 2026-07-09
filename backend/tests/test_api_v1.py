@@ -31,6 +31,23 @@ def test_telemetry_sanitization_and_bounds():
 
 
 
+# Append this inside the existing test_telemetry_sanitization_and_bounds() function or add it right below:
+
+def test_telemetry_invalid_longitude_bounds():
+    """Ensure that geographic longitude constraints throw a 422 error for out-of-bounds parameters."""
+    from backend.tests.test_api_v1 import client
+    
+    bad_longitude_payload = {
+        "tracking_id": "CONT-99999",
+        "origin_country": "IND",
+        "latitude": 18.5204,
+        "longitude": 200.0  # Invalid longitude (> 180.0)
+    }
+    response = client.post("/api/v1/telemetry/validate", json=bad_longitude_payload)
+    assert response.status_code == 422
+
+
+
 
 
 client = TestClient(app)
