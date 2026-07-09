@@ -1,4 +1,5 @@
 from backend.agents.news_agent import news_agent
+from backend.models.agent_contracts import StructuredNews
 from backend.models.search import NewsCollection
 
 
@@ -40,13 +41,10 @@ def test_prepare_agent_input():
 
     agent_input = news_agent.prepare_agent_input(raw_news)
 
-    assert "query" in agent_input
-    assert "articles" in agent_input
-    assert "article_count" in agent_input
-
-    assert agent_input["query"] != ""
-    assert isinstance(agent_input["articles"], list)
-    assert agent_input["article_count"] == len(agent_input["articles"])
+    assert isinstance(agent_input, StructuredNews)
+    assert agent_input.query != ""
+    assert isinstance(agent_input.articles, list)
+    assert agent_input.article_count == len(agent_input.articles)
 
 
 def test_duplicate_removal():

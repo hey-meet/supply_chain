@@ -1,7 +1,7 @@
 from backend.models.search import NewsCollection, SearchResult
 from backend.services.search_service import search_service
 from backend.models.agent_contracts import StructuredNews
-
+from backend.models.news import NewsArticle
 
 class NewsIntelligenceAgent:
     """Agent responsible for retrieving and preparing news data."""
@@ -151,10 +151,24 @@ class NewsIntelligenceAgent:
         """
         processed_news = self.process_news(news_data)
 
+        articles = [
+        NewsArticle(
+            title=article.title,
+            content=article.content,
+            source=None,
+            url=article.url,
+            published_date=article.published_date,
+            location=None,
+            search_score=article.score,
+        )
+        for article in processed_news.results
+    ]
+
+
         return StructuredNews(
             query=processed_news.query,
-            articles=processed_news.results,
-            article_count=len(processed_news.results),
+            articles=articles,
+            article_count=len(articles),
         )
 
 
