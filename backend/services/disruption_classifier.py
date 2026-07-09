@@ -135,7 +135,7 @@ def classify_article(article: dict) -> dict:
     }
 
 
-def _normalize_raw_articles(raw_articles):
+def normalize_raw_articles(raw_articles: list[dict] ) -> list[dict]:
     """Accept either a list of article dictionaries or a Tavily-style search result dict."""
     if isinstance(raw_articles, dict):
         return extract_articles_from_search_result(raw_articles)
@@ -169,7 +169,7 @@ def classify_articles(raw_articles: list[dict]) -> list[dict]:
         list[dict]: A list of structured classification results, one per
         article.
     """
-    normalized_articles = _normalize_raw_articles(raw_articles)
+    normalized_articles = normalize_raw_articles(raw_articles)
     structured_articles = process_raw_articles(normalized_articles)
     return [classify_article(article) for article in structured_articles]
 
@@ -177,7 +177,7 @@ def classify_articles(raw_articles: list[dict]) -> list[dict]:
 def classify_articles_to_json(raw_articles: list[dict]) -> str:
     """Return the classification results as a pretty JSON string."""
     results = classify_articles(raw_articles)
-    return json.dumps(results, indent=2)
+    return json.dumps(results, indent=2,  ensure_ascii=False)
 
 
 # -----------------------------------------------------------------------
