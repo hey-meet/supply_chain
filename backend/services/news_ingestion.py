@@ -97,7 +97,7 @@ _KNOWN_LOCATIONS = [
     # Countries
     "India", "China", "Taiwan", "USA", "United States", "Vietnam",
     "Bangladesh", "Indonesia", "Japan", "South Korea", "Germany",
-    "Brazil", "Russia", "Ukraine", "Egypt","Amarica", "Australia", "Canada", "France", "Italy", "Spain",
+    "Brazil", "Russia", "Ukraine", "Egypt","America", "Australia", "Canada", "France", "Italy", "Spain",
     # Indian states (common supply chain / manufacturing hubs)
     "Gujarat", "Maharashtra", "Rajasthan", "Tamil Nadu", "Karnataka",
     "Bihar", "Punjab", "Haryana", "Madhya Pradesh", "West Bengal",
