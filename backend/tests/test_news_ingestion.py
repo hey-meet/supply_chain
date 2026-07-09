@@ -17,7 +17,7 @@ SAMPLE_RAW_ARTICLES = [
     {
         "title": "  Heavy Rainfall Shuts Down Highway  ",
         "url": "https://www.reuters.com/world/story",
-        "content": "<p>Heavy rain has caused a road closure near the plant.</p>",
+        "content": "<p>Heavy rain has caused a road closure near the Gujarat plant.</p>",
         "published_date": "2026-07-01",
     },
 ]
@@ -53,9 +53,10 @@ def test_build_structured_article():
     assert expected_fields.issubset(structured.keys())
     assert structured["title"] == "Heavy Rainfall Shuts Down Highway"
     assert structured["domain"] == "reuters.com"
-    assert structured["content"] == "Heavy rain has caused a road closure near the plant."
- 
- 
+    assert structured["content"] == "Heavy rain has caused a road closure near the Gujarat plant."
+    assert structured["location"] == "Gujarat"
+
+
 def test_process_raw_articles():
     results = process_raw_articles(SAMPLE_RAW_ARTICLES)
     assert len(results) == 1
