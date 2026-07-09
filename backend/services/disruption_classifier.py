@@ -101,3 +101,53 @@ def assign_severity(content: str, matched_categories: list[str]) -> str:
     # No explicit severity word found — fall back on category count.
     return "High" if len(matched_categories) > 1 else "Medium"
 
+# -----------------------------------------------------------------------
+# STEP 4: Classify one article into the final structured schema
+# -----------------------------------------------------------------------
+def classify_article(article: dict) -> dict:
+    """
+    Takes ONE structured article (already cleaned by news_ingestion.py)
+    and returns the final structured classification object.
+
+    Args:
+        article (dict): A structured article from
+            news_ingestion.build_structured_article(), e.g.
+            {"title": ..., "content": ..., "domain": ..., "url": ...,
+             "published_date": ..., "location": ..., "keywords": [...]}
+
+    Returns:
+        dict: A structured classification object in Json format
+    """
+    content = article.get("content", "")
+    matched_categories = detect_risk_categories(content)
+    severity = assign_severity(content, matched_categories)
+
+    return {
+        "title": article.get("title"),
+        "content": article.get("content"),
+        "domain": article.get("domain"),
+        "published_date": article.get("published_date"),
+        "url": article.get("url"),
+        "location": article.get("location"),
+        "risk_categories": matched_categories,
+        "severity": severity,
+        "keywords": article.get("keywords"),
+    }
+
+
+def _normalize_raw_articles(raw_articles):
+    """Accept either a list of article dictionaries or a Tavily-style search result dict."""
+    if isinstance(raw_articles, dict):
+        return extract_articles_from_search_result(raw_articles)
+
+    if isinstance(raw_articles, list):
+        normalized_articles = []
+        for article in raw_articles:
+            if isinstance(article, dict):
+                normalized_articles.append(article)
+            elif isinstance(article, str):
+                normalized_articles.append({"title": article, "content": article, "url": ""})
+        return normalized_articles
+
+    return []
+
