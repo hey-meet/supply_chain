@@ -1,5 +1,6 @@
 from backend.models.search import NewsCollection, SearchResult
 from backend.services.search_service import search_service
+from backend.models.agent_contracts import StructuredNews
 
 
 class NewsIntelligenceAgent:
@@ -18,6 +19,23 @@ class NewsIntelligenceAgent:
             max_results=max_results,
         )
 
+    def parse_search_results(self, news_data: dict) -> list[SearchResult]:
+        """
+        Convert raw Tavily search results into SearchResult objects.
+        """
+        # Assigned to an explicitly typed variable before returning for readability/debugging
+        results: list[SearchResult] = [
+            SearchResult(
+                title=item.get("title", ""),
+                url=item.get("url", ""),
+                published_date=item.get("published_date"),
+                content=item.get("content", ""),
+                score=item.get("score", 0.0),
+            )
+            for item in news_data.get("results", [])
+        ]
+        return results
+
     def filter_relevant_articles(
         self,
         articles: list[SearchResult],
@@ -26,8 +44,7 @@ class NewsIntelligenceAgent:
         Filter out articles that do not contain enough information
         for downstream AI processing.
         """
-
-        filtered_articles = []
+        filtered_articles: list[SearchResult] = []
 
         for article in articles:
             if not article.title.strip():
@@ -47,9 +64,9 @@ class NewsIntelligenceAgent:
         """
         Remove duplicate articles using URL as the unique identifier.
         """
-
-        unique_articles = []
-        seen_urls = set()
+        unique_articles: list[SearchResult] = []
+        # Added explicit type definition for the hash set tracker
+        seen_urls: set[str] = set()
 
         for article in articles:
             url = str(article.url)
@@ -69,7 +86,6 @@ class NewsIntelligenceAgent:
         """
         Clean article content before AI processing.
         """
-
         article.title = " ".join(article.title.split())
         article.content = " ".join(article.content.split())
 
@@ -82,7 +98,6 @@ class NewsIntelligenceAgent:
         """
         Normalize metadata into a consistent format.
         """
-
         # HttpUrl is already validated by Pydantic.
         article.score = float(article.score or 0.0)
 
@@ -106,17 +121,7 @@ class NewsIntelligenceAgent:
         4. Clean article content
         5. Normalize metadata
         """
-
-        results = [
-            SearchResult(
-                title=item.get("title", ""),
-                url=item.get("url", ""),
-                published_date=item.get("published_date"),
-                content=item.get("content", ""),
-                score=item.get("score", 0.0),
-            )
-            for item in news_data.get("results", [])
-        ]
+        results = self.parse_search_results(news_data)
 
         results = self.filter_relevant_articles(results)
 
@@ -140,18 +145,17 @@ class NewsIntelligenceAgent:
     def prepare_agent_input(
         self,
         news_data: dict,
-    ) -> dict:
+    ) -> StructuredNews:
         """
         Prepare structured output for downstream AI agents.
         """
-
         processed_news = self.process_news(news_data)
 
-        return {
-            "query": processed_news.query,
-            "articles": processed_news.results,
-            "article_count": len(processed_news.results),
-        }
+        return StructuredNews(
+            query=processed_news.query,
+            articles=processed_news.results,
+            article_count=len(processed_news.results),
+        )
 
 
 news_agent = NewsIntelligenceAgent()
