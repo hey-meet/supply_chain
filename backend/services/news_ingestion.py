@@ -93,11 +93,13 @@ def extract_keywords(text: str, top_n: int = 5) -> list[str]:
 # -----------------------------------------------------------------------
 # STEP 4: Extract location from cleaned text
 # -----------------------------------------------------------------------
-_KNOWN_LOCATIONS = [
+_KNOWN_LOCATIONS = list(dict.fromkeys([
     # Countries
     "India", "China", "Taiwan", "USA", "United States", "Vietnam",
-    "Bangladesh", "Indonesia", "Japan", "South Korea", "Germany",
-    "Brazil", "Russia", "Ukraine", "Egypt","America", "Australia", "Canada", "France", "Italy", "Spain",
+    "Bangladesh", "Indonesia", "Japan", "South Korea", "Germany", "Israel",
+    "Turkey", "Thailand", "Malaysia", "Philippines", "Mexico",
+    "Brazil", "Russia", "Ukraine", "Egypt", "Australia", "Canada",
+    "France", "Italy", "Spain",
     # Indian states (common supply chain / manufacturing hubs)
     "Gujarat", "Maharashtra", "Rajasthan", "Tamil Nadu", "Karnataka",
     "Bihar", "Punjab", "Haryana", "Madhya Pradesh", "West Bengal",
@@ -106,7 +108,7 @@ _KNOWN_LOCATIONS = [
     "Mumbai", "Chennai", "Kolkata", "Delhi", "Bengaluru", "Surat",
     "Kandla", "Mundra", "Visakhapatnam", "Shanghai", "Singapore",
     "Rotterdam", "Los Angeles", "Suez", "Panama",
-]
+]))
 
 def extract_location(text: str) -> str | None:
     """
@@ -195,29 +197,3 @@ def process_raw_articles(raw_articles: list[dict]) -> list[dict]:
     """
     return [build_structured_article(article) for article in raw_articles]
 
-
-if __name__ == "__main__":
-    sample_raw_articles = [
-        {
-            "title": "  Heavy Rainfall Shuts Down Highway  ",
-            "url": "https://www.example.com/news/1",
-            "content": "<p>Heavy rain has caused a road closure near the plant.</p>",
-            "published_date": "2026-07-01",
-        }
-    ]
- 
-    try:
-        search_result = search_service.search_logistics_news(max_results=5)
-    except Exception as exc:
-        print(f"Search failed: {exc}")
-        raise SystemExit(1) from exc
-
-    processed = process_raw_articles(extract_articles_from_search_result(search_result))
-    if not processed:
-        print("No articles returned.")
-    else:
-        for article in processed:
-            print("\n----- STRUCTURED NEWS OBJECTS -----")
-            print(json.dumps(article, indent=2))
-            print("------------------------------------\n")
-            # print(article)
