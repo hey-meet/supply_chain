@@ -123,5 +123,42 @@ intainable backend architecture for the upcoming Tavily integration and News Int
 Day 3 marked the completion of the project's core AI Risk Intelligence workflow. The system can now retrieve real-time logistics news, preprocess and structure articles, perform AI-powered disruption classification using a provider-based LLM architecture, and generate validated structured risk assessments. In parallel, the News Ingestion module was completed with standardized article processing and expanded test coverage, while the backend application was fully integrated through the FastAPI entry point with centralized middleware, CORS configuration, request monitoring, and global exception handling. These developments establish a robust, production-ready foundation for the multi-agent supply chain intelligence platform and prepare the project for downstream impact analysis in the following development phase.
 
 
-phase focuses on integrating the Tavily Search API and implementing the News Intelligence Agent's disruption classification workflow.
+## Day 4 — 08/07/2026
+
+### Completed
+
+* Enhanced the News Ingestion pipeline with a curated list of known locations for improved geographic extraction from news articles.
+* Refactored article extraction logic with robust error handling for Search Service failures and normalized article field population.
+* Expanded unit tests for article extraction and processing, covering edge cases and structured output validation.
+* Created the `disruption_classifier.py` module as a foundational rule-based classification service.
+* Defined `RISK_CATEGORY_KEYWORDS` mapping ten disruption risk categories (Flood, Heavy Rainfall, Road Closure, Railway Strike, Port Congestion, Fuel Price Increase, Coal Price Increase, Supplier Shutdown, Political Conflict, Natural Disaster) with associated keyword sets.
+* Introduced `SEVERITY_KEYWORDS` with a four-tier severity hierarchy (Critical, High, Medium, Low) for disruption severity scoring.
+* Added `SAFE_CATEGORY` fallback classification for articles with no detected risk signals.
+* Renamed test file from `test_classification.py` to `test_classifier.py` for consistency with module naming conventions.
+* Created `DisruptionTelemetryInput` Pydantic schema with regex-based sanitizers and coordinate validators (`backend/api/inputs.py`).
+* Exposed a `POST /telemetry/validate` endpoint for real-time shipment telemetry ingestion with schema-layer sanitization (`backend/api/endpoints.py`).
+* Added comprehensive unit tests verifying string sanitizer behavior and coordinate boundary enforcement for latitude and longitude fields (`backend/tests/test_api_v1.py`).
+* Designed the News Intelligence Agent architecture document, defining responsibilities, processing lifecycle, and inter-agent communication flow (`docs/architecture/news-agent.md`).
+* Added reusable prompt templates for news relevance filtering and disruption classification (`backend/prompts/news_filter.py`, `backend/prompts/news_classifier.py`).
+* Defined typed agent communication contracts (`NewsAgentInput`, `StructuredNews`, `RiskAgentInput`) as Pydantic models in `backend/models/agent_contracts.py`.
+
+### In Progress
+
+* Implementing the full `NewsIntelligenceAgent` class with filtering, deduplication, content cleaning, and metadata normalization methods.
+* Integrating the News Intelligence Agent with the downstream Risk Classification Agent.
+
+### Pending
+
+* Complete News Intelligence Agent implementation and integration test coverage.
+* Wire the `disruption_classifier.py` keyword-based pipeline into the main classification workflow.
+* Validate the telemetry endpoint against live container tracking payloads.
+* Prepare backend for multi-agent orchestration in Week 2.
+
+### Notes
+
+Day 4 significantly expanded the project across three parallel workstreams. The News Ingestion module was hardened with better location extraction and robust error handling, while a foundational rule-based disruption classifier was introduced with clearly defined risk categories and severity tiers. In parallel, the API layer gained a validated telemetry ingestion endpoint with schema-level sanitization, and the multi-agent architecture received its formal design with communication contracts, prompt templates, and agent lifecycle documentation. These developments collectively advance the backend toward a structured, multi-agent supply chain intelligence platform.
+
+
+
+
 
