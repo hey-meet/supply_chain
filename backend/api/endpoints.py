@@ -10,6 +10,27 @@ from fastapi import APIRouter
 from backend.config import settings
 from backend.api.schemas import SystemStatusResponse
 from backend.api.inputs import DisruptionTelemetryInput
+# Append this to backend/api/endpoints.py
+from fastapi import BackgroundTasks, UUID4
+import uuid
+from backend.utils.workers import process_async_news_ingestion
+
+@router.post("/news/ingest-async", status_code=202)
+async def ingest_news_asynchronously(raw_text: str, background_tasks: BackgroundTasks):
+    """
+    Ingest heavy unstructured news content asynchronously.
+    Returns HTTP 202 Accepted instantly to keep connection pools clear.
+    """
+    generated_id = str(uuid.uuid4())
+    
+    # Enqueue the processing task to run concurrently in the background
+    background_tasks.add_task(process_async_news_ingestion, generated_id, raw_text)
+    
+    return {
+        "success": True,
+        "payload_id": generated_id,
+        "status": "Processing initiated in background task queue."
+    }
 
 # FIX: Initialized at the top before any decorators use it
 router = APIRouter()
