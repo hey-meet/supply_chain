@@ -9,6 +9,10 @@ from backend.api.schemas import SystemStatusResponse
 # Append to backend/tests/test_api_v1.py
 from fastapi.testclient import TestClient
 from backend.main import app
+
+
+
+
 # Append to backend/tests/test_api_v1.py
 def test_telemetry_sanitization_and_bounds():
     """Ensure data layers strip illegal characters and reject corrupt GPS bounds."""
@@ -71,3 +75,20 @@ def test_settings_initialization():
     assert settings.APP_NAME == "Logistics Autonomous Disruption Monitoring Agent"
     assert settings.API_V1_STR == "/api/v1"
     assert isinstance(settings.DEBUG, bool)
+
+
+
+
+
+# Append to backend/tests/test_api_v1.py
+
+def test_async_ingestion_returns_202():
+    """Verify that the async route returns 202 Accepted status immediately."""
+    from backend.tests.test_api_v1 import client
+    
+    test_payload = {"raw_text": "Breaking: Supply chain route disruptions reported at main port terminals."}
+    response = client.post("/api/v1/news/ingest-async", params=test_payload)
+    
+    assert response.status_code == 202
+    assert response.json()["success"] is True
+    assert "payload_id" in response.json()
