@@ -158,7 +158,39 @@ Day 3 marked the completion of the project's core AI Risk Intelligence workflow.
 
 Day 4 significantly expanded the project across three parallel workstreams. The News Ingestion module was hardened with better location extraction and robust error handling, while a foundational rule-based disruption classifier was introduced with clearly defined risk categories and severity tiers. In parallel, the API layer gained a validated telemetry ingestion endpoint with schema-level sanitization, and the multi-agent architecture received its formal design with communication contracts, prompt templates, and agent lifecycle documentation. These developments collectively advance the backend toward a structured, multi-agent supply chain intelligence platform.
 
+## Day 5 — 09/07/2026
 
+### Completed
 
+* Implemented the complete `NewsIntelligenceAgent` class with the full article processing pipeline (`backend/agents/news_agent.py`).
+* Implemented `filter_relevant_articles()` to discard articles missing titles or content before AI processing.
+* Implemented `remove_duplicates()` to eliminate duplicate articles using URL as the unique identifier.
+* Implemented `clean_content()` to normalize whitespace and standardize article text for downstream AI consumption.
+* Implemented `normalize_metadata()` to enforce consistent URL formatting, score typing, and publication date normalization.
+* Implemented `process_news()` orchestrating the full processing pipeline: raw result parsing → filtering → deduplication → content cleaning → metadata normalization.
+* Implemented `prepare_agent_input()` to produce structured output dictionaries for downstream AI agents, including query, articles, and article count.
+* Added comprehensive News Agent integration tests covering fetch, filter, deduplication, clean, normalize, process, and prepare pipeline stages (`backend/tests/test_news_agent.py`).
+* Refactored `backend/api/endpoints.py` by moving `APIRouter` instantiation above route decorators to prevent decorator evaluation errors (fixes #18).
+* Introduced explicit edge case tests for invalid longitude boundary values in the telemetry validation test suite (fixes #20).
+* Updated PR metadata boundaries and issue linkages in project documentation (fixes #21).
+* Fixed a typo in the known locations list, correcting `'Amarica'` to `'America'` in `backend/services/news_ingestion.py`.
+* Updated test data and expected results in the news ingestion test suite, replacing hardcoded search results with the `SAMPLE_RAW_ARTICLES` fixture for consistent and maintainable testing.
+* Refined test content and assertions across multiple news ingestion test cases to improve accuracy and stability.
+
+### In Progress
+
+* Integrating the News Intelligence Agent with the Risk Classification Agent for end-to-end disruption analysis.
+* Validating the complete multi-agent pipeline from news retrieval through structured risk output.
+
+### Pending
+
+* Complete integration of `NewsIntelligenceAgent` with `disruption_classifier.py` for automated keyword-based classification.
+* Validate full pipeline: news retrieval → ingestion → classification → structured risk output.
+* Expand test coverage to include multi-agent orchestration scenarios.
+* Prepare the backend architecture for Week 2 knowledge graph and supply chain impact analysis integration.
+
+### Notes
+
+Day 5 completed the News Intelligence Agent implementation, delivering a fully functional article processing pipeline capable of fetching, filtering, deduplicating, cleaning, and normalizing news data for downstream AI agents. Alongside this, the API layer was stabilized with a critical router initialization fix and expanded boundary validation tests. Test suite quality was improved across both the news ingestion and agent modules through better fixtures, edge case coverage, and data consistency corrections. With the News Intelligence Agent now fully operational and tested, the project is well-positioned to connect the news pipeline to the Risk Classification Agent and advance toward end-to-end multi-agent supply chain disruption analysis.
 
 
