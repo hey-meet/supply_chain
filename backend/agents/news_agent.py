@@ -10,7 +10,7 @@ class NewsIntelligenceAgent:
         self,
         query: str,
         max_results: int = 5,
-    ) -> dict:
+    ) -> NewsCollection:
         """
         Fetch news from the Search Service.
         """
@@ -22,6 +22,7 @@ class NewsIntelligenceAgent:
     def parse_search_results(self, news_data: dict) -> list[SearchResult]:
         """
         Convert raw Tavily search results into SearchResult objects.
+        Kept for backward compatibility with existing tests.
         """
         # Assigned to an explicitly typed variable before returning for readability/debugging
         results: list[SearchResult] = [
@@ -108,20 +109,20 @@ class NewsIntelligenceAgent:
 
     def process_news(
         self,
-        news_data: dict,
+        news_data: NewsCollection,
     ) -> NewsCollection:
         """
         Process raw search results into structured news objects.
 
         Processing Steps
-        ----------------
-        1. Convert raw response into SearchResult models
+            ----------------
+        1. Extract SearchResult models from NewsCollection
         2. Filter irrelevant articles
         3. Remove duplicate articles
         4. Clean article content
         5. Normalize metadata
         """
-        results = self.parse_search_results(news_data)
+        results = news_data.results
 
         results = self.filter_relevant_articles(results)
 
@@ -138,13 +139,13 @@ class NewsIntelligenceAgent:
         ]
 
         return NewsCollection(
-            query=news_data.get("query", ""),
+            query=news_data.query,
             results=results,
         )
 
     def prepare_agent_input(
         self,
-        news_data: dict,
+        news_data: NewsCollection,
     ) -> StructuredNews:
         """
         Prepare structured output for downstream AI agents.
@@ -152,24 +153,22 @@ class NewsIntelligenceAgent:
         processed_news = self.process_news(news_data)
 
         articles = [
-        NewsArticle(
-            title=article.title,
-            content=article.content,
-            source=None,
-            url=article.url,
-            published_date=article.published_date,
-            location=None,
-            search_score=article.score,
-        )
-        for article in processed_news.results
-    ]
-
+            NewsArticle(
+                title=article.title,
+                content=article.content,
+                source=None,
+                url=article.url,
+                published_date=article.published_date,
+                location=None,
+                search_score=article.score,
+            )
+            for article in processed_news.results
+        ]
 
         return StructuredNews(
             query=processed_news.query,
             articles=articles,
             article_count=len(articles),
         )
-
 
 news_agent = NewsIntelligenceAgent()
