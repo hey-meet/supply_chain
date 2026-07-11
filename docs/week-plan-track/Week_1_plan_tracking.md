@@ -194,3 +194,40 @@ Day 4 significantly expanded the project across three parallel workstreams. The 
 Day 5 completed the News Intelligence Agent implementation, delivering a fully functional article processing pipeline capable of fetching, filtering, deduplicating, cleaning, and normalizing news data for downstream AI agents. Alongside this, the API layer was stabilized with a critical router initialization fix and expanded boundary validation tests. Test suite quality was improved across both the news ingestion and agent modules through better fixtures, edge case coverage, and data consistency corrections. With the News Intelligence Agent now fully operational and tested, the project is well-positioned to connect the news pipeline to the Risk Classification Agent and advance toward end-to-end multi-agent supply chain disruption analysis.
 
 
+## Day 6 — 11/07/2026
+
+### Completed
+
+* Refactored `SearchService` to return a typed `NewsCollection` object instead of a raw dictionary, enforcing consistent typed responses across all search methods (`search_news`, `search_logistics_news`, `search_supply_chain_news`, `search_weather_news`, `search_commodity_news`).
+* Updated `NewsIntelligenceAgent.fetch_news()` return type annotation from `dict` to `NewsCollection` for full type-safety across the news pipeline.
+* Refactored `NewsIntelligenceAgent.process_news()` and `prepare_agent_input()` to accept `NewsCollection` instead of raw `dict`, replacing `parse_search_results()` calls with direct `.results` attribute access.
+* Fixed list comprehension indentation in `prepare_agent_input()` for consistent code formatting.
+* Added backward-compatibility docstring to `parse_search_results()` noting its retention for existing test compatibility.
+* Created `backend/tests/test_news_pipeline.py` with an end-to-end integration test validating the complete News Intelligence pipeline: query → `SearchService` → `NewsCollection` → `NewsIntelligenceAgent` → `StructuredNews`.
+* Updated `test_news_agent.py` to use typed `SearchResult` and `NewsCollection` fixtures instead of raw dicts in `test_duplicate_removal()` and `test_filter_empty_articles()`.
+* Updated `test_search_service.py` assertions to validate `isinstance(response, NewsCollection)` instead of generic `is not None` checks.
+* Implemented `backend/utils/workers.py` with an async background task execution pipeline (`process_async_news_ingestion`) for non-blocking news ingestion.
+* Exposed a `POST /news/ingest-async` HTTP 202 endpoint in `backend/api/endpoints.py` for asynchronous news content ingestion using FastAPI `BackgroundTasks`.
+* Added tests asserting that the async ingestion endpoint returns an instant HTTP 202 status without blocking the request lifecycle.
+* Fixed a critical bug in `backend/api/endpoints.py` by correcting the `UUID` import source from `fastapi` to the Python standard library `uuid` module (fixes #26).
+* Refactored `endpoints.py` to remove duplicate router declarations and duplicate route definitions, consolidating to a single `router = APIRouter()` initialization at the top of the file.
+* Added test coverage to ensure endpoint imports collect cleanly under the testing matrix (fixes #29).
+* Promoted private constants `_stopwords` and `_KNOWN_LOCATIONS` to public module-level constants `STOPWORDS` and `KNOWN_LOCATIONS` in `backend/services/news_ingestion.py`.
+* Improved `extract_keywords()` sort to use a stable secondary key `(−frequency, word)` for deterministic keyword ordering.
+* Added a type-guard (`isinstance(article, dict)`) to `process_raw_articles()` to gracefully skip non-dict inputs.
+
+### In Progress
+
+* Connecting the typed `NewsIntelligenceAgent` output to the `disruption_classifier.py` keyword-based classification pipeline.
+* Validating the full end-to-end flow: news retrieval → ingestion → classification → structured risk output.
+
+### Pending
+
+* Complete integration of `NewsIntelligenceAgent` with `disruption_classifier.py` for automated keyword-based classification.
+* Validate full pipeline: news retrieval → ingestion → classification → structured risk output.
+* Expand test coverage to include multi-agent orchestration scenarios.
+* Prepare the backend architecture for Week 2 knowledge graph and supply chain impact analysis integration.
+
+### Notes
+
+Day 6 focused on hardening the typed data contracts across the News Intelligence pipeline. The `SearchService` and `NewsIntelligenceAgent` were refactored to operate entirely on strongly typed `NewsCollection` and `SearchResult` models, eliminating raw dictionary passing and improving reliability and IDE support throughout the pipeline. A new end-to-end integration test was introduced to validate the complete query-to-`StructuredNews` flow. In parallel, the API layer received a critical fix correcting an incorrect UUID import, and the endpoint file was consolidated to remove duplicated router and route definitions. An asynchronous news ingestion pathway was also formalized with a dedicated background worker utility and HTTP 202 gateway endpoint. The `news_ingestion` module was further cleaned up with public constant promotion and more robust article processing. These changes collectively bring the project to a stable, typed foundation ahead of the disruption classification integration and Week 2 knowledge graph development.
