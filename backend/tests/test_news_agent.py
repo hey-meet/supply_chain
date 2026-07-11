@@ -1,6 +1,6 @@
 from backend.agents.news_agent import news_agent
 from backend.models.agent_contracts import StructuredNews
-from backend.models.search import NewsCollection
+from backend.models.search import NewsCollection, SearchResult
 
 
 def test_fetch_news():
@@ -9,18 +9,18 @@ def test_fetch_news():
         max_results=3,
     )
 
-    assert response is not None
-    assert isinstance(response, dict)
-    assert "results" in response
+    assert isinstance(response, NewsCollection)
+    assert response.query != ""
+    assert isinstance(response.results, list)
 
 
 def test_process_news():
-    raw_news = news_agent.fetch_news(
+    news = news_agent.fetch_news(
         query="cement supply chain disruption",
         max_results=3,
     )
 
-    processed_news = news_agent.process_news(raw_news)
+    processed_news = news_agent.process_news(news)
 
     assert isinstance(processed_news, NewsCollection)
     assert processed_news.query != ""
@@ -29,17 +29,17 @@ def test_process_news():
     for article in processed_news.results:
         assert article.title != ""
         assert article.content != ""
-        assert article.url != ""
+        assert str(article.url) != ""
         assert isinstance(article.score, float)
 
 
 def test_prepare_agent_input():
-    raw_news = news_agent.fetch_news(
+    news = news_agent.fetch_news(
         query="cement supply chain disruption",
         max_results=3,
     )
 
-    agent_input = news_agent.prepare_agent_input(raw_news)
+    agent_input = news_agent.prepare_agent_input(news)
 
     assert isinstance(agent_input, StructuredNews)
     assert agent_input.query != ""
@@ -48,53 +48,53 @@ def test_prepare_agent_input():
 
 
 def test_duplicate_removal():
-    raw_news = {
-        "query": "test",
-        "results": [
-            {
-                "title": "News 1",
-                "url": "https://example.com/1",
-                "published_date": "2026-07-09",
-                "content": "Sample content",
-                "score": 0.9,
-            },
-            {
-                "title": "News 1 Duplicate",
-                "url": "https://example.com/1",
-                "published_date": "2026-07-09",
-                "content": "Duplicate content",
-                "score": 0.8,
-            },
+    news = NewsCollection(
+        query="test",
+        results=[
+            SearchResult(
+                title="News 1",
+                url="https://example.com/1",
+                published_date="2026-07-09",
+                content="Sample content",
+                score=0.9,
+            ),
+            SearchResult(
+                title="News 1 Duplicate",
+                url="https://example.com/1",
+                published_date="2026-07-09",
+                content="Duplicate content",
+                score=0.8,
+            ),
         ],
-    }
+    )
 
-    processed = news_agent.process_news(raw_news)
+    processed = news_agent.process_news(news)
 
     assert len(processed.results) == 1
 
 
 def test_filter_empty_articles():
-    raw_news = {
-        "query": "test",
-        "results": [
-            {
-                "title": "",
-                "url": "https://example.com/1",
-                "published_date": "2026-07-09",
-                "content": "",
-                "score": 0.8,
-            },
-            {
-                "title": "Valid Article",
-                "url": "https://example.com/2",
-                "published_date": "2026-07-09",
-                "content": "Valid content",
-                "score": 0.9,
-            },
+    news = NewsCollection(
+        query="test",
+        results=[
+            SearchResult(
+                title="",
+                url="https://example.com/1",
+                published_date="2026-07-09",
+                content="",
+                score=0.8,
+            ),
+            SearchResult(
+                title="Valid Article",
+                url="https://example.com/2",
+                published_date="2026-07-09",
+                content="Valid content",
+                score=0.9,
+            ),
         ],
-    }
+    )
 
-    processed = news_agent.process_news(raw_news)
+    processed = news_agent.process_news(news)
 
     assert len(processed.results) == 1
     assert processed.results[0].title == "Valid Article"

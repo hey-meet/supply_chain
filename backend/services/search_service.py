@@ -1,3 +1,4 @@
+from backend.models.search import NewsCollection, SearchResult
 from backend.services.tavily_client import tavily_client
 
 
@@ -8,36 +9,55 @@ class SearchService:
         self,
         query: str,
         max_results: int = 5,
-    ) -> dict:
+    ) -> NewsCollection:
         """Search news using a custom query."""
-        return tavily_client.search(
+
+        response = tavily_client.search(
             query=query,
             topic="news",
             max_results=max_results,
         )
 
-    def search_logistics_news(self, max_results: int = 5) -> dict:
+        results = []
+
+        for item in response.get("results", []):
+            results.append(
+                SearchResult(
+                    title=item.get("title", ""),
+                    url=item.get("url"),
+                    published_date=item.get("published_date"),
+                    content=item.get("content", ""),
+                    score=item.get("score", 0.0),
+                )
+            )
+
+        return NewsCollection(
+            query=query,
+            results=results,
+        )
+
+    def search_logistics_news(self, max_results: int = 5) -> NewsCollection:
         """Retrieve recent logistics-related news."""
         return self.search_news(
             query="latest logistics disruptions transportation freight shipping",
             max_results=max_results,
         )
 
-    def search_supply_chain_news(self, max_results: int = 5) -> dict:
+    def search_supply_chain_news(self, max_results: int = 5) -> NewsCollection:
         """Retrieve recent supply chain news."""
         return self.search_news(
             query="latest supply chain disruptions cement manufacturing",
             max_results=max_results,
         )
 
-    def search_weather_news(self, max_results: int = 5) -> dict:
+    def search_weather_news(self, max_results: int = 5) -> NewsCollection:
         """Retrieve weather events affecting transportation and logistics."""
         return self.search_news(
             query="extreme weather affecting logistics transportation India",
             max_results=max_results,
         )
 
-    def search_commodity_news(self, max_results: int = 5) -> dict:
+    def search_commodity_news(self, max_results: int = 5) -> NewsCollection:
         """Retrieve commodity market news relevant to cement manufacturing."""
         return self.search_news(
             query="coal diesel gypsum fly ash commodity price news",
