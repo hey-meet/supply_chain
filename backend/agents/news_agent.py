@@ -1,6 +1,7 @@
 from backend.models.search import NewsCollection, SearchResult
 from backend.services.search_service import search_service
-
+from backend.models.agent_contracts import StructuredNews
+from backend.models.news import NewsArticle
 
 class NewsIntelligenceAgent:
     """Agent responsible for retrieving and preparing news data."""
@@ -9,7 +10,7 @@ class NewsIntelligenceAgent:
         self,
         query: str,
         max_results: int = 5,
-    ) -> dict:
+    ) -> NewsCollection:
         """
         Fetch news from the Search Service.
         """
@@ -17,6 +18,24 @@ class NewsIntelligenceAgent:
             query=query,
             max_results=max_results,
         )
+
+    def parse_search_results(self, news_data: dict) -> list[SearchResult]:
+        """
+        Convert raw Tavily search results into SearchResult objects.
+        Kept for backward compatibility with existing tests.
+        """
+        # Assigned to an explicitly typed variable before returning for readability/debugging
+        results: list[SearchResult] = [
+            SearchResult(
+                title=item.get("title", ""),
+                url=item.get("url", ""),
+                published_date=item.get("published_date"),
+                content=item.get("content", ""),
+                score=item.get("score", 0.0),
+            )
+            for item in news_data.get("results", [])
+        ]
+        return results
 
     def filter_relevant_articles(
         self,
@@ -26,8 +45,7 @@ class NewsIntelligenceAgent:
         Filter out articles that do not contain enough information
         for downstream AI processing.
         """
-
-        filtered_articles = []
+        filtered_articles: list[SearchResult] = []
 
         for article in articles:
             if not article.title.strip():
@@ -47,9 +65,9 @@ class NewsIntelligenceAgent:
         """
         Remove duplicate articles using URL as the unique identifier.
         """
-
-        unique_articles = []
-        seen_urls = set()
+        unique_articles: list[SearchResult] = []
+        # Added explicit type definition for the hash set tracker
+        seen_urls: set[str] = set()
 
         for article in articles:
             url = str(article.url)
@@ -69,7 +87,6 @@ class NewsIntelligenceAgent:
         """
         Clean article content before AI processing.
         """
-
         article.title = " ".join(article.title.split())
         article.content = " ".join(article.content.split())
 
@@ -82,7 +99,6 @@ class NewsIntelligenceAgent:
         """
         Normalize metadata into a consistent format.
         """
-
         # HttpUrl is already validated by Pydantic.
         article.score = float(article.score or 0.0)
 
@@ -93,30 +109,20 @@ class NewsIntelligenceAgent:
 
     def process_news(
         self,
-        news_data: dict,
+        news_data: NewsCollection,
     ) -> NewsCollection:
         """
         Process raw search results into structured news objects.
 
         Processing Steps
-        ----------------
-        1. Convert raw response into SearchResult models
+            ----------------
+        1. Extract SearchResult models from NewsCollection
         2. Filter irrelevant articles
         3. Remove duplicate articles
         4. Clean article content
         5. Normalize metadata
         """
-
-        results = [
-            SearchResult(
-                title=item.get("title", ""),
-                url=item.get("url", ""),
-                published_date=item.get("published_date"),
-                content=item.get("content", ""),
-                score=item.get("score", 0.0),
-            )
-            for item in news_data.get("results", [])
-        ]
+        results = news_data.results
 
         results = self.filter_relevant_articles(results)
 
@@ -133,25 +139,36 @@ class NewsIntelligenceAgent:
         ]
 
         return NewsCollection(
-            query=news_data.get("query", ""),
+            query=news_data.query,
             results=results,
         )
 
     def prepare_agent_input(
         self,
-        news_data: dict,
-    ) -> dict:
+        news_data: NewsCollection,
+    ) -> StructuredNews:
         """
         Prepare structured output for downstream AI agents.
         """
-
         processed_news = self.process_news(news_data)
 
-        return {
-            "query": processed_news.query,
-            "articles": processed_news.results,
-            "article_count": len(processed_news.results),
-        }
+        articles = [
+            NewsArticle(
+                title=article.title,
+                content=article.content,
+                source=None,
+                url=article.url,
+                published_date=article.published_date,
+                location=None,
+                search_score=article.score,
+            )
+            for article in processed_news.results
+        ]
 
+        return StructuredNews(
+            query=processed_news.query,
+            articles=articles,
+            article_count=len(articles),
+        )
 
 news_agent = NewsIntelligenceAgent()
