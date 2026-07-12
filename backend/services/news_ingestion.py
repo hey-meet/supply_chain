@@ -52,7 +52,7 @@ def extract_domain(url: str) -> str:
     return domain.replace("www.", "") if domain else "unknown"  # Remove 'www.' prefix if present
 
 
-_stopwords = {
+STOPWORDS = {
     "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
     "of", "with", "is", "are", "was", "were", "by", "from", "as", "it",
     "this", "that", "has", "have", "will", "be", "its", "after", "over",
@@ -77,7 +77,7 @@ def extract_keywords(text: str, top_n: int = 5) -> list[str]:
     
     # Normalize text to lowercase and split into words
     words = re.findall(r"[a-zA-Z]+", text.lower())
-    meaningful_words = [w for w in words if w not in _stopwords and len(w) > 3]
+    meaningful_words = [w for w in words if w not in STOPWORDS and len(w) > 3]
     
     # Count word frequencies
     word_counts = {}
@@ -86,14 +86,17 @@ def extract_keywords(text: str, top_n: int = 5) -> list[str]:
         word_counts[word] = word_counts.get(word, 0) + 1
 
     # Sort words by frequency and return the top N keywords
-    sorted_keywords = sorted(word_counts.items(), key=lambda item: item[1], reverse=True)
+    sorted_keywords = sorted(
+    word_counts.items(),
+    key=lambda item: (-item[1], item[0])
+)
 
     return [word for word, count in sorted_keywords[:top_n]]
 
 # -----------------------------------------------------------------------
 # STEP 4: Extract location from cleaned text
 # -----------------------------------------------------------------------
-_KNOWN_LOCATIONS = list(dict.fromkeys([
+KNOWN_LOCATIONS = list(dict.fromkeys([
     # Countries
     "India", "China", "Taiwan", "USA", "United States", "Vietnam",
     "Bangladesh", "Indonesia", "Japan", "South Korea", "Germany", "Israel",
@@ -123,7 +126,7 @@ def extract_location(text: str) -> str | None:
     if not text:
         return None
  
-    for location in _KNOWN_LOCATIONS:
+    for location in KNOWN_LOCATIONS:
         pattern = r"\b" + re.escape(location) + r"\b"
         if re.search(pattern, text, re.IGNORECASE):
             return location
@@ -184,7 +187,6 @@ def extract_articles_from_search_result(search_result: dict | None) -> list[dict
 
     return normalized_articles
 
-
 def process_raw_articles(raw_articles: list[dict]) -> list[dict]:
     """
     Processes a list of raw articles and returns a list of structured articles.
@@ -195,5 +197,13 @@ def process_raw_articles(raw_articles: list[dict]) -> list[dict]:
     Returns:
         list[dict]: A list of structured article objects.
     """
-    return [build_structured_article(article) for article in raw_articles]
+    processed = []
+
+    for article in raw_articles:
+        if not isinstance(article, dict):
+            continue
+
+        processed.append(build_structured_article(article))
+
+    return processed
 
