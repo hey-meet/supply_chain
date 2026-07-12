@@ -1,0 +1,43 @@
+{
+    "company_id": "COMP-BCEM-001",
+    "company_name": "BuildCem Industries Pvt. Ltd.",
+    "industry": "Cement Manufacturing",
+    "company_type": "Private Limited",
+    "headquarters": {
+        "address": "BuildCem Tower, Plot No. 42, Sector 5, CBD Belapur",
+        "city": "Navi Mumbai",
+        "state": "Maharashtra",
+        "postal_code": "400614",
+        "country": "India"
+    },
+    "founded_year": 2012,
+    "annual_production_capacity_tons": 12500000,
+    "operating_states": [
+        "Rajasthan",
+        "Madhya Pradesh",
+        "Gujarat",
+        "Maharashtra",
+        "Karnataka",
+        "Andhra Pradesh"
+    ],
+    "supported_transport_modes": [
+        "Rail",
+        "Road",
+        "Coastal Shipping"
+    ],
+    "raw_materials": [
+        "Limestone",
+        "Coal",
+        "Gypsum",
+        "Fly Ash",
+        "Diesel",
+        "Packaging Material"
+    ],
+    "total_plants": 3,
+    "total_suppliers": 5,
+    "total_warehouses": 3,
+    "total_distribution_centers": 3,
+    "mission": "To provide high-performance, sustainable building materials through advanced automated production, optimizing resource utilization and maintaining unparalleled supply chain resilience across India.",
+    "vision": "To be India's most technologically advanced and reliable cement manufacturer, leveraging autonomous intelligence to drive operational excellence, zero downtime, and sustainable industrial growth.",
+    "description": "BuildCem Industries Pvt. Ltd. is a leading heavy building materials manufacturer in India, operating state-of-the-art integrated cement plants, strategic regional warehouses, and fully automated distribution hubs. Utilizing next-generation logistics systems and deep industrial networks, BuildCem specializes in Ordinary Portland Cement (OPC) and Portland Pozzolana Cement (PPC) tailored for critical infrastructure and urban development."
+}

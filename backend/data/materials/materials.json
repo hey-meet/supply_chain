@@ -1,0 +1,88 @@
+{
+    "materials": [
+        {
+            "material_id": "MAT-LMS-01",
+            "material_name": "Limestone",
+            "category": "Mineral Core Raw Material",
+            "criticality": "CRITICAL",
+            "unit": "Metric Tons",
+            "storage_method": "Covered Stockpile Yard",
+            "shelf_life": "Indefinite",
+            "daily_usage_priority": "P1",
+            "preferred_supplier": "SUP-001",
+            "alternate_supplier": "SUP-002",
+            "minimum_storage_days": 15,
+            "description": "Primary calcareous sedimentary rock component containing high calcium carbonate content, crushed onsite for clinker production."
+        },
+        {
+            "material_id": "MAT-COL-02",
+            "material_name": "Coal",
+            "category": "Fuel / Thermal Energy",
+            "criticality": "CRITICAL",
+            "unit": "Metric Tons",
+            "storage_method": "Ventilated Coal Shed",
+            "shelf_life": "365 Days",
+            "daily_usage_priority": "P1",
+            "preferred_supplier": "SUP-003",
+            "alternate_supplier": "SUP-001",
+            "minimum_storage_days": 21,
+            "description": "High-calorific value thermal coal pulverized for kiln firing to achieve essential sintering temperatures."
+        },
+        {
+            "material_id": "MAT-GYP-03",
+            "material_name": "Gypsum",
+            "category": "Mineral Additive",
+            "criticality": "HIGH",
+            "unit": "Metric Tons",
+            "storage_method": "Dry Shed Storage",
+            "shelf_life": "730 Days",
+            "daily_usage_priority": "P2",
+            "preferred_supplier": "SUP-002",
+            "alternate_supplier": "SUP-004",
+            "minimum_storage_days": 10,
+            "description": "Hydrous calcium sulfate inter-ground with clinker to regulate and retard the setting time of the finished cement."
+        },
+        {
+            "material_id": "MAT-FLA-04",
+            "material_name": "Fly Ash",
+            "category": "Pozzolanic Material",
+            "criticality": "HIGH",
+            "unit": "Metric Tons",
+            "storage_method": "Hermetic Steel Silos",
+            "shelf_life": "180 Days",
+            "daily_usage_priority": "P2",
+            "preferred_supplier": "SUP-004",
+            "alternate_supplier": "SUP-003",
+            "minimum_storage_days": 7,
+            "description": "Fine siliceous byproduct sourced from thermal power stations utilized for Portland Pozzolana Cement (PPC) blending."
+        },
+        {
+            "material_id": "MAT-DSL-05",
+            "material_name": "Diesel",
+            "category": "Fuel / Plant Operations",
+            "criticality": "HIGH",
+            "unit": "Kilo Liters",
+            "storage_method": "Underground Double-Walled Tanks",
+            "shelf_life": "90 Days",
+            "daily_usage_priority": "P3",
+            "preferred_supplier": "SUP-005",
+            "alternate_supplier": "SUP-002",
+            "minimum_storage_days": 5,
+            "description": "High-speed diesel for heavy earthmoving machinery, captive power generation backups, and intra-plant heavy haulage."
+        },
+        {
+            "material_id": "MAT-PKG-06",
+            "material_name": "Packaging Material",
+            "category": "Finished Goods Packaging",
+            "criticality": "MEDIUM",
+            "unit": "Bags",
+            "storage_method": "Palletized Dehumidified Warehouse",
+            "shelf_life": "365 Days",
+            "daily_usage_priority": "P3",
+            "preferred_supplier": "SUP-005",
+            "alternate_supplier": "SUP-004",
+            "minimum_storage_days": 12,
+            "description": "50kg capacity laminated woven polypropylene (WPP) bags optimized for automated packing machine lines."
+        }
+    ]
+}
