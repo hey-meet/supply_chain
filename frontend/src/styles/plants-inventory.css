@@ -1,0 +1,32 @@
+.inventory-progress-bar {
+    background-color: var(--border-color);
+    height: 8px;
+    border-radius: 4px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.inventory-progress-fill {
+    background-color: var(--brand-primary);
+    height: 100%;
+}
+
+.inventory-progress-fill.warning {
+    background-color: var(--status-warning);
+}
+
+.warehouse-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.warehouse-slot {
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    text-align: center;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+}

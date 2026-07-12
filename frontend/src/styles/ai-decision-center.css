@@ -1,0 +1,25 @@
+.ai-recommendation-card {
+    border-left: 6px solid var(--brand-primary);
+}
+
+.action-btn {
+    background-color: var(--brand-primary);
+    color: #FFFFFF;
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    margin-top: 12px;
+    transition: opacity 0.2s;
+}
+
+.action-btn:hover {
+    opacity: 0.9;
+}
+
+.model-metric {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
