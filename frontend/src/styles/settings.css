@@ -1,0 +1,29 @@
+.settings-form-group {
+    margin-bottom: 16px;
+}
+
+.settings-form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--brand-primary);
+}
+
+.settings-form-group input,
+.settings-form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    outline: none;
+}
+
+.settings-save-btn {
+    background-color: var(--brand-primary);
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 24px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+}
