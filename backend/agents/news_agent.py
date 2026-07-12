@@ -72,6 +72,48 @@ class NewsIntelligenceAgent:
 
         return filtered_articles
 
+    
+    def _ask_llm_is_relevant(self, article: SearchResult) -> tuple[bool, str]:
+        """
+        Asks the LLM whether ONE article is relevant to cement supply
+        chain disruptions, using the prompt defined in news_filter.py.
+ 
+        Returns:
+            tuple[bool, str]: (is_relevant, reason). If the LLM call or
+            response parsing fails for any reason, this FAILS OPEN —
+            returns (True, "...") so a broken AI call doesn't silently
+            drop real data. The article can still be filtered out later
+            by the Risk Classification Agent if it truly isn't relevant.
+        """
+        prompt = build_relevance_prompt(article.title, article.content)
+ 
+        try:
+            llm_client = LLMClient()
+            raw_response = llm_client.generate(prompt)
+            parsed = json.loads(raw_response)
+            return bool(parsed.get("is_relevant", True)), parsed.get("reason", "")
+        except Exception as exc:
+            return True, f"AI relevance check failed, kept by default ({exc})"
+            
+    def filter_by_ai_relevance(
+        self,
+        articles: list[SearchResult],
+    ) -> list[SearchResult]:
+        """
+        Filter articles using AI relevance checks.
+        """
+        if LLMClient is None:
+            return articles
+ 
+        relevant_articles: list[SearchResult] = []
+        for article in articles:
+            is_relevant, _reason = self._ask_llm_is_relevant(article)
+            if is_relevant:
+                relevant_articles.append(article)
+ 
+        return relevant_articles
+    
+
     def remove_duplicates(
         self,
         articles: list[SearchResult],
