@@ -14,22 +14,5 @@
       "location": {"latitude": 18.6784, "longitude": 73.8972, "city": "Chakan", "country": "IND"},
       "risk_tier": "LOW"
     }
-  ],
-  "warehouses": [
-    {
-      "warehouse_id": "WH-MUMBAI-03",
-      "name": "Nhava Sheva Port Gateway Logistics",
-      "location": {"latitude": 18.9503, "longitude": 72.9514, "city": "Mumbai", "country": "IND"},
-      "current_capacity_pct": 74.5
-    }
-  ],
-  "transportation_routes": [
-    {
-      "route_id": "ROUTE-CHAKAN-PUNE",
-      "origin": "SUPPLIER-ASTEMO-02",
-      "destination": "PLNT-PUNE-01",
-      "mode": "TRUCK",
-      "average_transit_time_hours": 2.5
-    }
   ]
 }
