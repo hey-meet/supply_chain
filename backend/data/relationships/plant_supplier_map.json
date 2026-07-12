@@ -1,0 +1,238 @@
+{
+    "plant_supplier_mappings": [
+        {
+            "plant_id": "PLT-001",
+            "primary_suppliers": [
+                "SUP-001",
+                "SUP-003"
+            ],
+            "secondary_suppliers": [
+                "SUP-002"
+            ],
+            "supplied_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-DSL-05",
+                "MAT-PKG-06"
+            ],
+            "average_monthly_requirement": [
+                {
+                    "material_id": "MAT-LMS-01",
+                    "volume_tons": 250000.0
+                },
+                {
+                    "material_id": "MAT-COL-02",
+                    "volume_tons": 45000.0
+                },
+                {
+                    "material_id": "MAT-GYP-03",
+                    "volume_tons": 12000.0
+                },
+                {
+                    "material_id": "MAT-FLA-04",
+                    "volume_tons": 60000.0
+                },
+                {
+                    "material_id": "MAT-DSL-05",
+                    "volume_kl": 450.0
+                },
+                {
+                    "material_id": "MAT-PKG-06",
+                    "volume_bags": 5200000.0
+                }
+            ],
+            "supplier_priority": [
+                {
+                    "material_id": "MAT-LMS-01",
+                    "rank": [
+                        "SUP-001",
+                        "SUP-002"
+                    ]
+                },
+                {
+                    "material_id": "MAT-COL-02",
+                    "rank": [
+                        "SUP-001",
+                        "SUP-003"
+                    ]
+                },
+                {
+                    "material_id": "MAT-GYP-03",
+                    "rank": [
+                        "SUP-002"
+                    ]
+                },
+                {
+                    "material_id": "MAT-FLA-04",
+                    "rank": [
+                        "SUP-003"
+                    ]
+                }
+            ]
+        },
+        {
+            "plant_id": "PLT-002",
+            "primary_suppliers": [
+                "SUP-002",
+                "SUP-003"
+            ],
+            "secondary_suppliers": [
+                "SUP-001",
+                "SUP-004"
+            ],
+            "supplied_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-DSL-05",
+                "MAT-PKG-06"
+            ],
+            "average_monthly_requirement": [
+                {
+                    "material_id": "MAT-LMS-01",
+                    "volume_tons": 330000.0
+                },
+                {
+                    "material_id": "MAT-COL-02",
+                    "volume_tons": 60000.0
+                },
+                {
+                    "material_id": "MAT-GYP-03",
+                    "volume_tons": 16000.0
+                },
+                {
+                    "material_id": "MAT-FLA-04",
+                    "volume_tons": 80000.0
+                },
+                {
+                    "material_id": "MAT-DSL-05",
+                    "volume_kl": 600.0
+                },
+                {
+                    "material_id": "MAT-PKG-06",
+                    "volume_bags": 7000000.0
+                }
+            ],
+            "supplier_priority": [
+                {
+                    "material_id": "MAT-LMS-01",
+                    "rank": [
+                        "SUP-001",
+                        "SUP-002"
+                    ]
+                },
+                {
+                    "material_id": "MAT-COL-02",
+                    "rank": [
+                        "SUP-003",
+                        "SUP-001"
+                    ]
+                },
+                {
+                    "material_id": "MAT-GYP-03",
+                    "rank": [
+                        "SUP-002",
+                        "SUP-004"
+                    ]
+                },
+                {
+                    "material_id": "MAT-FLA-04",
+                    "rank": [
+                        "SUP-003",
+                        "SUP-004"
+                    ]
+                }
+            ]
+        },
+        {
+            "plant_id": "PLT-003",
+            "primary_suppliers": [
+                "SUP-004",
+                "SUP-005"
+            ],
+            "secondary_suppliers": [
+                "SUP-002",
+                "SUP-003"
+            ],
+            "supplied_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-DSL-05",
+                "MAT-PKG-06"
+            ],
+            "average_monthly_requirement": [
+                {
+                    "material_id": "MAT-LMS-01",
+                    "volume_tons": 220000.0
+                },
+                {
+                    "material_id": "MAT-COL-02",
+                    "volume_tons": 40000.0
+                },
+                {
+                    "material_id": "MAT-GYP-03",
+                    "volume_tons": 10000.0
+                },
+                {
+                    "material_id": "MAT-FLA-04",
+                    "volume_tons": 55000.0
+                },
+                {
+                    "material_id": "MAT-DSL-05",
+                    "volume_kl": 400.0
+                },
+                {
+                    "material_id": "MAT-PKG-06",
+                    "volume_bags": 4600000.0
+                }
+            ],
+            "supplier_priority": [
+                {
+                    "material_id": "MAT-LMS-01",
+                    "rank": [
+                        "SUP-002"
+                    ]
+                },
+                {
+                    "material_id": "MAT-COL-02",
+                    "rank": [
+                        "SUP-003"
+                    ]
+                },
+                {
+                    "material_id": "MAT-GYP-03",
+                    "rank": [
+                        "SUP-004",
+                        "SUP-002"
+                    ]
+                },
+                {
+                    "material_id": "MAT-FLA-04",
+                    "rank": [
+                        "SUP-004",
+                        "SUP-003"
+                    ]
+                },
+                {
+                    "material_id": "MAT-DSL-05",
+                    "rank": [
+                        "SUP-005",
+                        "SUP-002"
+                    ]
+                },
+                {
+                    "material_id": "MAT-PKG-06",
+                    "rank": [
+                        "SUP-005",
+                        "SUP-004"
+                    ]
+                }
+            ]
+        }
+    ]
+}
