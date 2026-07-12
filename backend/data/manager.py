@@ -21,3 +21,4 @@ class KnowledgeBaseManager:
         return next((p for p in self.data.get("production_plants", []) if p["plant_id"] == plant_id), None)
 
 kb_manager = KnowledgeBaseManager()
+# PR Trigger
