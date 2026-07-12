@@ -1,7 +1,21 @@
+import json
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__),"..",".."))
 from backend.models.search import NewsCollection, SearchResult
 from backend.services.search_service import search_service
 from backend.models.agent_contracts import StructuredNews
 from backend.models.news import NewsArticle
+from backend.services.news_ingestion import extract_domain
+from backend.prompts.news_filter import build_relevance_prompt
+
+try:
+    from backend.services.llm_client import LLMClient
+except ImportError:
+    LLMClient = None
+
+MIN_CONTENT_LENGTH = 40
+
 
 class NewsIntelligenceAgent:
     """Agent responsible for retrieving and preparing news data."""
