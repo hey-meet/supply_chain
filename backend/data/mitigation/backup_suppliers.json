@@ -1,0 +1,106 @@
+{
+    "backup_supplier_mappings": [
+        {
+            "supplier_id": "SUP-001",
+            "primary_supplier": "Marwar Mining & Minerals Corp.",
+            "backup_suppliers": [
+                "SUP-002",
+                "SUP-003"
+            ],
+            "supported_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02"
+            ],
+            "activation_priority": "P1",
+            "average_activation_time_days": 2,
+            "estimated_capacity": {
+                "value": 12000.0,
+                "unit": "Metric Tons per Day"
+            },
+            "preferred_transport": "Rail",
+            "risk_score": 12.5
+        },
+        {
+            "supplier_id": "SUP-002",
+            "primary_supplier": "Deccan Gypsum & Chemical Aggregates",
+            "backup_suppliers": [
+                "SUP-001",
+                "SUP-004"
+            ],
+            "supported_materials": [
+                "MAT-LMS-01",
+                "MAT-GYP-03",
+                "MAT-DSL-05"
+            ],
+            "activation_priority": "P1",
+            "average_activation_time_days": 3,
+            "estimated_capacity": {
+                "value": 5000.0,
+                "unit": "Metric Tons per Day"
+            },
+            "preferred_transport": "Road",
+            "risk_score": 18.2
+        },
+        {
+            "supplier_id": "SUP-003",
+            "primary_supplier": "Singrauli Coalfields & Energy Fuels",
+            "backup_suppliers": [
+                "SUP-001",
+                "SUP-004"
+            ],
+            "supported_materials": [
+                "MAT-COL-02",
+                "MAT-FLA-04"
+            ],
+            "activation_priority": "P2",
+            "average_activation_time_days": 4,
+            "estimated_capacity": {
+                "value": 15000.0,
+                "unit": "Metric Tons per Day"
+            },
+            "preferred_transport": "Rail",
+            "risk_score": 9.8
+        },
+        {
+            "supplier_id": "SUP-004",
+            "primary_supplier": "Vidarbha Ash & Minerals Supply Ltd.",
+            "backup_suppliers": [
+                "SUP-003",
+                "SUP-005"
+            ],
+            "supported_materials": [
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-PKG-06"
+            ],
+            "activation_priority": "P1",
+            "average_activation_time_days": 2,
+            "estimated_capacity": {
+                "value": 6500.0,
+                "unit": "Metric Tons per Day"
+            },
+            "preferred_transport": "Road",
+            "risk_score": 14.0
+        },
+        {
+            "supplier_id": "SUP-005",
+            "primary_supplier": "Hospet Petro-Packaging & Logistics",
+            "backup_suppliers": [
+                "SUP-002",
+                "SUP-004"
+            ],
+            "supported_materials": [
+                "MAT-DSL-05",
+                "MAT-PKG-06"
+            ],
+            "activation_priority": "P2",
+            "average_activation_time_days": 2,
+            "estimated_capacity": {
+                "value": 3500.0,
+                "unit": "Metric Tons per Day"
+            },
+            "preferred_transport": "Road",
+            "risk_score": 16.5
+        }
+    ]
+}
