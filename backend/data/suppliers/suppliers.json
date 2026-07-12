@@ -1,0 +1,141 @@
+{
+    "suppliers": [
+        {
+            "supplier_id": "SUP-001",
+            "supplier_name": "Marwar Mining & Minerals Corp.",
+            "materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02"
+            ],
+            "city": "Jodhpur",
+            "state": "Rajasthan",
+            "country": "India",
+            "latitude": 26.3000,
+            "longitude": 73.0200,
+            "lead_time_days": 3,
+            "daily_supply_capacity_tons": 15000.0,
+            "minimum_order_quantity": 500.0,
+            "maximum_order_quantity": 25000.0,
+            "reliability_score": 94.5,
+            "preferred_transport": "Rail",
+            "assigned_warehouse": "RWH-001",
+            "contact": {
+                "person": "Rajendra Singh",
+                "email": "operations@marwarminerals.in",
+                "phone": "+912912445678"
+            },
+            "business_priority": "High",
+            "status": "ACTIVE"
+        },
+        {
+            "supplier_id": "SUP-002",
+            "supplier_name": "Deccan Gypsum & Chemical Aggregates",
+            "materials": [
+                "MAT-LMS-01",
+                "MAT-GYP-03",
+                "MAT-DSL-05"
+            ],
+            "city": "Indore",
+            "state": "Madhya Pradesh",
+            "country": "India",
+            "latitude": 22.7196,
+            "longitude": 75.8577,
+            "lead_time_days": 5,
+            "daily_supply_capacity_tons": 6000.0,
+            "minimum_order_quantity": 200.0,
+            "maximum_order_quantity": 10000.0,
+            "reliability_score": 88.2,
+            "preferred_transport": "Road",
+            "assigned_warehouse": "RWH-002",
+            "contact": {
+                "person": "Amit Sharma",
+                "email": "logistics@deccangypsum.co.in",
+                "phone": "+917314098765"
+            },
+            "business_priority": "Medium",
+            "status": "ACTIVE"
+        },
+        {
+            "supplier_id": "SUP-003",
+            "supplier_name": "Singrauli Coalfields & Energy Fuels",
+            "materials": [
+                "MAT-COL-02",
+                "MAT-FLA-04"
+            ],
+            "city": "Singrauli",
+            "state": "Madhya Pradesh",
+            "country": "India",
+            "latitude": 24.2020,
+            "longitude": 82.6660,
+            "lead_time_days": 7,
+            "daily_supply_capacity_tons": 20000.0,
+            "minimum_order_quantity": 1000.0,
+            "maximum_order_quantity": 35000.0,
+            "reliability_score": 96.8,
+            "preferred_transport": "Rail",
+            "assigned_warehouse": "RWH-002",
+            "contact": {
+                "person": "Vikas Mishra",
+                "email": "supply@singraulicoal.com",
+                "phone": "+917805223456"
+            },
+            "business_priority": "Critical",
+            "status": "ACTIVE"
+        },
+        {
+            "supplier_id": "SUP-004",
+            "supplier_name": "Vidarbha Ash & Minerals Supply Ltd.",
+            "materials": [
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-PKG-06"
+            ],
+            "city": "Nagpur",
+            "state": "Maharashtra",
+            "country": "India",
+            "latitude": 21.1458,
+            "longitude": 79.0882,
+            "lead_time_days": 4,
+            "daily_supply_capacity_tons": 8000.0,
+            "minimum_order_quantity": 150.0,
+            "maximum_order_quantity": 12000.0,
+            "reliability_score": 91.0,
+            "preferred_transport": "Road",
+            "assigned_warehouse": "RWH-003",
+            "contact": {
+                "person": "Nitin Deshmukh",
+                "email": "orders@vidarbhaash.in",
+                "phone": "+917122554321"
+            },
+            "business_priority": "High",
+            "status": "ACTIVE"
+        },
+        {
+            "supplier_id": "SUP-005",
+            "supplier_name": "Hospet Petro-Packaging & Logistics",
+            "materials": [
+                "MAT-DSL-05",
+                "MAT-PKG-06"
+            ],
+            "city": "Hospet",
+            "state": "Karnataka",
+            "country": "India",
+            "latitude": 15.2721,
+            "longitude": 76.3806,
+            "lead_time_days": 2,
+            "daily_supply_capacity_tons": 4000.0,
+            "minimum_order_quantity": 100.0,
+            "maximum_order_quantity": 8000.0,
+            "reliability_score": 85.4,
+            "preferred_transport": "Road",
+            "assigned_warehouse": "RWH-003",
+            "contact": {
+                "person": "K. Srinivas",
+                "email": "b2b@hospetpetropack.com",
+                "phone": "+918394228901"
+            },
+            "business_priority": "Medium",
+            "status": "ACTIVE"
+        }
+    ]
+}
