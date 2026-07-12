@@ -1,0 +1,118 @@
+{
+    "plants": [
+        {
+            "plant_id": "PLT-001",
+            "plant_name": "BuildCem Rajasthan Integrated Plant",
+            "city": "Chittorgarh",
+            "state": "Rajasthan",
+            "latitude": 24.8887,
+            "longitude": 74.6269,
+            "production_capacity_tpd": 12000.0,
+            "current_daily_production_tpd": 10500.0,
+            "storage_capacity_tons": 180000.0,
+            "warehouse_id": "RWH-001",
+            "distribution_center_id": "DBC-001",
+            "supplied_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-DSL-05",
+                "MAT-PKG-06"
+            ],
+            "operating_status": "OPERATIONAL",
+            "risk_zone": "Low-to-Medium",
+            "production_lines": [
+                {
+                    "line_id": "PLT-001-L1",
+                    "line_name": "Kiln Line 1",
+                    "capacity_tpd": 6000.0,
+                    "status": "OPERATIONAL"
+                },
+                {
+                    "line_id": "PLT-001-L2",
+                    "line_name": "Kiln Line 2",
+                    "capacity_tpd": 6000.0,
+                    "status": "OPERATIONAL"
+                }
+            ],
+            "commissioned_year": 2013
+        },
+        {
+            "plant_id": "PLT-002",
+            "plant_name": "BuildCem Central India Mega Plant",
+            "city": "Satna",
+            "state": "Madhya Pradesh",
+            "latitude": 24.6005,
+            "longitude": 80.8322,
+            "production_capacity_tpd": 15000.0,
+            "current_daily_production_tpd": 13800.0,
+            "storage_capacity_tons": 220000.0,
+            "warehouse_id": "RWH-002",
+            "distribution_center_id": "DBC-002",
+            "supplied_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-DSL-05",
+                "MAT-PKG-06"
+            ],
+            "operating_status": "OPERATIONAL",
+            "risk_zone": "Low",
+            "production_lines": [
+                {
+                    "line_id": "PLT-002-L1",
+                    "line_name": "Kiln Line 1",
+                    "capacity_tpd": 7500.0,
+                    "status": "OPERATIONAL"
+                },
+                {
+                    "line_id": "PLT-002-L2",
+                    "line_name": "Kiln Line 2",
+                    "capacity_tpd": 7500.0,
+                    "status": "OPERATIONAL"
+                }
+            ],
+            "commissioned_year": 2016
+        },
+        {
+            "plant_id": "PLT-003",
+            "plant_name": "BuildCem Deccan Cement Works",
+            "city": "Yerraguntla",
+            "state": "Andhra Pradesh",
+            "latitude": 14.6337,
+            "longitude": 78.5372,
+            "production_capacity_tpd": 11000.0,
+            "current_daily_production_tpd": 9200.0,
+            "storage_capacity_tons": 160000.0,
+            "warehouse_id": "RWH-003",
+            "distribution_center_id": "DBC-003",
+            "supplied_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-DSL-05",
+                "MAT-PKG-06"
+            ],
+            "operating_status": "OPERATIONAL",
+            "risk_zone": "Medium",
+            "production_lines": [
+                {
+                    "line_id": "PLT-003-L1",
+                    "line_name": "Kiln Line 1",
+                    "capacity_tpd": 5500.0,
+                    "status": "OPERATIONAL"
+                },
+                {
+                    "line_id": "PLT-003-L2",
+                    "line_name": "Kiln Line 2",
+                    "capacity_tpd": 5500.0,
+                    "status": "OPERATIONAL"
+                }
+            ],
+            "commissioned_year": 2019
+        }
+    ]
+}
