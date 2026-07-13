@@ -1,3 +1,5 @@
+import json
+import logging
 from datetime import datetime, timezone
 
 from backend.models.risk import RiskAnalysis, RiskAssessment, RiskCategory
@@ -5,12 +7,30 @@ from backend.models.search import SearchResult
 from backend.prompts.risk_classifier import build_risk_classification_prompt
 from backend.services.llm_client import LLMClient
 
+logger = logging.getLogger(__name__)
+
 
 class RiskClassificationAgent:
     """Agent responsible for preparing structured risk context from news articles."""
 
     def __init__(self):
         self.llm = LLMClient()
+
+    def _normalize_enum_casing(self, data: dict | SearchResult) -> dict:
+        """Normalize the casing of enum values in the data dictionary."""
+        if isinstance(data, SearchResult):
+            normalized_data = data.model_dump()
+        elif isinstance(data, dict):
+            normalized_data = dict(data)
+        else:
+            raise TypeError(f"Unsupported article type: {type(data)!r}")
+
+        normalized = dict(normalized_data)
+        for field in ("category", "severity", "business_impact"):
+            value = normalized.get(field)
+            if isinstance(value, str):
+                normalized[field] = value.strip().lower()
+        return normalized
 
     def extract_key_events(self, article: SearchResult) -> list[str]:
         """
@@ -112,8 +132,11 @@ class RiskClassificationAgent:
                 .replace("```", "")
                 .strip()
             )
+            
+            raw_dict = json.loads(clean_response)
+            normalized_dict = self._normalize_enum_casing(raw_dict)
 
-            assessment = RiskAssessment.model_validate_json(clean_response)
+            assessment = RiskAssessment.model_validate(normalized_dict)
 
         except Exception as exc:
             raise RuntimeError(
@@ -128,6 +151,25 @@ class RiskClassificationAgent:
             assessment=assessment,
         )
 
+    def classify_risks(self, articles: list[SearchResult]) -> list[RiskAnalysis]:
+        
+        """Classify risks for a list of articles, returning a list of RiskAnalysis objects.
+        Any articles that fail classification will be skipped with a warning."""
+        
+        results: list[RiskAnalysis] = []
+ 
+        for article in articles:
+            try:
+                results.append(self.classify_risk(article))
+            except Exception as exc:
+                logger.warning(
+                    "Skipping article %r — risk classification failed: %s",
+                    getattr(article, "url", "<unknown url>"),
+                    exc,
+                )
+ 
+        return results
+    
     def _build_context(self, article: SearchResult, published_date: datetime) -> dict:
         """Extract lightweight, structured context for token savings."""
         events = self.extract_key_events(article)
@@ -148,5 +190,12 @@ class RiskClassificationAgent:
             try:
                 return datetime.fromisoformat(raw_date.replace("Z", "+00:00"))
             except ValueError:
-                pass
+                logger.warning(
+                    "Could not parse published_date %r — defaulting to current UTC time.",
+                    raw_date,
+                )
+        else:
+            logger.warning(
+                "Article has no published_date — defaulting to current UTC time."
+            )
         return datetime.now(timezone.utc)
