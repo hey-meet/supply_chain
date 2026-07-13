@@ -1,3 +1,8 @@
+import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__),"..",".."))
+from backend.agents import risk_agent
 from backend.agents.risk_agent import RiskClassificationAgent
 from backend.models.search import SearchResult
 
@@ -27,6 +32,10 @@ def main():
 
     print("\n[2] RiskClassificationAgent initialized")
 
+    print("\nFirst normalization of enum casing: ")
+    articles = agent._normalize_enum_casing(article)
+    print(articles)
+
     print("\n[3] Extracting key events...")
     events = agent.extract_key_events(article)
     print(events)
@@ -40,11 +49,14 @@ def main():
     print(category)
 
     print("\n[6] Running full AI pipeline...")
-    result = agent.classify_risk(article)
+    result = agent.classify_risks([article])
 
     print("\n[7] AI Risk Analysis Completed")
 
-    print(result.model_dump_json(indent=2))
+    if result:
+        print(result[0].model_dump_json(indent=2))
+    else:
+        print("No results generated")
 
     print("\n")
     print("=" * 60)
