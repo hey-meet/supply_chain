@@ -1,0 +1,24 @@
+:root {
+    /* Color Palette */
+    --bg-primary: #F5F5F4;
+    --bg-secondary: #F7F8F9;
+    --surface-card: #ECEFF1;
+    --border-color: #D1D5D8;
+    --brand-primary: #3E556B;
+    --text-primary: #1E293B;
+    --text-secondary: #7D8791;
+
+    /* Status Colors */
+    --status-success: #708C72;
+    --status-warning: #C8A652;
+    --status-critical: #B15A52;
+
+    /* Layout Constants */
+    --sidebar-width: 260px;
+    --topbar-height: 70px;
+
+    /* Design Details */
+    --radius-md: 10px;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
+}

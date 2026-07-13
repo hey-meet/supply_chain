@@ -1,0 +1,46 @@
+{
+    "port_routes": [
+        {
+            "route_id": "RTE-PT-MND01",
+            "port_name": "Mundra Port",
+            "port_state": "Gujarat",
+            "material": "MAT-COL-02",
+            "destination_warehouse": "RWH-001",
+            "transit_days": 4,
+            "shipping_mode": "Coastal Shipping & Rail Link",
+            "monthly_capacity_tons": 80000.0,
+            "customs_clearance_days": 3,
+            "risk_level": "Low",
+            "backup_port": "Kandla Port (Deendayal Port Authority)",
+            "status": "OPERATIONAL"
+        },
+        {
+            "route_id": "RTE-PT-JNP02",
+            "port_name": "Jawaharlal Nehru Port (JNPT)",
+            "port_state": "Maharashtra",
+            "material": "MAT-GYP-03",
+            "destination_warehouse": "RWH-002",
+            "transit_days": 6,
+            "shipping_mode": "Coastal Shipping & Road Multimodal",
+            "monthly_capacity_tons": 45000.0,
+            "customs_clearance_days": 4,
+            "risk_level": "Low",
+            "backup_port": "Mumbai Port Trust",
+            "status": "OPERATIONAL"
+        },
+        {
+            "route_id": "RTE-PT-KRP03",
+            "port_name": "Krishnapatnam Port",
+            "port_state": "Andhra Pradesh",
+            "material": "MAT-COL-02",
+            "destination_warehouse": "RWH-003",
+            "transit_days": 3,
+            "shipping_mode": "Coastal Shipping & Rail Link",
+            "monthly_capacity_tons": 60000.0,
+            "customs_clearance_days": 3,
+            "risk_level": "Medium",
+            "backup_port": "Chennai Port",
+            "status": "OPERATIONAL"
+        }
+    ]
+}

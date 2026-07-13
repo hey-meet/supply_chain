@@ -1,0 +1,69 @@
+{
+    "supplier_route_mappings": [
+        {
+            "supplier_id": "SUP-001",
+            "road_routes": [
+                "RTE-RD-S01W01"
+            ],
+            "rail_routes": [
+                "RTE-RL-S01W01"
+            ],
+            "port_routes": [
+                "RTE-PT-MND01"
+            ],
+            "primary_route": "RTE-RL-S01W01",
+            "backup_route": "RTE-RD-S01W01",
+            "preferred_transport": "Rail"
+        },
+        {
+            "supplier_id": "SUP-002",
+            "road_routes": [
+                "RTE-RD-S02W02"
+            ],
+            "rail_routes": [],
+            "port_routes": [
+                "RTE-PT-JNP02"
+            ],
+            "primary_route": "RTE-RD-S02W02",
+            "backup_route": "RTE-PT-JNP02",
+            "preferred_transport": "Road"
+        },
+        {
+            "supplier_id": "SUP-003",
+            "road_routes": [
+                "RTE-RD-S03W02"
+            ],
+            "rail_routes": [
+                "RTE-RL-S03W02"
+            ],
+            "port_routes": [],
+            "primary_route": "RTE-RL-S03W02",
+            "backup_route": "RTE-RD-S03W02",
+            "preferred_transport": "Rail"
+        },
+        {
+            "supplier_id": "SUP-004",
+            "road_routes": [
+                "RTE-RD-S04W03"
+            ],
+            "rail_routes": [],
+            "port_routes": [],
+            "primary_route": "RTE-RD-S04W03",
+            "backup_route": "RTE-RD-S04W03",
+            "preferred_transport": "Road"
+        },
+        {
+            "supplier_id": "SUP-005",
+            "road_routes": [
+                "RTE-RD-S05W03"
+            ],
+            "rail_routes": [],
+            "port_routes": [
+                "RTE-PT-KRP03"
+            ],
+            "primary_route": "RTE-RD-S05W03",
+            "backup_route": "RTE-PT-KRP03",
+            "preferred_transport": "Road"
+        }
+    ]
+}

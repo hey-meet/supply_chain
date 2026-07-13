@@ -1,0 +1,175 @@
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: var(--sidebar-width);
+    height: 100vh;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-logo {
+    height: var(--topbar-height);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: var(--brand-primary);
+    letter-spacing: 0.5px;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+}
+
+.sidebar-link {
+    display: block;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-link:hover {
+    background-color: var(--surface-card);
+    color: var(--brand-primary);
+}
+
+.sidebar-link.active {
+    background-color: var(--brand-primary);
+    color: #FFFFFF;
+}
+
+/* Topbar Styling */
+.topbar {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width);
+    right: 0;
+    height: var(--topbar-height);
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+}
+
+.topbar-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--brand-primary);
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.search-box {
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: #FFFFFF;
+    width: 240px;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.notification-icon {
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    position: relative;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--brand-primary);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+/* Content Area Wrapper */
+.main-wrapper {
+    margin-left: var(--sidebar-width);
+    padding-top: var(--topbar-height);
+    width: calc(100% - var(--sidebar-width));
+    min-height: 100vh;
+}
+
+.page-content {
+    padding: 32px;
+}
+
+.page-header {
+    margin-bottom: 28px;
+}
+
+.page-title {
+    font-size: 1.75rem;
+    margin-bottom: 4px;
+}
+
+.page-description {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* Base Card Styling for all pages */
+.panel-card {
+    background-color: var(--surface-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.panel-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    color: var(--brand-primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+        /* Desktop first architecture simple toggle boundary */
+    }
+
+    .topbar {
+        left: 0;
+    }
+
+    .main-wrapper {
+        margin-left: 0;
+        width: 100%;
+    }
+}

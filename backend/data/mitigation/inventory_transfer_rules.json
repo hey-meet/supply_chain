@@ -1,0 +1,130 @@
+{
+    "inventory_transfer_rules": [
+        {
+            "rule_id": "TRF-RUL-LMS-01",
+            "trigger_condition": "Destination plant available stock drops below reorder level and remaining operational days are less than 5 days, while source plant holds a surplus above safety stock.",
+            "source_plant": "PLT-001",
+            "destination_plant": "PLT-002",
+            "material": "MAT-LMS-01",
+            "minimum_transfer_quantity": 5000.0,
+            "maximum_transfer_quantity": 15000.0,
+            "minimum_remaining_stock_source": 45000.0,
+            "minimum_required_stock_destination": 45000.0,
+            "preferred_transport": "Road",
+            "preferred_route": "RTE-RD-W02P02",
+            "estimated_transfer_time_hours": 12.0,
+            "estimated_transfer_cost": {
+                "value": 1400.0,
+                "currency": "INR",
+                "unit": "per ton"
+            },
+            "approval_required": true,
+            "priority": "P1"
+        },
+        {
+            "rule_id": "TRF-RUL-COL-02",
+            "trigger_condition": "Destination plant available stock drops below reorder level and remaining operational days are less than 7 days, while source plant holds a surplus above safety stock.",
+            "source_plant": "PLT-001",
+            "destination_plant": "PLT-003",
+            "material": "MAT-COL-02",
+            "minimum_transfer_quantity": 2000.0,
+            "maximum_transfer_quantity": 5000.0,
+            "minimum_remaining_stock_source": 12000.0,
+            "minimum_required_stock_destination": 8000.0,
+            "preferred_transport": "Rail",
+            "preferred_route": "RTE-RL-P03D03",
+            "estimated_transfer_time_hours": 18.0,
+            "estimated_transfer_cost": {
+                "value": 950.0,
+                "currency": "INR",
+                "unit": "per ton"
+            },
+            "approval_required": true,
+            "priority": "P1"
+        },
+        {
+            "rule_id": "TRF-RUL-GYP-03",
+            "trigger_condition": "Destination plant available stock drops below reorder level, while source plant holds a surplus above safety stock.",
+            "source_plant": "PLT-002",
+            "destination_plant": "PLT-001",
+            "material": "MAT-GYP-03",
+            "minimum_transfer_quantity": 500.0,
+            "maximum_transfer_quantity": 1500.0,
+            "minimum_remaining_stock_source": 3000.0,
+            "minimum_required_stock_destination": 2500.0,
+            "preferred_transport": "Road",
+            "preferred_route": "RTE-RD-W02P01",
+            "estimated_transfer_time_hours": 13.5,
+            "estimated_transfer_cost": {
+                "value": 1600.0,
+                "currency": "INR",
+                "unit": "per ton"
+            },
+            "approval_required": false,
+            "priority": "P2"
+        },
+        {
+            "rule_id": "TRF-RUL-FLA-04",
+            "trigger_condition": "Destination plant available stock drops below reorder level and remaining operational days are less than 5 days, while source plant holds a surplus above safety stock.",
+            "source_plant": "PLT-002",
+            "destination_plant": "PLT-003",
+            "material": "MAT-FLA-04",
+            "minimum_transfer_quantity": 1500.0,
+            "maximum_transfer_quantity": 4000.0,
+            "minimum_remaining_stock_source": 15000.0,
+            "minimum_required_stock_destination": 6500.0,
+            "preferred_transport": "Road",
+            "preferred_route": "RTE-RD-W03P03",
+            "estimated_transfer_time_hours": 10.5,
+            "estimated_transfer_cost": {
+                "value": 1300.0,
+                "currency": "INR",
+                "unit": "per ton"
+            },
+            "approval_required": true,
+            "priority": "P1"
+        },
+        {
+            "rule_id": "TRF-RUL-DSL-05",
+            "trigger_condition": "Destination plant available stock drops below reorder level and remaining operational days are less than 2 days, indicating an emergency state, while source plant holds a surplus above safety stock.",
+            "source_plant": "PLT-001",
+            "destination_plant": "PLT-003",
+            "material": "MAT-DSL-05",
+            "minimum_transfer_quantity": 15.0,
+            "maximum_transfer_quantity": 35.0,
+            "minimum_remaining_stock_source": 50.0,
+            "minimum_required_stock_destination": 20.0,
+            "preferred_transport": "Road",
+            "preferred_route": "RTE-RD-W03P03",
+            "estimated_transfer_time_hours": 11.0,
+            "estimated_transfer_cost": {
+                "value": 2400.0,
+                "currency": "INR",
+                "unit": "per ton"
+            },
+            "approval_required": true,
+            "priority": "P1"
+        },
+        {
+            "rule_id": "TRF-RUL-PKG-06",
+            "trigger_condition": "Destination plant available stock drops below reorder level, while source plant holds a surplus above safety stock.",
+            "source_plant": "PLT-002",
+            "destination_plant": "PLT-001",
+            "material": "MAT-PKG-06",
+            "minimum_transfer_quantity": 500.0,
+            "maximum_transfer_quantity": 2000.0,
+            "minimum_remaining_stock_source": 2000.0,
+            "minimum_required_stock_destination": 1500.0,
+            "preferred_transport": "Road",
+            "preferred_route": "RTE-RD-W02P01",
+            "estimated_transfer_time_hours": 14.0,
+            "estimated_transfer_cost": {
+                "value": 1750.0,
+                "currency": "INR",
+                "unit": "per ton"
+            },
+            "approval_required": false,
+            "priority": "P3"
+        }
+    ]
+}

@@ -1,0 +1,147 @@
+{
+    "warehouse_plant_mappings": [
+        {
+            "warehouse_id": "RWH-001",
+            "connected_plants": [
+                "PLT-001"
+            ],
+            "primary_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02"
+            ],
+            "average_monthly_dispatch": [
+                {
+                    "plant_id": "PLT-001",
+                    "material_id": "MAT-LMS-01",
+                    "volume_tons": 250000.0
+                },
+                {
+                    "plant_id": "PLT-001",
+                    "material_id": "MAT-COL-02",
+                    "volume_tons": 45000.0
+                }
+            ],
+            "road_routes": [
+                "RTE-RD-W01P01"
+            ],
+            "rail_routes": [
+                "RTE-RL-W01P01"
+            ]
+        },
+        {
+            "warehouse_id": "RWH-002",
+            "connected_plants": [
+                "PLT-001",
+                "PLT-002"
+            ],
+            "primary_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-DSL-05"
+            ],
+            "average_monthly_dispatch": [
+                {
+                    "plant_id": "PLT-001",
+                    "material_id": "MAT-GYP-03",
+                    "volume_tons": 12000.0
+                },
+                {
+                    "plant_id": "PLT-001",
+                    "material_id": "MAT-FLA-04",
+                    "volume_tons": 60000.0
+                },
+                {
+                    "plant_id": "PLT-002",
+                    "material_id": "MAT-LMS-01",
+                    "volume_tons": 330000.0
+                },
+                {
+                    "plant_id": "PLT-002",
+                    "material_id": "MAT-COL-02",
+                    "volume_tons": 60000.0
+                },
+                {
+                    "plant_id": "PLT-002",
+                    "material_id": "MAT-GYP-03",
+                    "volume_tons": 16000.0
+                },
+                {
+                    "plant_id": "PLT-002",
+                    "material_id": "MAT-FLA-04",
+                    "volume_tons": 80000.0
+                }
+            ],
+            "road_routes": [
+                "RTE-RD-W02P01",
+                "RTE-RD-W02P02"
+            ],
+            "rail_routes": [
+                "RTE-RL-W02P02"
+            ]
+        },
+        {
+            "warehouse_id": "RWH-003",
+            "connected_plants": [
+                "PLT-002",
+                "PLT-003"
+            ],
+            "primary_materials": [
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-DSL-05",
+                "MAT-PKG-06"
+            ],
+            "average_monthly_dispatch": [
+                {
+                    "plant_id": "PLT-002",
+                    "material_id": "MAT-DSL-05",
+                    "volume_kl": 600.0
+                },
+                {
+                    "plant_id": "PLT-002",
+                    "material_id": "MAT-PKG-06",
+                    "volume_bags": 7000000.0
+                },
+                {
+                    "plant_id": "PLT-003",
+                    "material_id": "MAT-LMS-01",
+                    "volume_tons": 220000.0
+                },
+                {
+                    "plant_id": "PLT-003",
+                    "material_id": "MAT-COL-02",
+                    "volume_tons": 40000.0
+                },
+                {
+                    "plant_id": "PLT-003",
+                    "material_id": "MAT-GYP-03",
+                    "volume_tons": 10000.0
+                },
+                {
+                    "plant_id": "PLT-003",
+                    "material_id": "MAT-FLA-04",
+                    "volume_tons": 55000.0
+                },
+                {
+                    "plant_id": "PLT-003",
+                    "material_id": "MAT-DSL-05",
+                    "volume_kl": 400.0
+                },
+                {
+                    "plant_id": "PLT-003",
+                    "material_id": "MAT-PKG-06",
+                    "volume_bags": 4600000.0
+                }
+            ],
+            "road_routes": [
+                "RTE-RD-W03P02",
+                "RTE-RD-W03P03"
+            ],
+            "rail_routes": [
+                "RTE-RL-W03P03"
+            ]
+        }
+    ]
+}
