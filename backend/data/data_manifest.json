@@ -1,0 +1,26 @@
+{
+    "version": "1.0.0",
+    "company": "company/company.json",
+    "materials": "materials/materials.json",
+    "suppliers": "suppliers/suppliers.json",
+    "warehouses": "warehouses/warehouses.json",
+    "plants": "plants/plants.json",
+    "plant_config": "plants/plant_config.json",
+    "distribution_centers": "distribution/distribution_centers.json",
+    "inventory": "inventory/inventory.json",
+    "road_routes": "transportation/road_routes.json",
+    "rail_routes": "transportation/rail_routes.json",
+    "port_routes": "transportation/port_routes.json",
+    "relationships": {
+        "plant_supplier": "relationships/plant_supplier_map.json",
+        "warehouse_plant": "relationships/warehouse_plant_map.json",
+        "supplier_route": "relationships/supplier_route_map.json",
+        "material_supplier": "relationships/material_supplier_map.json",
+        "plant_distribution": "relationships/plant_distribution_map.json"
+    },
+    "mitigation": {
+        "rules": "mitigation/mitigation_rules.json",
+        "backup_suppliers": "mitigation/backup_suppliers.json",
+        "inventory_transfer": "mitigation/inventory_transfer_rules.json"
+    }
+}
