@@ -1,0 +1,65 @@
+{
+    "plant_distribution_mappings": [
+        {
+            "plant_id": "PLT-001",
+            "distribution_center_id": "DBC-001",
+            "supported_regions": [
+                "National Capital Region",
+                "Haryana",
+                "Punjab",
+                "Western Uttar Pradesh"
+            ],
+            "daily_dispatch_capacity": {
+                "value": 12000.0,
+                "unit": "Metric Tons"
+            },
+            "preferred_transport": "Rail",
+            "road_routes": [
+                "RTE-RD-P01D01"
+            ],
+            "rail_routes": [
+                "RTE-RL-P01D01"
+            ]
+        },
+        {
+            "plant_id": "PLT-002",
+            "distribution_center_id": "DBC-002",
+            "supported_regions": [
+                "Gujarat",
+                "Maharashtra",
+                "Western Madhya Pradesh"
+            ],
+            "daily_dispatch_capacity": {
+                "value": 15000.0,
+                "unit": "Metric Tons"
+            },
+            "preferred_transport": "Rail",
+            "road_routes": [
+                "RTE-RD-P02D02"
+            ],
+            "rail_routes": [
+                "RTE-RL-P02D02"
+            ]
+        },
+        {
+            "plant_id": "PLT-003",
+            "distribution_center_id": "DBC-003",
+            "supported_regions": [
+                "Karnataka",
+                "Tamil Nadu",
+                "Andhra Pradesh"
+            ],
+            "daily_dispatch_capacity": {
+                "value": 10000.0,
+                "unit": "Metric Tons"
+            },
+            "preferred_transport": "Road",
+            "road_routes": [
+                "RTE-RD-P03D03"
+            ],
+            "rail_routes": [
+                "RTE-RL-P03D03"
+            ]
+        }
+    ]
+}

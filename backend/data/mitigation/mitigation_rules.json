@@ -1,0 +1,325 @@
+{
+    "mitigation_rules": [
+        {
+            "rule_id": "MIT-RUL-FLD-01",
+            "event": "Flood",
+            "severity": "CRITICAL",
+            "affected_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-GYP-03",
+                "MAT-FLA-04"
+            ],
+            "affected_suppliers": [
+                "SUP-002",
+                "SUP-003"
+            ],
+            "affected_transport_modes": [
+                "Road",
+                "Rail"
+            ],
+            "inventory_threshold_days": 5.0,
+            "production_risk": "HIGH",
+            "recommended_actions": [
+                "Activate backup supplier SUP-001 for Limestone and Coal",
+                "Transfer inventory from RWH-001 to RWH-002",
+                "Switch transportation mode from Road to Rail link where possible",
+                "Delay non-critical production lines at PLT-002"
+            ],
+            "inventory_strategy": "Draw down safety stocks at affected plants and initiate inter-plant transfers from unaffected zones.",
+            "transport_strategy": "Reroute long-haul logistics via Western Dedicated Freight Corridor (WDFC) to bypass flooded regional segments.",
+            "procurement_strategy": "Freeze purchase orders with SUP-002 and SUP-003; dynamically issue spot-contracts to SUP-001.",
+            "estimated_delay_days": 6,
+            "estimated_cost_impact": "High (Premium pricing on spot market logistics and emergency handling charges)",
+            "priority": "P1",
+            "executive_message": "CRITICAL: Regional flooding has halted logistics from Central Indian suppliers. Initiating emergency asset protections, diverting inbound supply lines to North-Western corridors, and rationing plant allocations to protect core kilns."
+        },
+        {
+            "rule_id": "MIT-RUL-HRN-02",
+            "event": "Heavy Rain",
+            "severity": "MEDIUM",
+            "affected_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-FLA-04"
+            ],
+            "affected_suppliers": [
+                "SUP-002",
+                "SUP-003",
+                "SUP-004"
+            ],
+            "affected_transport_modes": [
+                "Road"
+            ],
+            "inventory_threshold_days": 7.0,
+            "production_risk": "MEDIUM",
+            "recommended_actions": [
+                "Increase procurement volumes for covered materials ahead of storm arrival",
+                "Switch transportation mode to Rail to maintain bulk terminal flows",
+                "Prioritize high-demand plants PLT-001 and PLT-002"
+            ],
+            "inventory_strategy": "Enforce maximum storage level policies at stockpiles and hermetic silos to mitigate moisture absorption.",
+            "transport_strategy": "Shift transit mix from open-top trucks to covered rail rakes and bulk container bulkers.",
+            "procurement_strategy": "Accelerate order releases to SUP-003 to secure dry coal stockpiles before pit head saturation.",
+            "estimated_delay_days": 3,
+            "estimated_cost_impact": "Medium (Demurrage costs at rail yards and minor handling premiums for moisture controls)",
+            "priority": "P2",
+            "executive_message": "WARNING: Monsoon intensity is causing significant road transit slow-downs across Central and Western corridors. Shifting cargo volumes to rail networks and utilizing moisture protection protocols for fly ash and coal structures."
+        },
+        {
+            "rule_id": "MIT-RUL-RDC-03",
+            "event": "Road Closure",
+            "severity": "HIGH",
+            "affected_materials": [
+                "MAT-GYP-03",
+                "MAT-DSL-05",
+                "MAT-PKG-06"
+            ],
+            "affected_suppliers": [
+                "SUP-004",
+                "SUP-005"
+            ],
+            "affected_transport_modes": [
+                "Road"
+            ],
+            "inventory_threshold_days": 4.0,
+            "production_risk": "HIGH",
+            "recommended_actions": [
+                "Switch transportation mode to alternative rail siding networks",
+                "Activate backup supplier SUP-002 for immediate Diesel allocation",
+                "Transfer packaging material inventory from RWH-003 to PLT-003 via secondary links"
+            ],
+            "inventory_strategy": "Deploy strategic inventory reserves stationed at Regional Warehouses bypassing national highway blocks.",
+            "transport_strategy": "Enact predefined secondary route maps and switch local deliveries to smaller multi-axle configurations.",
+            "procurement_strategy": "Trigger expedited pull-forward options on standing contracts with local suppliers.",
+            "estimated_delay_days": 4,
+            "estimated_cost_impact": "Medium (Increased route distances translating to higher fuel surcharges and spot carrier premiums)",
+            "priority": "P1",
+            "executive_message": "HIGH RISK: Major national highway blockages are impacting downstream fuel and packaging supply lines. Activating secondary route deviations and routing emergency fuel shipments through backup networks."
+        },
+        {
+            "rule_id": "MIT-RUL-RYS-04",
+            "event": "Railway Strike",
+            "severity": "CRITICAL",
+            "affected_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-FLA-04"
+            ],
+            "affected_suppliers": [
+                "SUP-001",
+                "SUP-003"
+            ],
+            "affected_transport_modes": [
+                "Rail"
+            ],
+            "inventory_threshold_days": 6.0,
+            "production_risk": "CRITICAL",
+            "recommended_actions": [
+                "Switch transportation mode immediately to high-capacity road trailers",
+                "Activate backup supplier SUP-002 for localized limestone supply",
+                "Delay non-critical production lines to conserve clinker assets",
+                "Prioritize high-demand plants like PLT-002"
+            ],
+            "inventory_strategy": "Ration remaining on-site coal and limestone reserves. Transition operations to fuel-efficient kiln parameters.",
+            "transport_strategy": "Mobilize a massive continuous fleet of 40-ton bulk trailers to establish a rubber-tire pipeline.",
+            "procurement_strategy": "Diversify raw material buying patterns to focus entirely on truck-accessible regional mines.",
+            "estimated_delay_days": 5,
+            "estimated_cost_impact": "High (Severe freight cost escalation due to mass modal migration onto road fleets)",
+            "priority": "P1",
+            "executive_message": "CRITICAL: Freight rail networks have ceased operations due to industrial action. Moving corporate supply lines onto long-haul road fleets to protect continuous kiln firing. Expect major logistics cost variances."
+        },
+        {
+            "rule_id": "MIT-RUL-PGC-05",
+            "event": "Port Congestion",
+            "severity": "HIGH",
+            "affected_materials": [
+                "MAT-COL-02",
+                "MAT-GYP-03"
+            ],
+            "affected_suppliers": [
+                "SUP-001",
+                "SUP-002",
+                "SUP-003"
+            ],
+            "affected_transport_modes": [
+                "Coastal Shipping"
+            ],
+            "inventory_threshold_days": 8.0,
+            "production_risk": "MEDIUM",
+            "recommended_actions": [
+                "Reroute inbound shipments to backup ports like Kandla Port or Chennai Port",
+                "Increase procurement from domestic suppliers SUP-001 and SUP-003",
+                "Transfer inventory from RWH-001 inland pools"
+            ],
+            "inventory_strategy": "Extend coverage windows by pulling domestic thermal coal buffers forward to offset import bottlenecks.",
+            "transport_strategy": "Divert shipping vessels to alternative maritime entries and organize prompt rail evacuation upon offloading.",
+            "procurement_strategy": "Substitute imported materials with domestic equivalent grades through active contract clauses.",
+            "estimated_delay_days": 8,
+            "estimated_cost_impact": "Medium (Vessel demurrage penalties, port shifting fees, and increased rail lead distances)",
+            "priority": "P2",
+            "executive_message": "HIGH RISK: Structural delays at primary maritime import hubs are slowing fuel incoming shipments. Executing vessel diversions to secondary ports and scaling up domestic mining quotas to maintain balance."
+        },
+        {
+            "rule_id": "MIT-RUL-SSD-06",
+            "event": "Supplier Shutdown",
+            "severity": "CRITICAL",
+            "affected_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02"
+            ],
+            "affected_suppliers": [
+                "SUP-001"
+            ],
+            "affected_transport_modes": [
+                "Rail",
+                "Road"
+            ],
+            "inventory_threshold_days": 10.0,
+            "production_risk": "CRITICAL",
+            "recommended_actions": [
+                "Activate backup supplier SUP-002 for Limestone and SUP-003 for Coal",
+                "Increase procurement allocations across remaining operational partners",
+                "Transfer inventory from central hubs to PLT-001 immediately"
+            ],
+            "inventory_strategy": "Lock down existing local stock levels and clear out material volumes stored in transition warehouses.",
+            "transport_strategy": "Re-align dedicated carrier fleets to shift empty assets toward secondary supplier terminals.",
+            "procurement_strategy": "Enforce formal force-majeure mitigation rules and transfer standard order volume to alternative partners.",
+            "estimated_delay_days": 4,
+            "estimated_cost_impact": "High (Sudden exposure to higher spot volumes and rush-order procurement pricing premiums)",
+            "priority": "P1",
+            "executive_message": "CRITICAL: A primary raw material partner has entered an unexpected operational shutdown. Activating predefined secondary industrial mines to protect downstream clinker production schedules."
+        },
+        {
+            "rule_id": "MIT-RUL-CPI-07",
+            "event": "Coal Price Increase",
+            "severity": "LOW",
+            "affected_materials": [
+                "MAT-COL-02"
+            ],
+            "affected_suppliers": [
+                "SUP-001",
+                "SUP-003"
+            ],
+            "affected_transport_modes": [
+                "Rail",
+                "Road"
+            ],
+            "inventory_threshold_days": 15.0,
+            "production_risk": "LOW",
+            "recommended_actions": [
+                "Increase procurement of alternative low-cost blending materials",
+                "Optimize production mix to utilize energy-efficient clinker configurations",
+                "Maximize use of Waste Heat Recovery Systems (WHRS) across active lines"
+            ],
+            "inventory_strategy": "Maintain base level stock levels; avoid long-term inventory building at high price tiers.",
+            "transport_strategy": "Enforce strict freight optimization to eliminate deadlegs and minimize auxiliary distribution costs.",
+            "procurement_strategy": "Implement fuel price indexing clauses and evaluate long-term forward hedging arrangements.",
+            "estimated_delay_days": 0,
+            "estimated_cost_impact": "Medium (Direct increase in raw manufacturing cost per ton of finished cement product)",
+            "priority": "P3",
+            "executive_message": "NOTICE: Global fuel commodity spikes have increased raw thermal coal metrics. Transitioning operations to lean energy profiles and maximizing WHRS captive power outputs to protect margins."
+        },
+        {
+            "rule_id": "MIT-RUL-FPI-08",
+            "event": "Fuel Price Increase",
+            "severity": "LOW",
+            "affected_materials": [
+                "MAT-DSL-05"
+            ],
+            "affected_suppliers": [
+                "SUP-002",
+                "SUP-005"
+            ],
+            "affected_transport_modes": [
+                "Road"
+            ],
+            "inventory_threshold_days": 5.0,
+            "production_risk": "LOW",
+            "recommended_actions": [
+                "Switch transportation mode from Road to Rail for long-distance distributions",
+                "Optimize intra-plant heavy earthmoving machinery routes to cut idle times",
+                "Consolidate multiple inbound delivery shipments into maximum weight truckloads"
+            ],
+            "inventory_strategy": "Maintain standard safety stock targets while optimizing inventory placement to decrease secondary movements.",
+            "transport_strategy": "Enforce rail-first selection logic for all inter-hub movements; lock in road freight carrier rates.",
+            "procurement_strategy": "Re-negotiate volume-based diesel discounts with national fuel suppliers using multi-plant footprints.",
+            "estimated_delay_days": 0,
+            "estimated_cost_impact": "Low-to-Medium (Increases overall outbound logistics cost per ton-kilometer across road networks)",
+            "priority": "P3",
+            "executive_message": "NOTICE: Domestic diesel rate hikes are placing upward pressure on road freight. Enforcing institutional modal shifts to rail networks and freezing non-essential multi-point transfers."
+        },
+        {
+            "rule_id": "MIT-RUL-PLC-09",
+            "event": "Political Conflict",
+            "severity": "HIGH",
+            "affected_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-PKG-06"
+            ],
+            "affected_suppliers": [
+                "SUP-001",
+                "SUP-005"
+            ],
+            "affected_transport_modes": [
+                "Road",
+                "Rail"
+            ],
+            "inventory_threshold_days": 6.0,
+            "production_risk": "HIGH",
+            "recommended_actions": [
+                "Transfer inventory nodes away from volatile border state lines",
+                "Activate backup supplier SUP-004 for packaging requirements",
+                "Reroute critical material flows through peaceful central logistical corridors"
+            ],
+            "inventory_strategy": "Build safety stock inventory at secure interior plants while reducing open exposures in high-risk zones.",
+            "transport_strategy": "Utilize dedicated freight corridors that bypass geopolitical disturbance zones entirely.",
+            "procurement_strategy": "Distribute purchase requests away from single-source hubs into diversified supply basins.",
+            "estimated_delay_days": 7,
+            "estimated_cost_impact": "Medium (Extended transport travel times and compliance verification adjustments)",
+            "priority": "P1",
+            "executive_message": "HIGH RISK: Geopolitical unrest along regional borders is threatening regular supply corridors. Rerouting network traffic inward to preserve continuity and securing backup raw material nodes."
+        },
+        {
+            "rule_id": "MIT-RUL-NDS-10",
+            "event": "Natural Disaster",
+            "severity": "CRITICAL",
+            "affected_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-DSL-05",
+                "MAT-PKG-06"
+            ],
+            "affected_suppliers": [
+                "SUP-001",
+                "SUP-002",
+                "SUP-003",
+                "SUP-004",
+                "SUP-005"
+            ],
+            "affected_transport_modes": [
+                "Road",
+                "Rail",
+                "Coastal Shipping"
+            ],
+            "inventory_threshold_days": 3.0,
+            "production_risk": "CRITICAL",
+            "recommended_actions": [
+                "Enact emergency shutdown sequence for deeply affected plant assets",
+                "Transfer structural supply control to unaffected regional facilities",
+                "Activate all multi-category backup suppliers nationally",
+                "Prioritize logistics entirely to emergency public infrastructure support lines"
+            ],
+            "inventory_strategy": "Freeze all standard product commercial dispatches. Reserve remaining material stock for critical security functions.",
+            "transport_strategy": "Coordinate directly with national crisis response teams to open closed utility paths.",
+            "procurement_strategy": "Suspend general operational buying; open lines for emergency restoration resources.",
+            "estimated_delay_days": 12,
+            "estimated_cost_impact": "High (Significant physical restoration expenditures and major asset productivity losses)",
+            "priority": "P1",
+            "executive_message": "CRITICAL: Severe natural disaster has triggered crisis management provisions. Plant operations are focused on workforce protection, site security stabilization, and collaborative grid restoration."
+        }
+    ]
+}

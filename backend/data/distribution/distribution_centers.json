@@ -1,0 +1,77 @@
+{
+    "distribution_centers": [
+        {
+            "distribution_center_id": "DBC-001",
+            "distribution_center_name": "BuildCem NCR-North Distribution Hub",
+            "city": "Gurugram",
+            "state": "Haryana",
+            "latitude": 28.4595,
+            "longitude": 77.0266,
+            "connected_plant": "PLT-001",
+            "daily_dispatch_capacity": {
+                "value": 12000.0,
+                "unit": "Metric Tons"
+            },
+            "supported_regions": [
+                "National Capital Region",
+                "Haryana",
+                "Punjab",
+                "Western Uttar Pradesh"
+            ],
+            "manager": {
+                "name": "Arun Verma",
+                "email": "a.verma@buildcem.in",
+                "phone": "+911244301987"
+            },
+            "operating_status": "OPERATIONAL"
+        },
+        {
+            "distribution_center_id": "DBC-002",
+            "distribution_center_name": "BuildCem West-Central Distribution Hub",
+            "city": "Ahmedabad",
+            "state": "Gujarat",
+            "latitude": 23.0225,
+            "longitude": 72.5714,
+            "connected_plant": "PLT-002",
+            "daily_dispatch_capacity": {
+                "value": 15000.0,
+                "unit": "Metric Tons"
+            },
+            "supported_regions": [
+                "Gujarat",
+                "Maharashtra",
+                "Western Madhya Pradesh"
+            ],
+            "manager": {
+                "name": "Deepak Patel",
+                "email": "d.patel@buildcem.in",
+                "phone": "+917926584321"
+            },
+            "operating_status": "OPERATIONAL"
+        },
+        {
+            "distribution_center_id": "DBC-003",
+            "distribution_center_name": "BuildCem South-Peninsular Distribution Hub",
+            "city": "Bengaluru",
+            "state": "Karnataka",
+            "latitude": 12.9716,
+            "longitude": 77.5946,
+            "connected_plant": "PLT-003",
+            "daily_dispatch_capacity": {
+                "value": 10000.0,
+                "unit": "Metric Tons"
+            },
+            "supported_regions": [
+                "Karnataka",
+                "Tamil Nadu",
+                "Andhra Pradesh"
+            ],
+            "manager": {
+                "name": "M. Suresh Rao",
+                "email": "suresh.rao@buildcem.in",
+                "phone": "+918022961144"
+            },
+            "operating_status": "OPERATIONAL"
+        }
+    ]
+}

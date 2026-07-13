@@ -1,0 +1,150 @@
+{
+    "plant_configurations": [
+        {
+            "plant_id": "PLT-001",
+            "working_hours": 24,
+            "working_days": 7,
+            "number_of_shifts": 3,
+            "shift_duration_hours": 8,
+            "maintenance_day": "First Sunday",
+            "planned_shutdown_days_per_year": 18,
+            "production_lines": [
+                "PLT-001-L1",
+                "PLT-001-L2"
+            ],
+            "kiln_count": 2,
+            "grinding_units": [
+                {
+                    "unit_id": "PLT-001-GU1",
+                    "type": "Vertical Roller Mill",
+                    "capacity_tph": 250.0
+                },
+                {
+                    "unit_id": "PLT-001-GU2",
+                    "type": "Ball Mill with Separator",
+                    "capacity_tph": 180.0
+                }
+            ],
+            "power_source": "State Grid (AVVNL) & Captive Thermal Power Plant",
+            "power_backup": "25 MW Captive Thermal Plant & 5 MW DG Set",
+            "water_source": "Mahi Bajaj Sagar Dam Pipeline & Recycled Plant Water",
+            "preferred_transport_mode": "Rail",
+            "supported_transport_modes": [
+                "Rail",
+                "Road"
+            ],
+            "critical_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-DSL-05",
+                "MAT-PKG-06"
+            ],
+            "maximum_daily_dispatch_tons": 14000.0,
+            "minimum_operating_inventory_days": 7,
+            "maximum_storage_utilization_percent": 90.0,
+            "emergency_contact_role": "Head of Plant Operations",
+            "automation_level": "Level 4 - Fully Automated Kiln & Packing Control via DCS",
+            "operating_priority": "P1"
+        },
+        {
+            "plant_id": "PLT-002",
+            "plant_name": "BuildCem Central India Mega Plant",
+            "working_hours": 24,
+            "working_days": 7,
+            "number_of_shifts": 3,
+            "shift_duration_hours": 8,
+            "maintenance_day": "Second Saturday",
+            "planned_shutdown_days_per_year": 15,
+            "production_lines": [
+                "PLT-002-L1",
+                "PLT-002-L2"
+            ],
+            "kiln_count": 2,
+            "grinding_units": [
+                {
+                    "unit_id": "PLT-002-GU1",
+                    "type": "Vertical Roller Mill",
+                    "capacity_tph": 300.0
+                },
+                {
+                    "unit_id": "PLT-002-GU2",
+                    "type": "Vertical Roller Mill",
+                    "capacity_tph": 300.0
+                }
+            ],
+            "power_source": "State Grid (MPPKVVCL) & Waste Heat Recovery System (WHRS)",
+            "power_backup": "35 MW Captive Thermal Plant & 30 MW WHRS System",
+            "water_source": "Tons River Intake & On-site Rainwater Harvesting Reservoirs",
+            "preferred_transport_mode": "Rail",
+            "supported_transport_modes": [
+                "Rail",
+                "Road"
+            ],
+            "critical_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-DSL-05",
+                "MAT-PKG-06"
+            ],
+            "maximum_daily_dispatch_tons": 18000.0,
+            "minimum_operating_inventory_days": 8,
+            "maximum_storage_utilization_percent": 95.0,
+            "emergency_contact_role": "VP - Manufacturing Operations",
+            "automation_level": "Level 5 - Autonomous Expert Kiln Systems with AI Optimization",
+            "operating_priority": "P1"
+        },
+        {
+            "plant_id": "PLT-003",
+            "working_hours": 24,
+            "working_days": 7,
+            "number_of_shifts": 3,
+            "shift_duration_hours": 8,
+            "maintenance_day": "Third Tuesday",
+            "planned_shutdown_days_per_year": 20,
+            "production_lines": [
+                "PLT-003-L1",
+                "PLT-003-L2"
+            ],
+            "kiln_count": 2,
+            "grinding_units": [
+                {
+                    "unit_id": "PLT-003-GU1",
+                    "type": "Roller Press with Ball Mill",
+                    "capacity_tph": 220.0
+                },
+                {
+                    "unit_id": "PLT-003-GU2",
+                    "type": "Ball Mill",
+                    "capacity_tph": 150.0
+                }
+            ],
+            "power_source": "State Grid (APSPDCL) & Open Access Solar Power",
+            "power_backup": "15 MW Captive Thermal Plant & 12 MW WHRS System",
+            "water_source": "Borewell Cluster & Mine Pit Water Reclamation System",
+            "preferred_transport_mode": "Road",
+            "supported_transport_modes": [
+                "Road",
+                "Rail",
+                "Coastal Shipping"
+            ],
+            "critical_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-DSL-05",
+                "MAT-PKG-06"
+            ],
+            "maximum_daily_dispatch_tons": 12500.0,
+            "minimum_operating_inventory_days": 6,
+            "maximum_storage_utilization_percent": 88.0,
+            "emergency_contact_role": "Plant General Manager",
+            "automation_level": "Level 4 - Centralized PLC-SCADA Controlled Grinding & Blending",
+            "operating_priority": "P2"
+        }
+    ]
+}

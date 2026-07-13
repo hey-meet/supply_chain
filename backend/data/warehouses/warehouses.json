@@ -1,0 +1,91 @@
+{
+    "warehouses": [
+        {
+            "warehouse_id": "RWH-001",
+            "warehouse_name": "BuildCem North-Western Regional Warehouse",
+            "city": "Udaipur",
+            "state": "Rajasthan",
+            "latitude": 24.5854,
+            "longitude": 73.7125,
+            "storage_capacity_tons": 500000.0,
+            "current_utilization_tons": 385000.0,
+            "supported_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02"
+            ],
+            "connected_suppliers": [
+                "SUP-001"
+            ],
+            "connected_plants": [
+                "PLT-001"
+            ],
+            "manager": {
+                "name": "Sanjay Mehta",
+                "email": "s.mehta@buildcem.in",
+                "phone": "+912942490123"
+            },
+            "operating_status": "OPERATIONAL"
+        },
+        {
+            "warehouse_id": "RWH-002",
+            "warehouse_name": "BuildCem Central Regional Warehouse",
+            "city": "Jabalpur",
+            "state": "Madhya Pradesh",
+            "latitude": 23.1686,
+            "longitude": 79.9339,
+            "storage_capacity_tons": 650000.0,
+            "current_utilization_tons": 490000.0,
+            "supported_materials": [
+                "MAT-LMS-01",
+                "MAT-COL-02",
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-DSL-05"
+            ],
+            "connected_suppliers": [
+                "SUP-002",
+                "SUP-003"
+            ],
+            "connected_plants": [
+                "PLT-001",
+                "PLT-002"
+            ],
+            "manager": {
+                "name": "Rajesh Bundela",
+                "email": "r.bundela@buildcem.in",
+                "phone": "+917612667890"
+            },
+            "operating_status": "OPERATIONAL"
+        },
+        {
+            "warehouse_id": "RWH-003",
+            "warehouse_name": "BuildCem Deccan-South Regional Warehouse",
+            "city": "Solapur",
+            "state": "Maharashtra",
+            "latitude": 17.6599,
+            "longitude": 75.9064,
+            "storage_capacity_tons": 450000.0,
+            "current_utilization_tons": 320000.0,
+            "supported_materials": [
+                "MAT-GYP-03",
+                "MAT-FLA-04",
+                "MAT-DSL-05",
+                "MAT-PKG-06"
+            ],
+            "connected_suppliers": [
+                "SUP-004",
+                "SUP-005"
+            ],
+            "connected_plants": [
+                "PLT-002",
+                "PLT-003"
+            ],
+            "manager": {
+                "name": "Vijay Kulkarni",
+                "email": "v.kulkarni@buildcem.in",
+                "phone": "+912172314567"
+            },
+            "operating_status": "OPERATIONAL"
+        }
+    ]
+}
