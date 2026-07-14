@@ -7,8 +7,8 @@ from backend.models.enums import (
     RiskCategory,
     SeverityLevel,
 )
-from location import Location
-from supply_chain import MatchedSupplier
+from backend.models.location import Location
+from backend.models.supply_chain import MatchedSupplier
 
 class AffectedEntity(BaseModel):
     """Represents a supplier or organization affected by the disruption."""
