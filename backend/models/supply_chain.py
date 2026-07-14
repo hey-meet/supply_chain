@@ -3,7 +3,10 @@
 This file defines what ONE "matched supplier" result looks like.
 
 """
+
 from pydantic import BaseModel, ConfigDict, Field
+
+from backend.models.enums import MatchReason
 
 
 class MatchedSupplier(BaseModel):
@@ -39,7 +42,7 @@ class MatchedSupplier(BaseModel):
     #   "name"              -> the article mentioned this supplier by name
     #   "location"           -> this supplier is based in the affected area
     #   "name_and_location"  -> both of the above are true
-    match_reason: str = Field(
+    match_reason: MatchReason = Field(
         ...,
         description=(
             "Why this supplier was flagged: 'name', 'location', "
