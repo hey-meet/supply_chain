@@ -1,5 +1,5 @@
-# backend/models/supply_chain.py
+# backend/services/supplier_matching.py
 """
-This file defines what ONE "matched supplier" result looks like.
+This file match supplier by name or by location or by both
 
 """
