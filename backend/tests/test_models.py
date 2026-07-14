@@ -2,7 +2,7 @@ import pytest
 from datetime import datetime
 
 from backend.models.news import NewsArticle
-from backend.models.risk import RiskClassification, RiskAssessment, RiskAnalysis
+from backend.models.risk import RiskAssessment, RiskAnalysis
 from backend.models.agent_response import AgentResponse
 from backend.models.supply_chain import MatchedSupplier
 from backend.models.enums import MatchReason, RiskCategory, SeverityLevel, BusinessImpact
@@ -10,7 +10,6 @@ from backend.models.enums import MatchReason, RiskCategory, SeverityLevel, Busin
 
 def test_import_models():
     assert NewsArticle
-    assert RiskClassification
     assert AgentResponse
     assert RiskAssessment
     assert RiskAnalysis
