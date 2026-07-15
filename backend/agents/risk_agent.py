@@ -97,7 +97,7 @@ class RiskClassificationAgent:
 
         return RiskCategory.OTHER
 
-     def generate_summary(self, article: SearchResult) -> str:
+    def generate_summary(self, article: SearchResult) -> str:
         """
         Generate a polished, concise summary using the LLM.
         Falls back to extracting the first two sentences on failure.
