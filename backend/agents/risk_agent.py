@@ -97,19 +97,29 @@ class RiskClassificationAgent:
 
         return RiskCategory.OTHER
 
-    def generate_summary(self, article: SearchResult) -> str:
+     def generate_summary(self, article: SearchResult) -> str:
         """
-        Generate a lightweight summary.
-
-        Current implementation:
-        Return the first two sentences.
+        Generate a polished, concise summary using the LLM.
+        Falls back to extracting the first two sentences on failure.
         """
-        events = self.extract_key_events(article)
-
-        if not events:
+        if not article.content.strip():
             return ""
 
-        return " ".join(events[:2])
+        prompt = (
+            "Summarize the following news article in 2-3 clear, polished sentences. "
+            "Focus specifically on any supply chain disruptions, risks, or relevant business impacts.\n\n"
+            f"Title: {article.title}\n"
+            f"Content: {article.content}\n\n"
+            "Return ONLY the summary text, with no extra formatting."
+        )
+        
+        try:
+            summary = self.llm.generate(prompt)
+            return summary.strip()
+        except Exception as exc:
+            logger.warning("LLM summary generation failed: %s. Falling back to basic extraction.", exc)
+            events = self.extract_key_events(article)
+            return " ".join(events[:2]) if events else ""
 
     def classify_risk(self, article: SearchResult) -> RiskAnalysis:
         """
