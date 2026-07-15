@@ -7,7 +7,8 @@ from backend.models.enums import (
     RiskCategory,
     SeverityLevel,
 )
-
+from backend.models.location import Location
+from backend.models.supply_chain import MatchedSupplier
 
 class AffectedEntity(BaseModel):
     """Represents a supplier or organization affected by the disruption."""
@@ -70,6 +71,15 @@ class RiskAssessment(BaseModel):
         description="Estimated business impact.",
     )
 
+    location: Location | None = Field(
+        default=None,
+        description=(
+            "Primary real-world location where the disruption is "
+            "occurring, if the article clearly indicates one. None if "
+            "no specific location can be determined."
+        ),
+    )
+
     affected_suppliers: list[AffectedEntity] = Field(
         default_factory=list,
         description="Affected suppliers or organizations.",
@@ -127,4 +137,15 @@ class RiskAnalysis(BaseModel):
     assessment: RiskAssessment = Field(
         ...,
         description="AI-generated risk assessment.",
+    )
+    
+    matched_suppliers: list[MatchedSupplier] = Field(
+        default_factory=list,
+        description=(
+            "Real suppliers from our supplier database that were "
+            "cross-referenced against this disruption, by name and/or "
+            "location. Distinct from assessment.affected_suppliers, "
+            "which are just the LLM's free-text guesses from the "
+            "article text."
+        ),
     )

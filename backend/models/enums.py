@@ -40,3 +40,11 @@ class AgentStatus(str, Enum):
 
     SUCCESS = "success"
     FAILED = "failed"
+
+
+class MatchReason(str, Enum):
+    """Why a supplier was matched to a disruption."""
+
+    NAME = "name"
+    LOCATION = "location"
+    NAME_AND_LOCATION = "name_and_location"
