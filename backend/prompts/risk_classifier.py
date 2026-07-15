@@ -22,24 +22,31 @@ Analyze the disruption and identify:
 2. Risk Severity
 3. Confidence Score
 4. Business Impact
-5. Affected Suppliers
-6. Affected Materials
-7. Summary
-8. Reasoning
-9. Recommended Action
+5. Primary Location
+6. Affected Suppliers
+7. Affected Materials
+8. Summary
+9. Reasoning
+10. Recommended Action
 
 Return ONLY valid JSON.
 
 The response MUST exactly follow this schema:
 
 {{
-    "category": "RAW_MATERIAL_SHORTAGE | TRANSPORTATION | WEATHER | PORT_CONGESTION | SUPPLIER_FAILURE | REGULATORY | LABOR_STRIKE | ENERGY | PRICE_FLUCTUATION | GEOPOLITICAL | OTHER",
+    "category": "raw_material_shortage | transportation | weather | port_congestion | supplier_failure | regulatory | labor_strike | energy | price_fluctuation | geopolitical | other",
 
-    "severity": "LOW | MEDIUM | HIGH | CRITICAL",
+    "severity": "low | medium | high | critical",
 
     "confidence": 0.95,
 
-    "business_impact": "LOW | MEDIUM | HIGH | SEVERE",
+    "business_impact": "low | medium | high | severe",
+
+    "location": {{
+        "country": "",
+        "state": null,
+        "city": null
+    }},
 
     "affected_suppliers": [
         {{
@@ -66,35 +73,44 @@ STRICT RULES
 
 1. category MUST be exactly one of:
 
-- RAW_MATERIAL_SHORTAGE
-- TRANSPORTATION
-- WEATHER
-- PORT_CONGESTION
-- SUPPLIER_FAILURE
-- REGULATORY
-- LABOR_STRIKE
-- ENERGY
-- PRICE_FLUCTUATION
-- GEOPOLITICAL
-- OTHER
+- raw_material_shortage
+- transportation
+- weather
+- port_congestion
+- supplier_failure
+- regulatory
+- labor_strike
+- energy
+- price_fluctuation
+- geopolitical
+- other
 
 2. severity MUST be exactly one of:
 
-- LOW
-- MEDIUM
-- HIGH
-- CRITICAL
+- low
+- medium
+- high
+- critical
 
 3. business_impact MUST be exactly one of:
 
-- LOW
-- MEDIUM
-- HIGH
-- SEVERE
+- low
+- medium
+- high
+- severe
 
 4. confidence MUST be a decimal number between 0.0 and 1.0.
 
-5. affected_suppliers MUST be an array of supplier objects.
+5. location represents the PRIMARY real-world place where the
+disruption is occurring.
+
+- If the article clearly names a location, return it with at least
+  "country" filled in ("state" and "city" as available).
+- If NO clear real-world location is stated or reasonably inferable,
+  return "location": null. Do NOT guess or invent a location that
+  isn't supported by the article text.
+
+6. affected_suppliers MUST be an array of supplier objects.
 
 Example:
 
@@ -107,7 +123,7 @@ Example:
     }}
 ]
 
-6. affected_materials MUST be an array of strings.
+7. affected_materials MUST be an array of strings.
 
 Correct:
 
@@ -126,19 +142,19 @@ Incorrect:
     }}
 ]
 
-7. summary MUST contain 2-3 concise sentences.
+8. summary MUST contain 2-3 concise sentences.
 
-8. reasoning MUST briefly explain why the risk category and severity were selected.
+9. reasoning MUST briefly explain why the risk category and severity were selected.
 
-9. recommended_action MUST provide clear mitigation steps for the supply chain team.
+10. recommended_action MUST provide clear mitigation steps for the supply chain team.
 
-10. Do NOT invent suppliers if none are mentioned. Return an empty list.
+11. Do NOT invent suppliers if none are mentioned. Return an empty list.
 
-11. Return ONLY valid JSON.
+12. Return ONLY valid JSON.
 
-12. Do NOT use Markdown.
+13. Do NOT use Markdown.
 
-13. Do NOT wrap the response inside ```json blocks.
+14. Do NOT wrap the response inside ```json blocks.
 
-14. Do NOT include explanations before or after the JSON.
+15. Do NOT include explanations before or after the JSON.
 """
