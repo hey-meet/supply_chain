@@ -1,4 +1,3 @@
-import json
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__),"..",".."))
@@ -6,13 +5,7 @@ from backend.models.search import NewsCollection, SearchResult
 from backend.services.search_service import search_service
 from backend.models.agent_contracts import StructuredNews
 from backend.models.news import NewsArticle
-from backend.services.news_ingestion import extract_domain
-from backend.prompts.news_filter import build_relevance_prompt
-
-try:
-    from backend.services.llm_client import LLMClient
-except ImportError:
-    LLMClient = None
+from backend.agents.news_filter_agent import news_filter_agent
 
 MIN_CONTENT_LENGTH = 40
 
@@ -72,47 +65,21 @@ class NewsIntelligenceAgent:
 
         return filtered_articles
 
-    
-    def _ask_llm_is_relevant(self, article: SearchResult) -> tuple[bool, str]:
-        """
-        Asks the LLM whether ONE article is relevant to cement supply
-        chain disruptions, using the prompt defined in news_filter.py.
- 
-        Returns:
-            tuple[bool, str]: (is_relevant, reason). If the LLM call or
-            response parsing fails for any reason, this FAILS OPEN —
-            returns (True, "...") so a broken AI call doesn't silently
-            drop real data. The article can still be filtered out later
-            by the Risk Classification Agent if it truly isn't relevant.
-        """
-        prompt = build_relevance_prompt(article.title, article.content)
- 
-        try:
-            llm_client = LLMClient()
-            raw_response = llm_client.generate(prompt)
-            parsed = json.loads(raw_response)
-            return bool(parsed.get("is_relevant", True)), parsed.get("reason", "")
-        except Exception as exc:
-            return True, f"AI relevance check failed, kept by default ({exc})"
-            
     def filter_by_ai_relevance(
         self,
         articles: list[SearchResult],
     ) -> list[SearchResult]:
         """
-        Filter articles using AI relevance checks.
+        Filter articles using the News Filter Agent.
         """
-        if LLMClient is None:
-            return articles
- 
         relevant_articles: list[SearchResult] = []
+
         for article in articles:
-            is_relevant, _reason = self._ask_llm_is_relevant(article)
+            is_relevant, _ = news_filter_agent.is_relevant(article)
             if is_relevant:
                 relevant_articles.append(article)
- 
+
         return relevant_articles
-    
 
     def remove_duplicates(
         self,
@@ -173,14 +140,17 @@ class NewsIntelligenceAgent:
         Processing Steps
             ----------------
         1. Extract SearchResult models from NewsCollection
-        2. Filter irrelevant articles
-        3. Remove duplicate articles
-        4. Clean article content
-        5. Normalize metadata
+        2. Filter out raw articles lacking basic validation (title/content)
+        3. Filter articles via AI relevance checks using NewsFilterAgent
+        4. Remove duplicate articles using URL tracking
+        5. Clean article content text structure
+        6. Normalize metadata formats
         """
         results = news_data.results
 
         results = self.filter_relevant_articles(results)
+
+        results = self.filter_by_ai_relevance(results)
 
         results = self.remove_duplicates(results)
 
