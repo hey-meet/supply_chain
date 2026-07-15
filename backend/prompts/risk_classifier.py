@@ -1,9 +1,17 @@
 import json
+from typing import Any
+
+from backend.prompts.prompt_manager import (
+    prompt_manager,
+)
 
 
-def build_risk_classification_prompt(article: dict) -> str:
+def build_risk_classification_prompt(
+    article: dict[str, Any],
+) -> str:
     """
-    Build the prompt used by the Risk Classification Agent.
+    Build the Risk Classification prompt using the
+    enterprise Prompt Manager.
     """
 
     article_json = json.dumps(article, indent=2)

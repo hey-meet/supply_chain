@@ -8,6 +8,11 @@ class MistralProvider(BaseLLMProvider):
     """Mistral AI provider."""
 
     def __init__(self):
+        if not settings.MISTRAL_API_KEY:
+            raise ValueError(
+                "MISTRAL_API_KEY is not configured."
+            )
+
         self.client = Mistral(
             api_key=settings.MISTRAL_API_KEY,
         )
