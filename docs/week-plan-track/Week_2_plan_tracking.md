@@ -31,6 +31,10 @@
 * Initialize complete enterprise datasets for transportation and inventory.
 * Optimize data retrieval performance for the KB.
 
+### Notes
+
+Successfully established the foundational infrastructure for the dashboard and the Knowledge Base. The initial structural setup for the news intelligence agent is also in place.
+
 
 ## Day 2 — 13/07/2026
 
@@ -60,6 +64,10 @@
 * Refactor supplier matching reasons into a unified Enum.
 * Add comprehensive unit tests for the updated supply chain models.
 
+### Notes
+
+Made significant progress on expanding the enterprise master data and graph mapping. The risk agent's enum handling was improved, laying the groundwork for robust supplier risk assessment.
+
 
 ## Day 3 — 14/07/2026
 
@@ -83,9 +91,40 @@
 * Develop the actual logic for `supplier_matching.py`.
 * Implement frontend components for the Executive Dashboard (Supply Chain Health, Active Risks).
 * Connect the AI Risk Intelligence APIs to the frontend for visualization.
+  
+### Notes
 
----
+Focused heavily on data consistency and backend testing. The refactoring of match reasons using strict Enums ensures better data integrity moving forward.
+
+## Day 4 — 15/07/2026
+
+### Completed
+
+* **News Intelligence & Executive Summary:**
+  * Implemented AI-powered news relevance filtering pipeline and executive summary generation (#74, #75).
+  * Added enterprise news filtering and executive summary prompt templates (#74, #75).
+  * Added unit tests for the news filter and executive summary agents (#74, #75).
+  * Refactored `generate_summary` to use LLM for summaries with a basic extraction fallback.
+* **Supplier Matching & Risk Assessment:**
+  * Added supplier matching models for risk assessment (#73).
+  * Enhanced supplier matching service documentation and implementation logic.
+  * Updated `risk_classifier.py` for JSON schema changes and fixed indentation issues.
+
+### In Progress
+
+* Connecting the AI Risk Intelligence pipelines with the frontend Executive Dashboard.
+
+### Pending
+
+* Finalize the integration of the supplier matching logic with active news feeds.
 
 ### Notes
 
+Today marked significant milestones in the AI layer, with the successful implementation of the news filtering and executive summary pipelines. Supplier matching logic has also been enhanced and integrated.
+
+---
+
+### Weekly Summary
+
 Week 2 planning is advancing smoothly with immense progress across the stack. The backend data layer is now fully equipped with a queryable Supply Chain Knowledge Base containing plants, suppliers, and transportation graphs. The frontend React foundation is up and running with a redesigned sidebar and routing. The core AI intelligence layer is rapidly maturing, setting us up perfectly to connect the disruption classifications to our internal business entities and complete the functional MVP by the end of Week 3.
+
