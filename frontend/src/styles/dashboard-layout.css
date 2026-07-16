@@ -1,0 +1,60 @@
+/* dashboard-layout.css */
+
+/* Global safety reset inside layout scope */
+.app-container,
+.app-container *,
+.app-container *::before,
+.app-container *::after {
+    box-sizing: border-box;
+}
+
+/* Outer layout wrapper */
+.app-container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    min-height: 0;
+    overflow: hidden;
+    background-color: #F5F5F4;
+    /* Primary Background Sync */
+}
+
+/* Main work area wrapper to isolate from fixed Sidebar */
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    position: relative;
+}
+
+/* Independent scroll window for page views under Topbar */
+.page-content {
+    flex: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 0;
+    width: 100%;
+}
+
+/* Enterprise container ensuring structure, padding, and max-width thresholds */
+.page-container {
+    width: 100%;
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 32px;
+}
+
+/* Responsive constraints across standard form-factors */
+@media (max-width: 968px) {
+    .page-container {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 640px) {
+    .page-container {
+        padding: 16px;
+    }
+}
