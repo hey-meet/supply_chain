@@ -31,6 +31,10 @@
 * Initialize complete enterprise datasets for transportation and inventory.
 * Optimize data retrieval performance for the KB.
 
+### Notes
+
+Successfully established the foundational infrastructure for the dashboard and the Knowledge Base. The initial structural setup for the news intelligence agent is also in place.
+
 
 ## Day 2 — 13/07/2026
 
@@ -60,6 +64,10 @@
 * Refactor supplier matching reasons into a unified Enum.
 * Add comprehensive unit tests for the updated supply chain models.
 
+### Notes
+
+Made significant progress on expanding the enterprise master data and graph mapping. The risk agent's enum handling was improved, laying the groundwork for robust supplier risk assessment.
+
 
 ## Day 3 — 14/07/2026
 
@@ -83,7 +91,10 @@
 * Develop the actual logic for `supplier_matching.py`.
 * Implement frontend components for the Executive Dashboard (Supply Chain Health, Active Risks).
 * Connect the AI Risk Intelligence APIs to the frontend for visualization.
+  
+### Notes
 
+Focused heavily on data consistency and backend testing. The refactoring of match reasons using strict Enums ensures better data integrity moving forward.
 
 ## Day 4 — 15/07/2026
 
