@@ -13,7 +13,6 @@ class OrderProcessorService:
         self.optimizer = RouteOptimizerService()
 
     def process_maintenance_order(self, plant_id: str, part_id: str, quantity: int, route_id: str) -> Dict[str, Any]:
-        """Simulates processing a replacement part order for a critical maintenance task."""
         plant = self.kb.get_plant_by_id(plant_id)
         if not plant:
             return {"status": "rejected", "reason": f"Plant {plant_id} not recognized."}
@@ -38,7 +37,6 @@ class OrderProcessorService:
         }
 
     def trigger_inventory_shortage_fallback(self, plant_id: str) -> Dict[str, Any]:
-        """Triggers fallback lookup if local parts inventory is depleted."""
         alternatives = self.optimizer.find_alternative_suppliers(plant_id)
         if not alternatives:
             return {"status": "critical", "message": "No emergency backup suppliers trackable for this plant profile."}
@@ -48,6 +46,4 @@ class OrderProcessorService:
             "message": "Alternative sourcing locations verified successfully.",
             "backup_options": alternatives
         }
-# Force Day 4 Order Processor Update Implementation
-
-# Day 4: Processing verification update
+# Day 4 Finalized Implementation Line
