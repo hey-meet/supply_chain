@@ -1,29 +1,1120 @@
-.settings-form-group {
-    margin-bottom: 16px;
+/* settings.css */
+:root {
+    --sc-bg-p: #F5F5F4;
+    --sc-bg-s: #F7F8F9;
+    --sc-surf: #ECEFF1;
+    --sc-card: #FFFFFF;
+    --sc-border: #D1D5D8;
+    --sc-brand: #3E556B;
+    --sc-text-p: #1E293B;
+    --sc-text-s: #7D8791;
+
+    --sc-success: #708C72;
+    --sc-warning: #C8A652;
+    --sc-critical: #B15A52;
+
+    --sc-radius: 18px;
+    --sc-radius-sm: 8px;
+    --sc-shadow: 0 4px 10px rgba(0, 0, 0, 0.02), 0 1px 4px rgba(0, 0, 0, 0.01);
+    --sc-motion: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.settings-form-group label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: var(--brand-primary);
-}
-
-.settings-form-group input,
-.settings-form-group select {
+/* Base Framework Rules Alignment */
+.sc-content-scope {
     width: 100%;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    outline: none;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    padding-bottom: 96px;
 }
 
-.settings-save-btn {
-    background-color: var(--brand-primary);
-    color: #FFFFFF;
-    border: none;
-    padding: 10px 24px;
-    border-radius: var(--radius-md);
+.sc-content-scope *,
+.sc-content-scope *::before,
+.sc-content-scope *::after {
+    box-sizing: border-box;
+}
+
+.font-mono {
+    font-family: monospace;
+}
+
+.font-semibold {
     font-weight: 600;
+}
+
+.text-success {
+    color: var(--sc-success);
+}
+
+.text-critical {
+    color: var(--sc-critical);
+}
+
+.text-brand {
+    color: var(--sc-brand);
+}
+
+.color-brand {
+    color: var(--sc-brand);
+}
+
+.text-right {
+    text-align: right;
+}
+
+/* Header Elements Structures */
+.sc-header-block {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--sc-border);
+    padding-bottom: 24px;
+    width: 100%;
+}
+
+.sc-page-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--sc-brand);
+    margin: 0 0 8px 0;
+    letter-spacing: -0.02em;
+}
+
+.sc-page-subtitle {
+    font-size: 15px;
+    color: var(--sc-text-s);
+    margin: 0;
+    font-weight: 500;
+}
+
+.sc-header-right {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* Premium Industrial Gearbox Assembly Dashboard Component Layout */
+.sc-gearbox-widget-assembly {
+    display: inline-flex;
+    align-items: center;
+    gap: 20px;
+    background-color: var(--sc-card);
+    border: 1px solid var(--sc-border);
+    padding: 12px 20px;
+    border-radius: var(--sc-radius-sm);
+    box-shadow: var(--sc-shadow);
+    transition: var(--sc-motion);
+    position: relative;
+    user-select: none;
+}
+
+/* Connected Industrial Transmission Cluster Frame */
+.sc-gearbox-mechanical-cluster {
+    position: relative;
+    width: 104px;
+    height: 84px;
+    background-color: var(--sc-bg-s);
+    border: 1px solid var(--sc-border);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Glowing Indicator Rings */
+.sc-gearbox-glow-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    box-shadow: inset 0 0 12px transparent;
+    transition: var(--sc-motion);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.engine-unsaved .sc-gearbox-glow-ring {
+    box-shadow: inset 0 0 14px rgba(200, 166, 82, 0.15);
+    border: 1px solid var(--sc-warning);
+}
+
+.engine-saving .sc-gearbox-glow-ring {
+    box-shadow: inset 0 0 14px rgba(62, 85, 107, 0.2);
+    border: 1px solid var(--sc-brand);
+}
+
+.engine-updated .sc-gearbox-glow-ring {
+    box-shadow: inset 0 0 14px rgba(112, 140, 114, 0.25);
+    border: 1px solid var(--sc-success);
+}
+
+.engine-restoring .sc-gearbox-glow-ring {
+    box-shadow: inset 0 0 14px rgba(125, 135, 145, 0.15);
+}
+
+/* Rotating Status LED Ring Node Rules */
+.sc-gearbox-led-ring {
+    position: absolute;
+    width: 90%;
+    height: 90%;
+    top: 5%;
+    left: 5%;
+    pointer-events: none;
+    z-index: 4;
+}
+
+.sc-gearbox-led-node {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--sc-success);
+    box-shadow: 0 0 6px var(--sc-success);
+    transition: var(--sc-motion);
+}
+
+.sc-gearbox-led-node:nth-child(1) {
+    top: 4px;
+    left: 4px;
+}
+
+.sc-gearbox-led-node:nth-child(2) {
+    bottom: 4px;
+    right: 4px;
+}
+
+.sc-gearbox-led-node:nth-child(3) {
+    top: 50%;
+    right: 4px;
+    transform: translateY(-50%);
+}
+
+.engine-unsaved .sc-gearbox-led-node {
+    background-color: var(--sc-warning);
+    box-shadow: 0 0 6px var(--sc-warning);
+}
+
+.engine-saving .sc-gearbox-led-node {
+    background-color: var(--sc-warning);
+    box-shadow: 0 0 6px var(--sc-warning);
+    animation: sc-led-flash 500ms linear infinite;
+}
+
+.engine-updated .sc-gearbox-led-node {
+    background-color: var(--sc-success);
+    box-shadow: 0 0 6px var(--sc-success);
+}
+
+.engine-restoring .sc-gearbox-led-node {
+    background-color: var(--sc-text-s);
+    box-shadow: none;
+}
+
+@keyframes sc-led-flash {
+
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Industrial Precision Gear Vector Styling Rules */
+.sc-gear-component {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sc-gear-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.sc-gear-body {
+    fill: #E2E8F0;
+    stroke: #94A3B8;
+    stroke-width: 1.5;
+}
+
+.sc-gear-tooth {
+    fill: #E2E8F0;
+    stroke: #94A3B8;
+    stroke-width: 1.5;
+}
+
+.sc-gear-center-bore {
+    fill: #F1F5F9;
+    stroke: #BCC5D0;
+    stroke-width: 1;
+}
+
+/* Mechanical Gear Layout Positions */
+.gear-large-center {
+    width: 56px;
+    height: 56px;
+    left: 24px;
+    top: 14px;
+    z-index: 3;
+}
+
+.gear-medium-left {
+    width: 38px;
+    height: 38px;
+    left: -4px;
+    top: 38px;
+    z-index: 2;
+}
+
+.gear-small-right {
+    width: 28px;
+    height: 28px;
+    left: 74px;
+    top: 10px;
+    z-index: 2;
+}
+
+/* Micro Animation Rotations (Mashed Industrial Gear Ratios) */
+.engine-stable .gear-large-center {
+    animation: sc-gear-idle-cw 12s ease-in-out infinite;
+}
+
+.engine-stable .gear-medium-left {
+    animation: sc-gear-idle-ccw 12s ease-in-out infinite;
+}
+
+.engine-stable .gear-small-right {
+    animation: sc-gear-idle-cw 12s ease-in-out infinite;
+}
+
+.engine-unsaved .gear-large-center {
+    animation: sc-gear-rotate-cw 6s linear infinite;
+}
+
+.engine-unsaved .gear-medium-left {
+    animation: sc-gear-rotate-ccw 4.1s linear infinite;
+}
+
+.engine-unsaved .gear-small-right {
+    animation: sc-gear-rotate-cw 3s linear infinite;
+}
+
+.engine-saving .gear-large-center {
+    animation: sc-gear-rotate-cw 1.5s linear infinite;
+}
+
+.engine-saving .gear-medium-left {
+    animation: sc-gear-rotate-ccw 1s linear infinite;
+}
+
+.engine-saving .gear-small-right {
+    animation: sc-gear-rotate-cw 0.75s linear infinite;
+}
+
+.engine-updated .gear-large-center {
+    animation: sc-gear-stop-decel 1.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+.engine-updated .gear-medium-left {
+    animation: sc-gear-stop-decel-ccw 1.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+.engine-updated .gear-small-right {
+    animation: sc-gear-stop-decel 1.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+.engine-restoring .gear-large-center {
+    animation: sc-gear-rotate-cw 3s linear infinite;
+}
+
+.engine-restoring .gear-medium-left {
+    animation: sc-gear-rotate-ccw 2.05s linear infinite;
+}
+
+.engine-restoring .gear-small-right {
+    animation: sc-gear-rotate-cw 1.5s linear infinite;
+}
+
+/* Mechanical Core Keyframe Easing Arrays */
+@keyframes sc-gear-idle-cw {
+
+    0%,
+    85%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    90%,
+    95% {
+        transform: rotate(15deg);
+    }
+}
+
+@keyframes sc-gear-idle-ccw {
+
+    0%,
+    85%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    90%,
+    95% {
+        transform: rotate(-22deg);
+    }
+}
+
+@keyframes sc-gear-rotate-cw {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes sc-gear-rotate-ccw {
+    100% {
+        transform: rotate(-360deg);
+    }
+}
+
+@keyframes sc-gear-stop-decel {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(140deg);
+    }
+}
+
+@keyframes sc-gear-stop-decel-ccw {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(-200deg);
+    }
+}
+
+/* Tiny Pulses and Status Markers within Bores */
+.sc-gearbox-ai-core-indicator {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--sc-brand);
+    z-index: 5;
+}
+
+.engine-unsaved .sc-gearbox-ai-core-indicator {
+    background-color: var(--sc-warning);
+    animation: pulse 1.5s infinite;
+}
+
+.engine-saving .sc-gearbox-ai-core-indicator {
+    background-color: var(--sc-brand);
+    animation: pulse 600ms infinite;
+}
+
+.sc-gearbox-success-checkmark {
+    position: absolute;
+    color: var(--sc-success);
+    z-index: 6;
+    animation: sc-checkmark-bump 450ms cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes sc-checkmark-bump {
+    0% {
+        transform: scale(0.4);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+}
+
+/* Text Display Controls Inside Assemblies */
+.sc-gearbox-text-panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 160px;
+}
+
+.sc-gearbox-status-lbl {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--sc-text-s);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.sc-gearbox-status-flex-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.sc-gearbox-status-value {
+    font-size: 13px;
+    color: var(--sc-text-p);
+    transition: var(--sc-motion);
+}
+
+.engine-stable .sc-gearbox-status-value {
+    color: var(--sc-success);
+}
+
+.engine-unsaved .sc-gearbox-status-value {
+    color: var(--sc-warning);
+}
+
+.engine-saving .sc-gearbox-status-value {
+    color: var(--sc-brand);
+}
+
+.engine-updated .sc-gearbox-status-value {
+    color: var(--sc-success);
+}
+
+.engine-restoring .sc-gearbox-status-value {
+    color: var(--sc-text-s);
+}
+
+.sc-gearbox-timestamp-tracker {
+    font-size: 11px;
+    color: var(--sc-text-s);
+    margin-top: 2px;
+}
+
+/* Processing Continuous Progress Indicator Ring Ticker */
+.sc-gearbox-progress-bar-ticker {
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--sc-surf);
+    border-top-color: var(--sc-brand);
+    border-radius: 50%;
+    display: inline-block;
+    animation: sc-spin-gear 800ms linear infinite;
+}
+
+/* Executive Top KPI Cards Grid Layouts */
+.sc-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 32px;
+    width: 100%;
+}
+
+.sc-kpi-card {
+    background-color: var(--sc-card);
+    border: 1px solid var(--sc-border);
+    border-radius: var(--sc-radius-sm);
+    padding: 16px 20px;
+    box-shadow: var(--sc-shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+.sc-kpi-lbl {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--sc-text-s);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.sc-kpi-value-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 6px 0 4px 0;
+}
+
+.sc-kpi-val-text {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--sc-text-p);
+    line-height: 1.1;
+    margin: 0;
+}
+
+.sc-indicator-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.sc-indicator-dot.dot-success {
+    background-color: var(--sc-success);
+}
+
+.sc-indicator-dot.dot-brand {
+    background-color: var(--sc-brand);
+}
+
+.sc-kpi-desc-text {
+    font-size: 12px;
+    color: var(--sc-text-s);
+    margin: 0;
+}
+
+/* Sourcing Content Form Configuration Split Matrix Grids */
+.sc-workspace-layout-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+    margin-bottom: 32px;
+    width: 100%;
+    align-items: stretch;
+}
+
+.sc-panel-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+}
+
+.sc-configuration-card {
+    background-color: var(--sc-card);
+    border: 1px solid var(--sc-border);
+    border-radius: var(--sc-radius);
+    padding: 24px;
+    box-shadow: var(--sc-shadow);
+    transition: var(--sc-motion);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Mutation Visual Highlight Borders Indicators */
+.sc-configuration-card.section-mutated-highlight {
+    border-color: rgba(200, 166, 82, 0.45);
+    box-shadow: 0 0 10px rgba(200, 166, 82, 0.04);
+}
+
+.sc-card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed var(--sc-border);
+    padding-bottom: 14px;
+    margin-bottom: 20px;
+}
+
+.sc-card-title-block {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sc-card-heading {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--sc-brand);
+    margin: 0;
+}
+
+.sc-health-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+}
+
+.sc-health-badge.healthy {
+    background-color: rgba(112, 140, 114, 0.08);
+    color: var(--sc-success);
+}
+
+.sc-form-elements-vertical-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.sc-form-row-item {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.sc-form-row-double-columns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 100%;
+}
+
+.sc-field-lbl {
+    margin-bottom: 6px;
+}
+
+.sc-select-element,
+.sc-input-element {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--sc-border);
+    background-color: var(--sc-bg-s);
+    color: var(--sc-text-p);
+    font-size: 14px;
+    outline: none;
+    transition: var(--sc-motion);
+}
+
+.sc-select-element:focus,
+.sc-input-element:focus {
+    border-color: var(--sc-brand);
+    background-color: var(--sc-card);
+}
+
+/* Sliders Component Accents */
+.sc-slider-labels-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.sc-slider-numerical-value {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--sc-brand);
+}
+
+.sc-slider-element {
+    width: 100%;
+    height: 6px;
+    background-color: var(--sc-surf);
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 10px 0;
+}
+
+.sc-slider-element::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--sc-brand);
+    cursor: pointer;
+    transition: var(--sc-motion);
+}
+
+/* Switches Grid Relays Switchboard Components */
+.sc-toggle-switch-element {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.sc-toggle-switch-element input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.sc-toggle-slider-nob {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--sc-border);
+    transition: var(--sc-motion);
+    border-radius: 22px;
+}
+
+.sc-toggle-slider-nob::before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: var(--sc-motion);
+    border-radius: 50%;
+}
+
+.sc-toggle-switch-element input:checked+.sc-toggle-slider-nob {
+    background-color: var(--sc-brand);
+}
+
+.sc-toggle-switch-element input:checked+.sc-toggle-slider-nob::before {
+    transform: translateX(20px);
+}
+
+/* Sourcing Matrix Infrastructure System Lists rows */
+.sc-network-topology-vertical-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.sc-topology-list-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--sc-bg-p);
+    padding-bottom: 10px;
+}
+
+.sc-topology-list-item-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.sc-topology-left-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sc-topology-left-cell .sc-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.sc-topology-left-cell .sc-status-dot.dot-success {
+    background-color: var(--sc-success);
+}
+
+.sc-topology-left-cell .sc-status-dot.dot-warning {
+    background-color: var(--sc-warning);
+}
+
+.sc-topology-node-name {
+    font-size: 13px;
+    color: var(--sc-text-p);
+}
+
+.sc-topology-right-cell {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12px;
+}
+
+.sc-topology-status-txt {
+    color: var(--sc-text-p);
+}
+
+.sc-topology-sync-txt {
+    color: var(--sc-text-s);
+}
+
+/* Registry Data Storage Tables Grid Footprints */
+.sc-data-registry-vertical-table {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.sc-registry-table-header-row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--sc-text-s);
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--sc-border);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.sc-registry-table-data-row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    font-size: 13px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--sc-bg-p);
+    color: var(--sc-text-p);
+    align-items: center;
+}
+
+.sc-registry-table-data-row:last-child {
+    border-bottom: none;
+}
+
+/* System Health Monitor Diagnostics Dashboard Subpanel */
+.sc-system-health-dashboard-panel {
+    background-color: var(--sc-bg-s);
+    border: 1px solid var(--sc-border);
+    border-radius: var(--sc-radius);
+    padding: 24px;
+    box-shadow: var(--sc-shadow);
+    width: 100%;
+    margin-bottom: 32px;
+}
+
+.sc-panel-title-wrapper-border {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--sc-border);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+}
+
+.sc-section-title-heading {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--sc-brand);
+    margin: 0;
+}
+
+.sc-health-dashboard-fluid-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    width: 100%;
+}
+
+.sc-health-metric-card-node {
+    background-color: var(--sc-card);
+    border: 1px solid var(--sc-border);
+    border-radius: var(--sc-radius-sm);
+    padding: 16px;
+    box-shadow: var(--sc-shadow);
+}
+
+.sc-health-metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.sc-metric-component-name {
+    font-size: 13px;
+    color: var(--sc-text-p);
+    line-height: 1.3;
+}
+
+.sc-health-pill-tag {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.sc-health-pill-tag.status-success {
+    background-color: rgba(112, 140, 114, 0.1);
+    color: var(--sc-success);
+}
+
+.sc-health-metric-meta-strip {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    border-top: 1px solid var(--sc-bg-p);
+    padding-top: 10px;
+}
+
+.sc-meta-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.sc-meta-lbl {
+    font-size: 9px;
+}
+
+.sc-meta-val {
+    font-size: 12px;
+    color: var(--sc-text-p);
+    margin-top: 1px;
+}
+
+/* Bottom Execution Operational Actions Fixed Toolbar Base rules */
+.sc-bottom-fixed-actions-toolbar {
+    position: fixed;
+    bottom: 0;
+    left: 260px;
+    right: 0;
+    background-color: var(--sc-card);
+    border-top: 1px solid var(--sc-border);
+    padding: 16px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 99;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.sc-toolbar-warning-alert {
+    font-size: 12px;
+    color: var(--sc-warning);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
+.sc-toolbar-buttons-flex-stack {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sc-btn-utility-link {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--sc-radius-sm);
+    cursor: pointer;
+    transition: var(--sc-motion);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sc-btn-utility-link:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.sc-btn-utility-link:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.sc-btn-utility-link.border-outline {
+    background-color: transparent;
+    color: var(--sc-text-p);
+    border: 1px solid var(--sc-border);
+}
+
+.sc-btn-utility-link.border-outline:hover {
+    background-color: var(--sc-bg-s);
+    border-color: var(--sc-text-p);
+}
+
+.sc-btn-utility-link.border-outline-secondary {
+    background-color: transparent;
+    color: var(--sc-text-s);
+    border: 1px solid var(--sc-border);
+}
+
+.sc-btn-utility-link.border-outline-secondary:hover {
+    background-color: var(--sc-bg-s);
+    color: var(--sc-text-p);
+}
+
+.sc-btn-utility-link.text-critical-action {
+    background-color: transparent;
+    border: 1px dashed var(--sc-critical);
+    color: var(--sc-critical);
+}
+
+.sc-btn-utility-link.text-critical-action:hover {
+    background-color: rgba(177, 90, 82, 0.05);
+}
+
+.sc-btn-utility-link.action-primary-brand {
+    background-color: var(--sc-brand);
+    color: #FFFFFF;
+    border: 1px solid var(--sc-brand);
+}
+
+.sc-btn-utility-link.action-primary-brand:hover:not(:disabled) {
+    background-color: #2D3E4E;
+    border-color: #2D3E4E;
+}
+
+/* ======================================================
+   RESPONSIVE LAYOUT MATRIX BREAKPOINTS AND SCALING RULES
+   ====================================================== */
+
+@media (max-width: 1400px) {
+    .sc-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .sc-health-dashboard-fluid-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 1200px) {
+    .sc-workspace-layout-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .sc-bottom-fixed-actions-toolbar {
+        left: 0;
+        padding: 16px 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sc-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sc-health-dashboard-fluid-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sc-form-row-double-columns {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .sc-header-block {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sc-header-right {
+        margin-top: 16px;
+        width: 100%;
+    }
+
+    .sc-gearbox-widget-assembly {
+        width: 100%;
+    }
+
+    .sc-bottom-fixed-actions-toolbar {
+        flex-direction: column;
+        gap: 14px;
+        align-items: stretch;
+        padding-bottom: 24px;
+    }
+
+    .sc-toolbar-buttons-flex-stack {
+        flex-wrap: wrap;
+    }
+
+    .sc-btn-utility-link {
+        flex-grow: 1;
+        justify-content: center;
+    }
 }
