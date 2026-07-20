@@ -107,3 +107,76 @@ class KnowledgeGraphAgent:
         self._add_plant_supplier_edges(plant_supplier_map)
         self._add_warehouse_plant_edges(warehouse_plant_map)
         self._add_plant_distribution_edges(plant_distribution_map)
+     
+    def _add_plant_nodes(self, plants_data: list[dict]) -> None:
+        for plant in plants_data:
+            self.graph.add_node(
+                plant["plant_id"],
+                node_type="plant",
+                name=plant.get("plant_name"),
+                city=plant.get("city"),
+                state=plant.get("state"),
+                production_capacity_tpd=plant.get("production_capacity_tpd"),
+                storage_capacity_tons=plant.get("storage_capacity_tons"),
+                risk_zone=plant.get("risk_zone"),
+                operating_status=plant.get("operating_status"),
+            )
+ 
+    def _add_supplier_nodes(self, suppliers_data: list[dict]) -> None:
+        for supplier in suppliers_data:
+            self.graph.add_node(
+                supplier["supplier_id"],
+                node_type="supplier",
+                name=supplier.get("supplier_name"),
+                city=supplier.get("city"),
+                state=supplier.get("state"),
+                country=supplier.get("country"),
+                reliability_score=supplier.get("reliability_score"),
+                business_priority=supplier.get("business_priority"),
+                lead_time_days=supplier.get("lead_time_days"),
+                preferred_transport=supplier.get("preferred_transport"),
+                status=supplier.get("status"),
+            )
+
+    def _add_warehouse_nodes(self, warehouses_data: list[dict]) -> None:
+        for warehouse in warehouses_data:
+            self.graph.add_node(
+                warehouse["warehouse_id"],
+                node_type="warehouse",
+                name=warehouse.get("warehouse_name"),
+                city=warehouse.get("city"),
+                state=warehouse.get("state"),
+                storage_capacity_tons=warehouse.get("storage_capacity_tons"),
+                current_utilization_tons=warehouse.get("current_utilization_tons"),
+                operating_status=warehouse.get("operating_status"),
+            )
+
+    def _add_distribution_center_nodes(self, distribution_data: list[dict]) -> None:
+        for center in distribution_data:
+            self.graph.add_node(
+                center["distribution_center_id"],
+                node_type="distribution_center",
+                name=center.get("distribution_center_name"),
+                city=center.get("city"),
+                state=center.get("state"),
+                supported_regions=center.get("supported_regions", []),
+                operating_status=center.get("operating_status"),
+            )
+
+    def _add_material_nodes(self, material_supplier_map: list[dict]) -> None:
+        """
+        Adds one node per material ID found in material_supplier_map.
+        Since materials/materials.json doesn't exist yet, we use a
+        fallback name lookup (see _FALLBACK_MATERIAL_NAMES) — if that
+        file is added later, this should read the real names from it
+        instead.
+        """
+        for mapping in material_supplier_map:
+            material_id = mapping["material_id"]
+            self.graph.add_node(
+                material_id,
+                node_type="material",
+                name=FALLBACK_MATERIAL_NAMES.get(material_id, material_id),
+                criticality=mapping.get("criticality"),
+                average_monthly_requirement=mapping.get("average_monthly_requirement"),
+            )
