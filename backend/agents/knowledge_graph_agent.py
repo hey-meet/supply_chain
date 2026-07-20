@@ -180,3 +180,158 @@ class KnowledgeGraphAgent:
                 criticality=mapping.get("criticality"),
                 average_monthly_requirement=mapping.get("average_monthly_requirement"),
             )
+
+# ---------------------------------------------------------------
+    # STEP 3: Build the edges (the actual "who depends on whom")
+    # ---------------------------------------------------------------
+    def _add_material_supplier_edges(self, material_supplier_map: list[dict]) -> None:
+        """supplier -> material, labeled 'primary' or 'backup'."""
+        for mapping in material_supplier_map:
+            material_id = mapping["material_id"]
+ 
+            primary_supplier = mapping.get("primary_supplier")
+            if primary_supplier:
+                self.graph.add_edge(
+                    primary_supplier, material_id,
+                    relation="SUPPLIES_MATERIAL", role="primary",
+                )
+ 
+            for backup_supplier in mapping.get("backup_suppliers", []):
+                self.graph.add_edge(
+                    backup_supplier, material_id,
+                    relation="SUPPLIES_MATERIAL", role="backup",
+                )
+ 
+    def _add_plant_supplier_edges(self, plant_supplier_map: list[dict]) -> None:
+        """supplier -> plant, labeled 'primary' or 'secondary'."""
+        for mapping in plant_supplier_map:
+            plant_id = mapping["plant_id"]
+ 
+            for supplier_id in mapping.get("primary_suppliers", []):
+                self.graph.add_edge(
+                    supplier_id, plant_id,
+                    relation="SUPPLIES_PLANT", role="primary",
+                )
+ 
+            for supplier_id in mapping.get("secondary_suppliers", []):
+                self.graph.add_edge(
+                    supplier_id, plant_id,
+                    relation="SUPPLIES_PLANT", role="secondary",
+                )
+ 
+    def _add_warehouse_plant_edges(self, warehouse_plant_map: list[dict]) -> None:
+        """warehouse -> plant."""
+        for mapping in warehouse_plant_map:
+            warehouse_id = mapping["warehouse_id"]
+            for plant_id in mapping.get("connected_plants", []):
+                self.graph.add_edge(
+                    warehouse_id, plant_id,
+                    relation="FEEDS_PLANT",
+                )
+ 
+    def _add_plant_distribution_edges(self, plant_distribution_map: list[dict]) -> None:
+        """plant -> distribution_center."""
+        for mapping in plant_distribution_map:
+            plant_id = mapping["plant_id"]
+            distribution_center_id = mapping.get("distribution_center_id")
+            if distribution_center_id:
+                self.graph.add_edge(
+                    plant_id, distribution_center_id,
+                    relation="DISTRIBUTES_TO",
+                )
+ 
+    # ---------------------------------------------------------------
+    # STEP 4: Query methods — what other agents will actually call
+    # ---------------------------------------------------------------
+    def get_node_info(self, node_id: str) -> dict | None:
+        """Returns everything we know about one node (plant, supplier, etc.)."""
+        if node_id not in self.graph.nodes:
+            return None
+        return dict(self.graph.nodes[node_id])
+ 
+    def get_suppliers_of_material(self, material_id: str) -> list[dict]:
+        """Which suppliers provide a given material, and whether they're primary/backup."""
+        results = []
+        for supplier_id in self.graph.predecessors(material_id):
+            edge_data = self.graph.get_edge_data(supplier_id, material_id)
+            results.append({"supplier_id": supplier_id, "role": edge_data.get("role")})
+        return results
+ 
+    def get_plants_supplied_by(self, supplier_id: str) -> list[dict]:
+        """Which plants does this supplier directly supply, and how (primary/secondary)?"""
+        results = []
+        for target in self.graph.successors(supplier_id):
+            if self.graph.nodes[target].get("node_type") != "plant":
+                continue
+            edge_data = self.graph.get_edge_data(supplier_id, target)
+            results.append({"plant_id": target, "role": edge_data.get("role")})
+        return results
+ 
+    def get_materials_supplied_by(self, supplier_id: str) -> list[str]:
+        """Which materials does this supplier provide?"""
+        return [
+            target for target in self.graph.successors(supplier_id)
+            if self.graph.nodes[target].get("node_type") == "material"
+        ]
+ 
+    def get_plants_fed_by_warehouse(self, warehouse_id: str) -> list[str]:
+        """Which plants does this warehouse feed?"""
+        return [
+            target for target in self.graph.successors(warehouse_id)
+            if self.graph.nodes[target].get("node_type") == "plant"
+        ]
+ 
+    def get_distribution_centers_for_plant(self, plant_id: str) -> list[str]:
+        """Which distribution centers does this plant distribute to?"""
+        return [
+            target for target in self.graph.successors(plant_id)
+            if self.graph.nodes[target].get("node_type") == "distribution_center"
+        ]
+ 
+    def get_downstream_impact(self, start_node_id: str) -> dict[str, list[str]]:
+        """
+        The "blast radius" query: given a disrupted node (usually a
+        supplier), find every node reachable downstream from it — every
+        material, plant, and distribution center that could be affected.
+ 
+        Args:
+            start_node_id (str): The node where the disruption starts
+                (e.g. a supplier_id).
+ 
+        Returns:
+            dict[str, list[str]]: Reachable node IDs grouped by type, e.g.
+                {
+                    "material": ["MAT-LMS-01"],
+                    "plant": ["PLT-001"],
+                    "distribution_center": ["DBC-001"],
+                }
+            Returns empty groups if start_node_id doesn't exist in the graph.
+        """
+        if start_node_id not in self.graph.nodes:
+            logger.warning("get_downstream_impact: unknown node %r", start_node_id)
+            return {}
+ 
+        reachable_nodes = nx.descendants(self.graph, start_node_id)
+ 
+        grouped: dict[str, list[str]] = {}
+        for node_id in reachable_nodes:
+            node_type = self.graph.nodes[node_id].get("node_type", "unknown")
+            grouped.setdefault(node_type, []).append(node_id)
+ 
+        return grouped
+ 
+    def summary(self) -> dict:
+        """Quick sanity-check counts, useful for debugging/logging."""
+        counts: dict[str, int] = {}
+        for _node_id, attrs in self.graph.nodes(data=True):
+            node_type = attrs.get("node_type", "unknown")
+            counts[node_type] = counts.get(node_type, 0) + 1
+ 
+        return {
+            "node_counts": counts,
+            "total_nodes": self.graph.number_of_nodes(),
+            "total_edges": self.graph.number_of_edges(),
+        }
+ 
+ 
+knowledge_graph_agent = KnowledgeGraphAgent()
