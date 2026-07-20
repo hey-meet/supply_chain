@@ -24,3 +24,24 @@ FALLBACK_MATERIAL_NAMES = {
     "MAT-DSL-05": "Diesel",
     "MAT-PKG-06": "Packaging Material",
 }
+
+class KnowledgeGraphAgent:
+    """
+    Builds a NetworkX graph of the supply chain network and provides
+    simple, reusable query methods on top of it.
+ 
+    Node types (stored as node attribute "node_type"):
+        "supplier", "material", "plant", "warehouse", "distribution_center"
+ 
+    Edge types (stored as edge attribute "relation"):
+        "SUPPLIES_MATERIAL"   supplier -> material
+        "SUPPLIES_PLANT"      supplier -> plant
+        "FEEDS_PLANT"         warehouse -> plant
+        "DISTRIBUTES_TO"      plant -> distribution_center
+    """
+ 
+    def __init__(self, data_dir: Path = DATA_DIR):
+        self.data_dir = data_dir
+        self.graph = nx.DiGraph()
+        self._build_graph()
+ 
