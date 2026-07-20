@@ -39,16 +39,12 @@ const Topbar = () => {
 
             {/* LEFT SECTION - SYSTEM IDENTITY (Optimized short copy) */}
             <div className="topbar-left">
-                <h1 className="system-identity-title">
-                    Supply Chain Agent
-                </h1>
+
                 <div className="system-status-group">
                     <div className="agent-status-indicator active">
-                        <span className="status-dot"></span>
-                        <span className="status-label">3 Active</span>
+
                     </div>
-                    <span className="status-divider">|</span>
-                    <span className="system-ready-text">Monitoring</span>
+
                 </div>
             </div>
 
