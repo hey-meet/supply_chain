@@ -1,4 +1,4 @@
-# backend/utils/error_handlers.py
+from typing import Optional, Dict, Any
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from backend.utils.logging_utils import logger
