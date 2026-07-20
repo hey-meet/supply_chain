@@ -76,3 +76,70 @@ def test_get_materials_supplied_by_supplier():
     materials = agent.get_materials_supplied_by("SUP-001")
     assert set(materials) == {"MAT-LMS-01", "MAT-COL-02"}
 
+# -----------------------------------------------------------------------
+# Supplier <-> plant relationships
+# -----------------------------------------------------------------------
+def test_get_plants_supplied_by_marks_primary_and_secondary_roles():
+    agent = _build_agent()
+    plants = agent.get_plants_supplied_by("SUP-001")
+
+    plants_by_id = {p["plant_id"]: p["role"] for p in plants}
+    assert plants_by_id["PLT-001"] == "primary"
+    assert plants_by_id["PLT-002"] == "secondary"
+
+
+# -----------------------------------------------------------------------
+# Warehouse <-> plant relationships
+# -----------------------------------------------------------------------
+def test_get_plants_fed_by_warehouse():
+    agent = _build_agent()
+    plants = agent.get_plants_fed_by_warehouse("RWH-002")
+    assert set(plants) == {"PLT-001", "PLT-002"}
+
+
+# -----------------------------------------------------------------------
+# Plant <-> distribution center relationships
+# -----------------------------------------------------------------------
+def test_get_distribution_centers_for_plant():
+    agent = _build_agent()
+    centers = agent.get_distribution_centers_for_plant("PLT-001")
+    assert centers == ["DBC-001"]
+
+
+# -----------------------------------------------------------------------
+# The "blast radius" query — the whole point of this agent
+# -----------------------------------------------------------------------
+def test_downstream_impact_from_disrupted_supplier():
+    agent = _build_agent()
+    impact = agent.get_downstream_impact("SUP-001")
+
+    # SUP-001 supplies limestone + coal, feeds PLT-001 (primary) and
+    # PLT-002 (secondary), which distribute to DBC-001 and DBC-002.
+    assert set(impact["material"]) == {"MAT-LMS-01", "MAT-COL-02"}
+    assert set(impact["plant"]) == {"PLT-001", "PLT-002"}
+    assert set(impact["distribution_center"]) == {"DBC-001", "DBC-002"}
+
+
+def test_downstream_impact_from_unknown_node_returns_empty():
+    agent = _build_agent()
+    assert agent.get_downstream_impact("NOT-A-REAL-NODE") == {}
+
+
+if __name__ == "__main__":
+    test_functions = [
+        test_graph_builds_expected_node_counts,
+        test_graph_has_edges,
+        test_get_node_info_returns_supplier_details,
+        test_get_node_info_returns_none_for_unknown_node,
+        test_get_suppliers_of_material_returns_primary_and_backup,
+        test_get_materials_supplied_by_supplier,
+        test_get_plants_supplied_by_marks_primary_and_secondary_roles,
+        test_get_plants_fed_by_warehouse,
+        test_get_distribution_centers_for_plant,
+        test_downstream_impact_from_disrupted_supplier,
+        test_downstream_impact_from_unknown_node_returns_empty,
+    ]
+    for test_fn in test_functions:
+        test_fn()
+        print("PASS:", test_fn.__name__)
+    print("All tests passed!")
