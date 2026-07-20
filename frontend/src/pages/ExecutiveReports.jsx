@@ -1,56 +1,86 @@
 // ExecutiveReports.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     FileText, AlertTriangle, Clock, ThumbsUp, ChevronRight, Download,
     FileDown, RefreshCw, Share2, Eye, Copy, CheckCircle2,
-    Layers, TrendingUp, BarChart2, Shield, Calendar, User
+    Layers, TrendingUp, BarChart2, Shield, Calendar, User, AlertCircle
 } from 'lucide-react';
+import reportService from '../services/reportService';
 import '../styles/executive-reports.css';
 
-// --- ENTERPRISE STATIC MOCK DATA ---
-const kpiData = [
-    { id: 1, title: 'Reports Generated', value: '1,248', trend: '+12% this month', status: 'success', icon: FileText },
-    { id: 2, title: 'Critical Reports', value: '14 Active', trend: '2 resolved today', status: 'critical', icon: AlertTriangle },
-    { id: 3, title: 'Avg Generation Time', value: '4.2s', desc: 'Real-time optimization', status: 'brand', icon: Clock },
-    { id: 4, title: 'Executive Approval', value: '98.6%', trend: '0% override fallback', status: 'success', icon: ThumbsUp }
-];
-
-const mockReportMeta = {
-    id: 'REP-2026-NX48',
-    generatedBy: 'Autonomous News Intelligence & Mitigation Agent Pool',
-    creationTime: '2026-07-17 10:32:15',
-    version: 'v3.4.1 (Stable)',
-    confidence: '96.4%',
-    status: 'Approved for Board Review',
-    priority: 'Critical / Tier 1 Risk',
-    readingTime: '3 min read'
+// Icon mapping dictionary for dynamic string-based icons from backend API
+const ICON_MAP = {
+    FileText,
+    AlertTriangle,
+    Clock,
+    ThumbsUp,
+    TrendingUp,
+    BarChart2,
+    Shield
 };
 
-const qualityMetrics = [
-    { label: 'Report Completeness', score: 100 },
-    { label: 'Data Accuracy Vector', score: 98 },
-    { label: 'Business Readiness Matrix', score: 96 },
-    { label: 'Empirical Evidence Score', score: 94 },
-    { label: 'Knowledge Graph Intersect', score: 100 }
-];
-
-const timelineActivity = [
-    { id: 1, event: 'Report Generated', desc: 'AI agent pool finalized clinker mitigation parameters.', time: '10:32:15' },
-    { id: 2, event: 'Manager Reviewed', desc: 'Automated verification against historical constraints.', time: '10:34:02' },
-    { id: 3, event: 'AI Updated Graph', desc: 'Knowledge database re-indexed regional transit vectors.', time: '10:34:10' },
-    { id: 4, event: 'Shared with Operations', desc: 'Secure payload broadcast to dispatch control towers.', time: '10:35:00' },
-    { id: 5, event: 'Executive Board Approved', desc: 'System baseline digital signature authorized.', time: '10:36:44' }
-];
-
-const reportHistory = [
-    { id: 'REP-2026-NX48', date: '2026-07-17', incident: 'NH-48 Monsoon Inundation Corridor Anomaly', severity: 'Critical', status: 'Approved', author: 'Mitigation Agent', version: 'v3.4.1' },
-    { id: 'REP-2026-CL82', date: '2026-07-15', incident: 'Madhya Pradesh Off-Peak Grid Outage', severity: 'Medium', status: 'Archived', author: 'Sourcing Engine', version: 'v1.2.0' },
-    { id: 'REP-2026-FL11', date: '2026-07-10', incident: 'Valsad Quarry Material Payload Variance', severity: 'High', status: 'Approved', author: 'Impact Agent', version: 'v2.1.0' },
-    { id: 'REP-2026-GY04', date: '2026-07-04', incident: 'Terminal Port Wait Lane Diesel Overhead', severity: 'Low', status: 'Reviewed', author: 'News Intel Agent', version: 'v1.0.4' }
-];
-
 export default function ExecutiveReports() {
+    const [reportData, setReportData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [selectedReportId, setSelectedReportId] = useState('REP-2026-NX48');
+
+    const fetchExecutiveReports = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await reportService.getExecutiveReports();
+            setReportData(response.data);
+
+            // Automatically select the first report from history if available
+            if (response?.data?.report_history && response.data.report_history.length > 0) {
+                setSelectedReportId(response.data.report_history[0].id);
+            }
+        } catch (err) {
+            console.error('Failed to fetch executive reports:', err);
+            setError(err.response?.data?.message || err.message || 'Failed to load executive reports from service.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchExecutiveReports();
+    }, []);
+
+    // --- RENDER LOADING STATE ---
+    if (loading) {
+        return (
+            <div className="er-content-scope">
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '400px', gap: '1rem' }}>
+                    <RefreshCw className="animate-spin text-brand" size={32} />
+                    <p style={{ color: 'var(--text-secondary, #64748b)', fontSize: '0.95rem' }}>Loading Executive Reports & Analysis Payload...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // --- RENDER ERROR STATE ---
+    if (error) {
+        return (
+            <div className="er-content-scope">
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '400px', gap: '1rem', textAlign: 'center' }}>
+                    <AlertCircle className="text-critical" size={40} />
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Failed to Load Reports</h3>
+                    <p style={{ color: 'var(--text-secondary, #64748b)', maxWidth: '480px' }}>{error}</p>
+                    <button className="er-btn-action-trigger primary-brand" onClick={fetchExecutiveReports} style={{ width: 'auto', padding: '0.5rem 1.25rem' }}>
+                        <RefreshCw size={14} /> <span>Retry Request</span>
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    const reportMeta = reportData?.report_meta;
+    const kpis = reportData?.kpis ?? [];
+    const qualityMetrics = reportData?.quality_metrics ?? [];
+    const timelineActivity = reportData?.timeline_activity ?? [];
+    const reportHistory = reportData?.report_history ?? [];
 
     return (
         <div className="er-content-scope">
@@ -74,17 +104,17 @@ export default function ExecutiveReports() {
                     </div>
                     <div className="er-header-pill font-semibold text-brand">
                         <Shield size={13} />
-                        <span>96.4% AI Conf</span>
+                        <span>{reportMeta?.confidence || '96.4%'} AI Conf</span>
                     </div>
                 </div>
             </header>
 
             {/* Top Corporate KPI Row Section */}
             <section className="er-kpi-grid">
-                {kpiData.map((kpi) => {
-                    const KpiIcon = kpi.icon;
+                {kpis.map((kpi, index) => {
+                    const KpiIcon = ICON_MAP[kpi.icon] || FileText;
                     return (
-                        <div key={kpi.id} className="er-kpi-card">
+                        <div key={kpi.id || index} className="er-kpi-card">
                             <div className="er-kpi-header-flex">
                                 <span className="er-kpi-lbl">{kpi.title}</span>
                                 <span className={`er-kpi-icon-container variant-${kpi.status}`}>
@@ -273,11 +303,11 @@ export default function ExecutiveReports() {
                         <footer className="er-doc-footer-signature-area">
                             <div className="er-doc-footer-row">
                                 <span className="er-signature-lbl">Orchestration Pool Authorization:</span>
-                                <span className="er-signature-val font-semibold">{mockReportMeta.generatedBy}</span>
+                                <span className="er-signature-val font-semibold">{reportMeta?.generatedBy}</span>
                             </div>
                             <div className="er-doc-footer-row split">
-                                <div><span className="er-signature-lbl">Generation Datetime:</span> <span className="font-mono er-signature-val">{mockReportMeta.creationTime}</span></div>
-                                <div><span className="er-signature-lbl">Autonomous Confidence:</span> <span className="font-mono text-success er-signature-val">{mockReportMeta.confidence}</span></div>
+                                <div><span className="er-signature-lbl">Generation Datetime:</span> <span className="font-mono er-signature-val">{reportMeta?.creationTime}</span></div>
+                                <div><span className="er-signature-lbl">Autonomous Confidence:</span> <span className="font-mono text-success er-signature-val">{reportMeta?.confidence}</span></div>
                             </div>
                         </footer>
 
@@ -291,14 +321,14 @@ export default function ExecutiveReports() {
                     <div className="er-sidebar-widget-card">
                         <h3 className="er-widget-card-title">Report Meta Profile</h3>
                         <div className="er-meta-properties-stack">
-                            <div className="er-property-row"><span>Report ID Identification</span><strong className="font-mono text-brand">{mockReportMeta.id}</strong></div>
-                            <div className="er-property-row"><span>System Generation Core</span><span className="er-txt-truncate">{mockReportMeta.generatedBy}</span></div>
-                            <div className="er-property-row"><span>Creation Compiled Time</span><span className="font-mono">{mockReportMeta.creationTime}</span></div>
-                            <div className="er-property-row"><span>Report Build Version</span><span className="font-mono">{mockReportMeta.version}</span></div>
-                            <div className="er-property-row"><span>AI Model Confidence</span><strong className="font-mono text-success">{mockReportMeta.confidence}</strong></div>
-                            <div className="er-property-row"><span>Board Approval Status</span><span className="er-badge-status status-success">{mockReportMeta.status}</span></div>
-                            <div className="er-property-row"><span>Enterprise Disruption Rank</span><span className="er-badge-status status-critical">{mockReportMeta.priority}</span></div>
-                            <div className="er-property-row"><span>Estimated Reading Time</span><span>{mockReportMeta.readingTime}</span></div>
+                            <div className="er-property-row"><span>Report ID Identification</span><strong className="font-mono text-brand">{reportMeta?.id}</strong></div>
+                            <div className="er-property-row"><span>System Generation Core</span><span className="er-txt-truncate">{reportMeta?.generatedBy}</span></div>
+                            <div className="er-property-row"><span>Creation Compiled Time</span><span className="font-mono">{reportMeta?.creationTime}</span></div>
+                            <div className="er-property-row"><span>Report Build Version</span><span className="font-mono">{reportMeta?.version}</span></div>
+                            <div className="er-property-row"><span>AI Model Confidence</span><strong className="font-mono text-success">{reportMeta?.confidence}</strong></div>
+                            <div className="er-property-row"><span>Board Approval Status</span><span className="er-badge-status status-success">{reportMeta?.status}</span></div>
+                            <div className="er-property-row"><span>Enterprise Disruption Rank</span><span className="er-badge-status status-critical">{reportMeta?.priority}</span></div>
+                            <div className="er-property-row"><span>Estimated Reading Time</span><span>{reportMeta?.readingTime}</span></div>
                         </div>
                     </div>
 
@@ -330,7 +360,7 @@ export default function ExecutiveReports() {
                             <button className="er-btn-action-trigger secondary-outline">
                                 <FileText size={14} /> <span>Export Markdown</span>
                             </button>
-                            <button className="er-btn-action-trigger secondary-outline">
+                            <button className="er-btn-action-trigger secondary-outline" onClick={fetchExecutiveReports}>
                                 <RefreshCw size={14} /> <span>Regenerate Analysis</span>
                             </button>
                             <button className="er-btn-action-trigger secondary-outline">
@@ -343,8 +373,8 @@ export default function ExecutiveReports() {
                     <div className="er-sidebar-widget-card">
                         <h3 className="er-widget-card-title">Recent Report Ingestion Activity</h3>
                         <div className="er-sequential-timeline-track">
-                            {timelineActivity.map((activity) => (
-                                <div key={activity.id} className="er-timeline-activity-node-row">
+                            {timelineActivity.map((activity, index) => (
+                                <div key={activity.id || index} className="er-timeline-activity-node-row">
                                     <div className="er-timeline-left-icon-pillar">
                                         <span className="er-timeline-node-dot"></span>
                                         <span className="er-timeline-pillar-line"></span>
@@ -386,19 +416,19 @@ export default function ExecutiveReports() {
                             </tr>
                         </thead>
                         <tbody>
-                            {reportHistory.map((row) => (
-                                <tr key={row.id} className={row.id === selectedReportId ? 'er-row-state-active-selected' : ''}>
+                            {reportHistory.map((row, index) => (
+                                <tr key={row.id || index} className={row.id === selectedReportId ? 'er-row-state-active-selected' : ''}>
                                     <td className="font-semibold text-brand font-mono">{row.id}</td>
                                     <td className="font-mono text-secondary">{row.date}</td>
                                     <td className="er-table-incident-cell-truncate" title={row.incident}>{row.incident}</td>
                                     <td>
-                                        <span className={`er-table-tag-badge severity-${row.severity.toLowerCase()}`}>
+                                        <span className={`er-table-tag-badge severity-${(row.severity || '').toLowerCase()}`}>
                                             {row.severity}
                                         </span>
                                     </td>
                                     <td>
                                         <span className="er-table-status-cell-flex">
-                                            <span className={`er-table-status-dot state-${row.status.toLowerCase()}`}></span>
+                                            <span className={`er-table-status-dot state-${(row.status || '').toLowerCase()}`}></span>
                                             <span className="font-semibold">{row.status}</span>
                                         </span>
                                     </td>
