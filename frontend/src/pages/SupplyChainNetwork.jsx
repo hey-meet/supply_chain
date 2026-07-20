@@ -1,7 +1,6 @@
 // SupplyChainNetwork.jsx
 import React, { useState, useEffect } from 'react';
 
-// FIX: Changed from 'react-flow-kit' to '@xyflow/react'
 import {
     ReactFlow,
     Background,
@@ -11,7 +10,6 @@ import {
     Position
 } from '@xyflow/react';
 
-// Also import the required CSS for the canvas grid lines to show up correctly:
 import '@xyflow/react/dist/style.css';
 
 import {
@@ -32,12 +30,30 @@ import {
     CornerDownRight,
     ShieldCheck
 } from 'lucide-react';
+import networkService from "../services/networkService";
 import '../styles/supply-chain-network.css';
 
+// Icon Map for dynamic icon lookup from string values
+const iconMap = {
+    Activity,
+    Layers,
+    Factory,
+    Package,
+    Route,
+    Truck,
+    Globe,
+    Clock,
+    Network,
+    AlertTriangle,
+    CheckCircle2,
+    TrendingUp,
+    Cpu,
+    ShieldCheck
+};
 
-// Custom Node Component to fit cleanly inside plain React Flow usage
+// Custom Node Component
 const TwinNode = ({ data }) => {
-    const Icon = data.icon;
+    const Icon = typeof data.icon === 'function' ? data.icon : (iconMap[data.icon] || Layers);
     return (
         <div className={`twin-node-card status-${data.health}`}>
             <Handle type="target" position={Position.Top} className="flow-handle" />
@@ -70,51 +86,50 @@ const TwinNode = ({ data }) => {
 
 const nodeTypes = { twinNode: TwinNode };
 
-// Mock Static Context Configuration Arrays
-const kpiData = [
-    { id: 1, title: 'Network Health', value: '94.8%', trend: 'Optimal Range', status: 'success', icon: Activity },
-    { id: 2, title: 'Connected Suppliers', value: '42 Nodes', trend: '+2 Activated', status: 'success', icon: UsersPlaceholder },
-    { id: 3, title: 'Operational Plants', value: '6 / 7 Live', trend: '1 High Alert', status: 'warning', icon: Factory },
-    { id: 4, title: 'Active Warehouses', value: '18 Hubs', trend: '84% Capacity', status: 'success', icon: Package },
-    { id: 5, title: 'Critical Routes', value: '3 Blocks', trend: 'Mitigation Ready', status: 'critical', icon: Route },
-    { id: 6, title: 'Current Material Flow', value: '4,850 T/h', trend: '+12% vs Baseline', status: 'success', icon: Truck }
-];
-
 function UsersPlaceholder(props) { return <Layers {...props} />; }
-
-const networkHealthCards = [
-    { id: 1, label: 'Supplier Status', val: '38 Online / 4 Affected', pct: 90, desc: 'Valsad Quarry cluster experiencing transport restrictions.', status: 'warning' },
-    { id: 2, label: 'Route Network', val: '88% Fluidity Rate', pct: 88, desc: 'NH-48 closed near border post; bypass options deployed.', status: 'warning' },
-    { id: 3, label: 'Warehouse Status', val: '12 Silos Stable / 1 Critical', pct: 94, desc: 'Plant A limestone reserves at 36-hour safety buffer thresholds.', status: 'critical' },
-    { id: 4, label: 'Overall AI Twin Score', val: '96.2 System Health', pct: 96, desc: 'Autonomous anomaly tracking engines operational.', status: 'success' }
-];
-
-const initialNodes = [
-    { id: 'sup-1', type: 'twinNode', position: { x: 50, y: 30 }, data: { name: 'Valsad Quarry Hub', location: 'Gujarat', material: 'Limestone Raw Bulk', health: 'critical', status: 'Logistics Obstructed', icon: Layers } },
-    { id: 'sup-2', type: 'twinNode', position: { x: 320, y: 30 }, data: { name: 'Jodhpur Actives', location: 'Rajasthan', material: 'Alternative Limestone', health: 'success', status: 'Emergency Capacity', icon: Layers } },
-    { id: 'wh-1', type: 'twinNode', position: { x: 185, y: 160 }, data: { name: 'Central Silo Matrix A', location: 'Plant A Proximity', material: 'Aggregate Storage', health: 'warning', status: 'Low Buffer Stock', icon: Package } },
-    { id: 'pl-1', type: 'twinNode', position: { x: 185, y: 290 }, data: { name: 'Plant A Grinding Mill', location: 'Gujarat East', material: 'Clinker Processing', health: 'warning', status: 'Rerouting Inbound', icon: Factory } },
-    { id: 'dc-1', type: 'twinNode', position: { x: 50, y: 420 }, data: { name: 'Mumbai Logistics Base', location: 'Maharashtra', material: 'Finished Product Cement', health: 'success', status: 'Optimal Output', icon: Truck } },
-    { id: 'dc-2', type: 'twinNode', position: { x: 320, y: 420 }, data: { name: 'Surat Terminal Node', location: 'Gujarat South', material: 'Bulk Matrix Packets', health: 'success', status: 'Optimal Output', icon: Truck } }
-];
-
-const initialEdges = [
-    { id: 'e1', source: 'sup-1', target: 'wh-1', className: 'edge-flow-limestone edge-critical' },
-    { id: 'e2', source: 'sup-2', target: 'wh-1', className: 'edge-flow-alternative edge-alternative-dashed' },
-    { id: 'e3', source: 'wh-1', target: 'pl-1', className: 'edge-flow-mix edge-transfer-blue' },
-    { id: 'e4', source: 'pl-1', target: 'dc-1', className: 'edge-flow-finished edge-healthy' },
-    { id: 'e5', source: 'pl-1', target: 'dc-2', className: 'edge-flow-finished edge-healthy' }
-];
-
-const aiActionPlans = [
-    { id: 1, priority: 'Critical', action: 'Transfer Inventory from Plant C', delay: 'None', cost: '$4,200', impact: 'Secures next 24 hours blending operations', conf: '98%', agent: 'Inventory Balancer', time: '14:30' },
-    { id: 2, priority: 'High', action: 'Activate Backup Supplier Hub 7', delay: '+2.5 Hours', cost: '$14,200', impact: 'Bypasses broken logistics lines on NH-48', conf: '97%', agent: 'Sourcing Engine', time: '14:45' },
-    { id: 3, priority: 'Medium', action: 'Switch Transport Vector to Rail', delay: '+4.0 Hours', cost: '-$2,100', impact: 'Mitigates prolonged highway congestion risk', conf: '92%', agent: 'Logistics Route Agent', time: '16:00' }
-];
 
 export default function SupplyChainNetwork() {
     const [liveSync, setLiveSync] = useState('14:17:02');
-    const [selectedNode, setSelectedNode] = useState(initialNodes[0].data);
+    const [selectedNode, setSelectedNode] = useState(null);
+
+    const [networkData, setNetworkData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchNetworkData = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await networkService.getSupplyChainNetwork();
+                const fetchedData = response.data;
+
+                // Process nodes to attach corresponding Lucide icon components if string provided
+                if (fetchedData && fetchedData.nodes) {
+                    fetchedData.nodes = fetchedData.nodes.map((node) => ({
+                        ...node,
+                        data: {
+                            ...node.data,
+                            icon: typeof node.data.icon === 'string' ? (iconMap[node.data.icon] || Layers) : node.data.icon
+                        }
+                    }));
+                }
+
+                setNetworkData(fetchedData);
+
+                if (fetchedData && fetchedData.nodes && fetchedData.nodes.length > 0) {
+                    setSelectedNode(fetchedData.nodes[0].data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch supply chain network data:", err);
+                setError(err?.message || "Failed to load supply chain network digital twin.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchNetworkData();
+    }, []);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -129,6 +144,28 @@ export default function SupplyChainNetwork() {
             setSelectedNode(node.data);
         }
     };
+
+    if (loading) {
+        return (
+            <div className="twin-page-scope flex-center" style={{ minHeight: '400px' }}>
+                <p>Loading Supply Chain Digital Twin Network...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="twin-page-scope flex-center" style={{ minHeight: '400px' }}>
+                <p className="text-critical">Error: {error}</p>
+            </div>
+        );
+    }
+
+    const kpiData = networkData?.kpis ?? [];
+    const networkHealthCards = networkData?.network_health_cards ?? [];
+    const nodes = networkData?.nodes ?? [];
+    const edges = networkData?.edges ?? [];
+    const aiActionPlans = networkData?.ai_action_plans ?? [];
 
     return (
         <div className="twin-page-scope">
@@ -159,7 +196,7 @@ export default function SupplyChainNetwork() {
             {/* Top 6 KPI Rows */}
             <section className="twin-kpi-grid">
                 {kpiData.map((kpi) => {
-                    const Icon = kpi.icon;
+                    const Icon = typeof kpi.icon === 'string' ? (iconMap[kpi.icon] || UsersPlaceholder) : (kpi.icon || UsersPlaceholder);
                     return (
                         <div key={kpi.id} className="twin-kpi-card">
                             <div className="twin-kpi-header">
@@ -212,8 +249,8 @@ export default function SupplyChainNetwork() {
 
                     <div className="react-flow-canvas-viewport">
                         <ReactFlow
-                            nodes={initialNodes}
-                            edges={initialEdges}
+                            nodes={nodes}
+                            edges={edges}
                             nodeTypes={nodeTypes}
                             onNodeClick={handleNodeClick}
                             fitView
@@ -265,9 +302,9 @@ export default function SupplyChainNetwork() {
                     </div>
                     <div className="side-column-content-stack">
                         {aiActionPlans.map((plan) => (
-                            <div key={plan.id} className={`action-plan-recommendation-card type-${plan.priority.toLowerCase()}`}>
+                            <div key={plan.id} className={`action-plan-recommendation-card type-${plan.priority ? plan.priority.toLowerCase() : ''}`}>
                                 <div className="plan-card-top-row">
-                                    <span className={`plan-priority-tag tag-${plan.priority.toLowerCase()}`}>{plan.priority} Priority</span>
+                                    <span className={`plan-priority-tag tag-${plan.priority ? plan.priority.toLowerCase() : ''}`}>{plan.priority} Priority</span>
                                     <span className="plan-agent-owner"><Cpu size={10} /> {plan.agent}</span>
                                 </div>
                                 <h3 className="plan-card-action-title">{plan.action}</h3>

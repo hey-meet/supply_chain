@@ -21,83 +21,45 @@ import {
     ArrowRight,
     Briefcase
 } from 'lucide-react';
+import incidentService from "../services/incidentService";
 import '../styles/incident-center.css';
 
-// Mock Data
-const incidentMeta = {
-    id: 'INC-2026-8941',
-    severity: 'Critical',
-    status: 'Active Investigation',
-    location: 'Valsad Corridor',
-    country: 'India',
-    state: 'Gujarat',
-    detectedTime: '13:50:42',
-    lastUpdated: '14:02:11',
-    riskCategory: 'Logistics Interruption',
-    confidence: '99%',
-    businessPriority: 'P1 - High Blockade',
-    description: 'Heavy rainfall has triggered sudden structural flash flooding and land displacement, causing a major highway closure on National Highway 48 and completely stopping limestone aggregate transportation vectors to Plant A.'
+// Helper map to match icon strings to Lucide components
+const iconMap = {
+    Factory,
+    Users,
+    Package,
+    Route,
+    ShieldAlert,
+    Layers,
+    Activity,
+    DollarSign,
+    Clock
 };
-
-const extractedEntities = ['Limestone Aggregate', 'Plant A Grinding Kiln', 'National Highway 48', 'Heavy Rainfall Corridor', 'Gujarat Logistics Fleet', 'Valsad Quarry Hub'];
-
-const supportingSources = [
-    { id: 1, publisher: 'Reuters Logistics', reliability: '98%', time: '3 mins ago', status: 'Verified' },
-    { id: 2, publisher: 'NOAA Flash Advisory', reliability: '99%', time: '8 mins ago', status: 'Verified' },
-    { id: 3, publisher: 'NHAI Highway Patrol', reliability: '97%', time: '11 mins ago', status: 'Verified' },
-    { id: 4, publisher: 'Gujarat State Telemetry', reliability: '94%', time: '14 mins ago', status: 'Cross-Referenced' },
-    { id: 5, publisher: 'Siam Fleet Dispatch', reliability: '91%', time: '18 mins ago', status: 'Cross-Referenced' }
-];
-
-const timelineSteps = [
-    {
-        id: 1,
-        title: 'Step 1: News Intelligence Output',
-        agent: 'News Intelligence Agent',
-        metrics: { risk: 'Logistics Failure', severity: 'Critical', confidence: '99%', latency: '0.4s' },
-        reasoning: 'Natural language models cross-referenced standard wire logs against industrial telemetry arrays, establishing automated confirmation of complete route blockade at the specified transit coordinates.',
-        active: false
-    },
-    {
-        id: 2,
-        title: 'Step 2: Supply Chain Impact Output',
-        agent: 'Supply Chain Impact Agent',
-        metrics: { assets: 'Plant A Kiln, Quarry Hub 4', stocks: 'Silo buffer at 36 hrs', blastRadius: 'Tier 1 Sourcing Network', latency: '0.9s' },
-        reasoning: 'Mathematical linear models simulate kiln feed degradation. Outbound clinker production runs into immediate inventory deficit within 36 hours if raw limestone distribution remains fully obstructed.',
-        active: false
-    },
-    {
-        id: 3,
-        title: 'Step 3: Mitigation Planning Output',
-        agent: 'Mitigation Planning Agent',
-        metrics: { alternate: 'Quarry Hub 7 (Rajasthan)', route: 'Bypass State Line 14', estDelay: '+2.5 Hours', estCost: '+$14,200', confidence: '97%', latency: '0.7s' },
-        reasoning: 'AI multi-variable engines generated prescriptive operational alternatives. Rerouting class-8 fleets to alternative corridors maintains raw inputs, safely avoiding a costly, unscheduled manufacturing halt.',
-        active: true
-    }
-];
-
-const impactCards = [
-    { id: 1, icon: Factory, title: 'Affected Plants', count: '1 Plant Active', desc: 'Plant A grinding production line facing immediate input loss.', status: 'critical' },
-    { id: 2, icon: Users, title: 'Affected Suppliers', count: '1 Primary Hub', desc: 'Valsad core aggregate operations isolated from transport loop.', status: 'critical' },
-    { id: 3, icon: Package, title: 'Affected Warehouses', count: '2 Storage Silos', desc: 'Buffer stockpiles decreasing significantly below standard safe baselines.', status: 'warning' },
-    { id: 4, icon: Route, title: 'Affected Routes', count: '1 Primary Vector', desc: 'National Highway 48 fully obstructed across multi-mile sector.', status: 'critical' },
-    { id: 5, icon: ShieldAlert, title: 'Inventory Risk', count: '36 Hour Window', desc: 'Critical depletion threshold tracked on secondary blending units.', status: 'critical' },
-    { id: 6, icon: Layers, title: 'Production Risk', count: 'High Exposure', desc: 'Failure to mitigate threatens downstream clinker deliveries.', status: 'critical' },
-    { id: 7, icon: Activity, title: 'Business Continuity', count: '82% Stability', desc: 'Platform response active. Safeguards executing correctly.', status: 'warning' },
-    { id: 8, icon: DollarSign, title: 'Financial Impact', count: '$48,500 Est.', desc: 'Calculated overhead variance across operational rerouting phases.', status: 'warning' },
-    { id: 9, icon: Clock, title: 'Expected Delay', count: '2.5 Hours Net', desc: 'Incremental cycle time added via alternative transit loops.', status: 'warning' }
-];
-
-const progressStages = [
-    { id: 1, name: 'Detected', status: 'Complete', time: '13:50:42', agent: 'News Intelligence Agent', active: false },
-    { id: 2, name: 'Investigating', status: 'Complete', time: '13:52:19', agent: 'Operational Context Agent', active: false },
-    { id: 3, name: 'Impact Calculated', status: 'Complete', time: '13:55:00', agent: 'Supply Chain Impact Agent', active: false },
-    { id: 4, name: 'Mitigation Ready', status: 'In Progress', time: '14:01:45', agent: 'Mitigation Planning Agent', active: true },
-    { id: 5, name: 'Closed', status: 'Pending', time: '--:--:--', agent: 'System Core Orchestrator', active: false }
-];
 
 export default function IncidentCenter() {
     const [liveTime, setLiveTime] = useState('14:02:11');
+    const [incidentData, setIncidentData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchIncidentData = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await incidentService.getIncidentCenter();
+                setIncidentData(response.data);
+            } catch (err) {
+                console.error("Failed to fetch incident center data:", err);
+                setError(err?.message || "Failed to load incident investigation data.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchIncidentData();
+    }, []);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -106,6 +68,29 @@ export default function IncidentCenter() {
         }, 1000);
         return () => clearInterval(timer);
     }, []);
+
+    if (loading) {
+        return (
+            <div className="incident-center-scope flex-center" style={{ minHeight: '400px' }}>
+                <p>Loading Incident Investigation Center...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="incident-center-scope flex-center" style={{ minHeight: '400px' }}>
+                <p className="text-critical">Error: {error}</p>
+            </div>
+        );
+    }
+
+    const incidentMeta = incidentData?.incident_meta || {};
+    const extractedEntities = incidentData?.extracted_entities ?? [];
+    const supportingSources = incidentData?.supporting_sources ?? [];
+    const timelineSteps = incidentData?.timeline_steps ?? [];
+    const impactCards = incidentData?.impact_cards ?? [];
+    const progressStages = incidentData?.progress_stages ?? [];
 
     return (
         <div className="incident-center-scope">
@@ -121,9 +106,9 @@ export default function IncidentCenter() {
                         <span className="ic-ts-lbl">System Time:</span>
                         <span className="ic-ts-val">{liveTime}</span>
                     </div>
-                    <div className="ic-status-capsule critical">
-                        <span className="ic-status-indicator-dot critical"></span>
-                        {incidentMeta.status.toUpperCase()}
+                    <div className={`ic-status-capsule ${incidentMeta.severity?.toLowerCase() || 'critical'}`}>
+                        <span className={`ic-status-indicator-dot ${incidentMeta.severity?.toLowerCase() || 'critical'}`}></span>
+                        {incidentMeta.status ? incidentMeta.status.toUpperCase() : ''}
                     </div>
                     <div className="ic-live-ops-badge">
                         <span className="ic-pulse-ring"></span>
@@ -138,7 +123,7 @@ export default function IncidentCenter() {
                     <div className="ic-summary-top-row">
                         <div className="ic-id-badge-flex">
                             <span className="ic-meta-id">{incidentMeta.id}</span>
-                            <span className={`ic-sev-badge ${incidentMeta.severity.toLowerCase()}`}>{incidentMeta.severity} Severity</span>
+                            <span className={`ic-sev-badge ${incidentMeta.severity?.toLowerCase() || 'critical'}`}>{incidentMeta.severity} Severity</span>
                             <span className="ic-priority-tag">{incidentMeta.businessPriority}</span>
                         </div>
                         <div className="ic-summary-quick-metrics">
@@ -208,7 +193,7 @@ export default function IncidentCenter() {
                                 {supportingSources.map((src) => (
                                     <div key={src.id} className="supporting-source-row">
                                         <div className="src-identity-flex">
-                                            <div className="src-avatar-circle">{src.publisher.charAt(0)}</div>
+                                            <div className="src-avatar-circle">{src.publisher ? src.publisher.charAt(0) : ''}</div>
                                             <div className="src-meta-block">
                                                 <span className="src-publisher-title">{src.publisher}</span>
                                                 <span className="src-time-label"><Clock size={10} /> {src.time}</span>
@@ -248,7 +233,7 @@ export default function IncidentCenter() {
                                     </div>
 
                                     <div className="timeline-step-metrics-grid">
-                                        {Object.entries(step.metrics).map(([key, val]) => (
+                                        {step.metrics && Object.entries(step.metrics).map(([key, val]) => (
                                             <div key={key} className="step-metric-badge-box">
                                                 <span className="sm-badge-lbl">{key.replace(/([A-Z])/g, ' $1').toUpperCase()}</span>
                                                 <span className="sm-badge-val truncate">{val}</span>
@@ -280,7 +265,7 @@ export default function IncidentCenter() {
 
                     <div className="compact-impact-cards-stack">
                         {impactCards.map((card) => {
-                            const Icon = card.icon;
+                            const Icon = typeof card.icon === 'string' ? (iconMap[card.icon] || ShieldAlert) : (card.icon || ShieldAlert);
                             return (
                                 <div key={card.id} className="compact-impact-card-item">
                                     <div className="cic-top-row">
