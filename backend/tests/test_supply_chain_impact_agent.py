@@ -88,3 +88,51 @@ def test_analyze_impact(sample_risk_assessment, sample_matched_suppliers):
     assert analysis.confidence_score >= 0.8
     assert "Blast Radius" in analysis.supply_chain_blast_radius
     assert analysis.business_impact in [BusinessImpact.HIGH, BusinessImpact.SEVERE]
+
+def test_agent_question_answering_helpers(sample_risk_assessment, sample_matched_suppliers):
+    agent = SupplyChainImpactAgent()
+    analysis = agent.analyze_impact(
+        assessment_input=sample_risk_assessment,
+        matched_suppliers=sample_matched_suppliers,
+    )
+
+    suppliers = agent.get_affected_suppliers(analysis)
+    assert len(suppliers) > 0
+    assert any("Marwar Mining" in s or "SUP-001" in s for s in suppliers)
+
+    materials = agent.get_affected_materials(analysis)
+    assert isinstance(materials, list)
+
+    plants = agent.get_affected_plants(analysis)
+    assert len(plants) > 0
+
+    warehouses = agent.get_affected_warehouses(analysis)
+    assert isinstance(warehouses, list)
+
+    dcs = agent.get_affected_distribution_centers(analysis)
+    assert isinstance(dcs, list)
+
+    inv_risk = agent.get_inventory_at_risk(analysis)
+    assert isinstance(inv_risk, list)
+
+    rem_days = agent.get_remaining_operational_days(analysis)
+    assert isinstance(rem_days, float)
+
+    prod_loss = agent.get_estimated_production_loss(analysis)
+    assert "TPD" in prod_loss or "capacity" in prod_loss
+
+    biz_impact = agent.get_business_impact(analysis)
+    assert biz_impact in ["high", "severe", "medium", "low"]
+
+    blast_radius = agent.get_blast_radius(analysis)
+    assert "Blast Radius" in blast_radius
+
+
+if __name__ == "__main__":
+    print("Running SupplyChainImpactAgent tests...")
+    test_agent_initialization()
+    assessment = get_sample_risk_assessment()
+    suppliers = get_sample_matched_suppliers()
+    test_analyze_impact(assessment, suppliers)
+    test_agent_question_answering_helpers(assessment, suppliers)
+    print("All SupplyChainImpactAgent tests passed successfully!")
