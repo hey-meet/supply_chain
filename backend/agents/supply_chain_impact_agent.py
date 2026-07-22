@@ -313,3 +313,54 @@ class SupplyChainImpactAgent:
             plant_details=plant_details,
         )
 
+    # -------------------------------------------------------------------
+    # Helper Question-Answering Methods
+    # -------------------------------------------------------------------
+    def get_affected_suppliers(self, analysis: ImpactAnalysis) -> list[str]:
+        """Which supplier is affected?"""
+        results = []
+        for item in analysis.affected_suppliers:
+            if isinstance(item, MatchedSupplier):
+                results.append(f"{item.supplier_name} ({item.supplier_id})")
+            else:
+                results.append(str(item))
+        return results
+
+    def get_affected_materials(self, analysis: ImpactAnalysis) -> list[str]:
+        """Which material is affected?"""
+        return analysis.affected_materials
+
+    def get_affected_plants(self, analysis: ImpactAnalysis) -> list[str]:
+        """Which plants will be impacted?"""
+        return analysis.affected_plants
+
+    def get_affected_warehouses(self, analysis: ImpactAnalysis) -> list[str]:
+        """Which warehouses are affected?"""
+        return analysis.affected_warehouses
+
+    def get_affected_distribution_centers(self, analysis: ImpactAnalysis) -> list[str]:
+        """Which distribution centers are affected?"""
+        return analysis.affected_distribution_centers
+
+    def get_inventory_at_risk(self, analysis: ImpactAnalysis) -> list[dict[str, Any]]:
+        """Which inventory is at risk?"""
+        return [item.model_dump() for item in analysis.inventory_details]
+
+    def get_remaining_operational_days(self, analysis: ImpactAnalysis) -> float:
+        """How many operational days remain?"""
+        return analysis.estimated_inventory_remaining_days
+
+    def get_estimated_production_loss(self, analysis: ImpactAnalysis) -> str:
+        """Estimated production loss?"""
+        return analysis.production_impact
+
+    def get_business_impact(self, analysis: ImpactAnalysis) -> str:
+        """Business impact level?"""
+        return analysis.business_impact.value
+
+    def get_blast_radius(self, analysis: ImpactAnalysis) -> str:
+        """Overall blast radius?"""
+        return analysis.supply_chain_blast_radius
+
+
+supply_chain_impact_agent = SupplyChainImpactAgent()
