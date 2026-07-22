@@ -5,6 +5,7 @@ The Knowledge Graph Agent: builds and queries a graph representation of
 the ENTIRE physical supply chain network — suppliers, materials,
 plants, warehouses, and distribution centers — and how they connect.
 """
+
 import json
 import logging
 from pathlib import Path
@@ -65,6 +66,7 @@ class KnowledgeGraphAgent:
  
         with open(full_path, "r", encoding="utf-8") as f:
             return json.load(f)
+ 
     # ---------------------------------------------------------------
     # STEP 2: Build every node first, then every edge
     # ---------------------------------------------------------------
@@ -107,7 +109,7 @@ class KnowledgeGraphAgent:
         self._add_plant_supplier_edges(plant_supplier_map)
         self._add_warehouse_plant_edges(warehouse_plant_map)
         self._add_plant_distribution_edges(plant_distribution_map)
-     
+
     def _add_plant_nodes(self, plants_data: list[dict]) -> None:
         for plant in plants_data:
             self.graph.add_node(
@@ -181,7 +183,7 @@ class KnowledgeGraphAgent:
                 average_monthly_requirement=mapping.get("average_monthly_requirement"),
             )
 
-# ---------------------------------------------------------------
+    # ---------------------------------------------------------------
     # STEP 3: Build the edges (the actual "who depends on whom")
     # ---------------------------------------------------------------
     def _add_material_supplier_edges(self, material_supplier_map: list[dict]) -> None:
@@ -320,6 +322,51 @@ class KnowledgeGraphAgent:
  
         return grouped
  
+    def get_affected_suppliers(self, start_node_id: str) -> list[str]:
+        """Get suppliers that might be affected by a disruption at start_node_id."""
+        return self.get_downstream_impact(start_node_id).get("supplier", [])
+
+    def get_affected_plants(self, start_node_id: str) -> list[str]:
+        """Get plants that might be affected by a disruption at start_node_id."""
+        return self.get_downstream_impact(start_node_id).get("plant", [])
+
+    def get_affected_warehouses(self, start_node_id: str) -> list[str]:
+        """Get warehouses that might be affected by a disruption at start_node_id."""
+        return self.get_downstream_impact(start_node_id).get("warehouse", [])
+
+    def get_affected_distribution_centers(self, start_node_id: str) -> list[str]:
+        """Get distribution centers that might be affected by a disruption at start_node_id."""
+        return self.get_downstream_impact(start_node_id).get("distribution_center", [])
+
+    def get_affected_materials(self, start_node_id: str) -> list[str]:
+        """Get materials that might be affected by a disruption at start_node_id."""
+        return self.get_downstream_impact(start_node_id).get("material", [])
+
+    def get_alternate_suppliers(self, supplier_id: str) -> list[str]:
+        """Finds other suppliers who supply the same materials or plants as the given supplier."""
+        if supplier_id not in self.graph.nodes or self.graph.nodes[supplier_id].get("node_type") != "supplier":
+            return []
+        
+        alternates = set()
+        for target in self.graph.successors(supplier_id):
+            for other_supplier in self.graph.predecessors(target):
+                if other_supplier != supplier_id and self.graph.nodes[other_supplier].get("node_type") == "supplier":
+                    alternates.add(other_supplier)
+        return list(alternates)
+
+    def get_dependency_chain(self, start_node_id: str) -> list[dict]:
+        """Returns the downstream edges representing the dependency chain starting from a node."""
+        if start_node_id not in self.graph.nodes:
+            return []
+        edges = list(nx.edge_bfs(self.graph, start_node_id))
+        return [
+            {
+                "source": u, 
+                "target": v, 
+                "relation": self.graph.get_edge_data(u, v).get("relation", "UNKNOWN")
+            } for u, v in edges
+        ]
+
     def summary(self) -> dict:
         """Quick sanity-check counts, useful for debugging/logging."""
         counts: dict[str, int] = {}
