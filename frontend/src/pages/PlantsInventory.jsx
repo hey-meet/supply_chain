@@ -22,108 +22,62 @@ import {
     MapPin,
     Cpu
 } from 'lucide-react';
+import plantService from "../services/plantService";
 import '../styles/plants-inventory.css';
 
-// --- STATIC MOCK DATA ---
-const kpiData = [
-    { id: 1, title: 'Total Production Today', value: '14,850 T', trend: '+4.2% vs baseline', status: 'success', icon: Factory },
-    { id: 2, title: 'Inventory Health', value: '84%', trend: '-1.5% weekly slip', status: 'warning', icon: Package },
-    { id: 3, title: 'Plants Online', value: '6 / 7', trend: '1 High Risk Obstructed', status: 'success', icon: CheckCircle2 },
-    { id: 4, title: 'Materials at Risk', value: '2 Items', trend: 'Safety stock violated', status: 'critical', icon: AlertTriangle }
-];
-
-const plantsData = [
-    {
-        id: 'PLT-A',
-        name: 'Plant A - Western Grinding Complex',
-        location: 'Gujarat East',
-        status: 'At Risk',
-        healthScore: 68,
-        production: '4,200 T/d',
-        capacity: '5,000 T/d',
-        utilization: 84,
-        risk: 'Limestone supply vector obstruction via NH-48 flooding.',
-        suppliers: 4,
-        inventoryHealth: 'Critical',
-        remainingDays: 1.5
-    },
-    {
-        id: 'PLT-B',
-        name: 'Plant B - Central Kiln Facility',
-        location: 'Madhya Pradesh',
-        status: 'Healthy',
-        healthScore: 94,
-        production: '6,100 T/d',
-        capacity: '6,500 T/d',
-        utilization: 93,
-        risk: 'None. Off-peak power grid schedules nominal.',
-        suppliers: 6,
-        inventoryHealth: 'Optimal',
-        remainingDays: 14
-    },
-    {
-        id: 'PLT-C',
-        name: 'Plant C - Southern Port Terminal',
-        location: 'Tamil Nadu',
-        status: 'Healthy',
-        healthScore: 91,
-        production: '4,550 T/d',
-        capacity: '5,000 T/d',
-        utilization: 91,
-        risk: 'Minor diesel overhead variance via terminal port wait lanes.',
-        suppliers: 5,
-        inventoryHealth: 'Stable',
-        remainingDays: 10
-    }
-];
-
-const inventoryData = [
-    { material: 'Limestone', stock: '6,200 T', safety: '15,000 T', consumption: '4,000 T/d', days: 1.5, incoming: '8,500 T', status: 'critical', supplier: 'Valsad Quarry Hub', risk: 'Critical', pct: 41 },
-    { material: 'Coal', stock: '14,500 T', safety: '12,000 T', consumption: '1,200 T/d', days: 12, incoming: '5,000 T', status: 'warning', supplier: 'International Trade', risk: 'Medium', pct: 120 },
-    { material: 'Fly Ash', stock: '9,800 T', safety: '8,000 T', consumption: '1,500 T/d', days: 6.5, incoming: '3,000 T', status: 'success', supplier: 'NTPC Cluster Node', risk: 'Low', pct: 122 },
-    { material: 'Gypsum', stock: '4,100 T', safety: '3,500 T', consumption: '450 T/d', days: 9.1, incoming: '1,200 T', status: 'success', supplier: 'Border Transit Check', risk: 'Low', pct: 117 },
-    { material: 'Diesel', stock: '85,000 L', safety: '90,000 L', consumption: '10,000 L/d', days: 8.5, incoming: '45,000 L', status: 'warning', supplier: 'Ministry Petroleum Link', risk: 'Medium', pct: 94 },
-    { material: 'Packaging Material', stock: '240k Units', safety: '200k Units', consumption: '35k/d', days: 6.8, incoming: '150k Units', status: 'success', supplier: 'Zone East Pack Co', risk: 'Low', pct: 120 }
-];
-
-const aiInsights = [
-    { priority: 'Critical', impact: 'Avoid Plant A shutdown completely', confidence: '97%', delay: '2 hours net', agent: 'Mitigation Planning Agent', action: 'Transfer 1,200 T Limestone from Plant C reserves via rail segment bypass loops.', title: 'Transfer Limestone from Plant C' },
-    { priority: 'High', impact: 'Bypass broken logistics corridors on NH-48', confidence: '94%', delay: '+45 mins cycle', agent: 'Sourcing Optimization Engine', action: 'Activate alternative solid fuel contract terms with emergency Rajasthan Quarry suppliers.', title: 'Activate Emergency Backup Supplier' },
-    { priority: 'Medium', impact: 'Hedging spot energy margin variance scales', confidence: '91%', delay: 'None', agent: 'Procurement Balance Module', action: 'Increase Coal procurement schedules across secondary rail loops to balance clinker burn runs.', title: 'Increase Coal Procurement' }
-];
-
-// --- CHART DATA CONFIGS ---
-const productionTrendData = [
-    { name: '08:00', PlantA: 380, PlantB: 590, PlantC: 420 },
-    { name: '10:00', PlantA: 400, PlantB: 600, PlantC: 450 },
-    { name: '12:00', PlantA: 420, PlantB: 610, PlantC: 455 },
-    { name: '14:00', PlantA: 350, PlantB: 610, PlantC: 450 }
-];
-
-const inventoryConsumptionData = [
-    { name: 'Limestone', Current: 6200, Safety: 15000 },
-    { name: 'Coal', Current: 14500, Safety: 12000 },
-    { name: 'Fly Ash', Current: 9800, Safety: 8000 },
-    { name: 'Gypsum', Current: 4100, Safety: 3500 }
-];
-
-const capacityUtilizationData = [
-    { name: 'Plant A', value: 84, fill: '#B15A52' },
-    { name: 'Plant B', value: 93, fill: '#708C72' },
-    { name: 'Plant C', value: 91, fill: '#3E556B' }
-];
-
-const materialAvailabilityData = [
-    { name: 'Healthy Nodes', value: 4 },
-    { name: 'Warning Nodes', value: 1 },
-    { name: 'Critical Risks', value: 1 }
-];
 const pieColors = ['#708C72', '#C8A652', '#B15A52'];
+
+// Map icon string names or fallbacks if icons are provided via backend strings
+const getKpiIcon = (kpi) => {
+    switch (kpi.id) {
+        case 1:
+            return Factory;
+        case 2:
+            return Package;
+        case 3:
+            return CheckCircle2;
+        case 4:
+            return AlertTriangle;
+        default:
+            return Factory;
+    }
+};
 
 export default function PlantsInventory() {
     const [liveSyncTime, setLiveSyncTime] = useState('14:37:50');
-    const [selectedPlant, setSelectedPlant] = useState(plantsData[0]);
+    const [selectedPlant, setSelectedPlant] = useState(null);
 
+    // API Data State
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Fetch Backend Data
+    useEffect(() => {
+        const fetchInventoryData = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await plantService.getPlantsInventory();
+                const fetchedData = response.data;
+
+                setData(fetchedData);
+
+                if (fetchedData && fetchedData.plants && fetchedData.plants.length > 0) {
+                    setSelectedPlant(fetchedData.plants[0]);
+                }
+            } catch (err) {
+                console.error("Failed to fetch plant inventory data:", err);
+                setError(err?.message || "Failed to load plant inventory data.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchInventoryData();
+    }, []);
+
+    // Timer Sync
     useEffect(() => {
         const timer = setInterval(() => {
             const now = new Date();
@@ -131,6 +85,31 @@ export default function PlantsInventory() {
         }, 1000);
         return () => clearInterval(timer);
     }, []);
+
+    if (loading) {
+        return (
+            <div className="pi-content-scope flex-center" style={{ minHeight: '400px' }}>
+                <p>Loading Plant Operations & Inventory data...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="pi-content-scope flex-center" style={{ minHeight: '400px' }}>
+                <p className="text-critical">Error: {error}</p>
+            </div>
+        );
+    }
+
+    const kpiData = data?.kpis || [];
+    const plantsData = data?.plants || [];
+    const inventoryData = data?.inventory || [];
+    const aiInsights = data?.ai_insights || [];
+    const productionTrendData = data?.production_trend || [];
+    const inventoryConsumptionData = data?.inventory_consumption || [];
+    const capacityUtilizationData = data?.capacity_utilization || [];
+    const materialAvailabilityData = data?.material_availability || [];
 
     return (
         <div className="pi-content-scope">
@@ -157,7 +136,7 @@ export default function PlantsInventory() {
             {/* Top Executive KPI Grid Section */}
             <section className="pi-kpi-grid">
                 {kpiData.map((kpi) => {
-                    const Icon = kpi.icon;
+                    const Icon = getKpiIcon(kpi);
                     return (
                         <div key={kpi.id} className="pi-kpi-card">
                             <div className="pi-kpi-header-flex">
@@ -188,7 +167,7 @@ export default function PlantsInventory() {
                     {plantsData.map((plant) => (
                         <div
                             key={plant.id}
-                            className={`pi-plant-card-item is-${plant.status.toLowerCase().replace(' ', '-')}`}
+                            className={`pi-plant-card-item is-${plant.status ? plant.status.toLowerCase().replace(' ', '-') : ''}`}
                             onClick={() => setSelectedPlant(plant)}
                         >
                             <div className="plant-card-top-row">
@@ -196,7 +175,7 @@ export default function PlantsInventory() {
                                     <h3 className="plant-card-name">{plant.name}</h3>
                                     <span className="plant-card-location"><MapPin size={11} /> {plant.location}</span>
                                 </div>
-                                <span className={`plant-status-badge tag-${plant.status.toLowerCase().replace(' ', '-')}`}>
+                                <span className={`plant-status-badge tag-${plant.status ? plant.status.toLowerCase().replace(' ', '-') : ''}`}>
                                     {plant.status}
                                 </span>
                             </div>
@@ -212,7 +191,7 @@ export default function PlantsInventory() {
                                 </div>
                                 <div className="plant-strip-cell text-right">
                                     <span className="strip-lbl">Remaining Days</span>
-                                    <span className={`strip-val font-semibold variant-${plant.status.toLowerCase().replace(' ', '-')}`}>
+                                    <span className={`strip-val font-semibold variant-${plant.status ? plant.status.toLowerCase().replace(' ', '-') : ''}`}>
                                         {plant.remainingDays} Days
                                     </span>
                                 </div>
@@ -224,7 +203,7 @@ export default function PlantsInventory() {
                                 </div>
                                 <div className="progress-track-frame">
                                     <span
-                                        className={`progress-fill-element fill-${plant.status.toLowerCase().replace(' ', '-')}`}
+                                        className={`progress-fill-element fill-${plant.status ? plant.status.toLowerCase().replace(' ', '-') : ''}`}
                                         style={{ width: `${plant.utilization}%` }}
                                     ></span>
                                 </div>
@@ -336,28 +315,32 @@ export default function PlantsInventory() {
                     </div>
 
                     <div className="plant-details-profile-stack">
-                        <div className="profile-identity-header">
-                            <span className="profile-lbl">Selected Target Asset</span>
-                            <h4 className="profile-asset-title-text">{selectedPlant.name}</h4>
-                            <span className="profile-meta-subtext"><MapPin size={10} /> {selectedPlant.location} Sector Profile</span>
-                        </div>
+                        {selectedPlant && (
+                            <>
+                                <div className="profile-identity-header">
+                                    <span className="profile-lbl">Selected Target Asset</span>
+                                    <h4 className="profile-asset-title-text">{selectedPlant.name}</h4>
+                                    <span className="profile-meta-subtext"><MapPin size={10} /> {selectedPlant.location} Sector Profile</span>
+                                </div>
 
-                        <div className="profile-metrics-property-list">
-                            <div className="p-property-row"><span>Production Capacity Status</span><span className="font-semibold">{selectedPlant.production} / {selectedPlant.capacity}</span></div>
-                            <div className="p-property-row"><span>Active Operating Shift</span><span className="font-mono font-semibold">Shift B - Operational Matrix</span></div>
-                            <div className="p-property-row"><span>Incoming Freight Shipments</span><span className="font-mono text-brand font-semibold">2 Fleet Vectors Enroute</span></div>
-                            <div className="p-property-row"><span>Silo Buffer Inventory Level</span><span className="font-semibold text-critical">{selectedPlant.inventoryHealth} Reserve</span></div>
-                            <div className="p-property-row"><span>Estimated Shutdown Risk</span><span className="font-semibold text-critical">High Risk Exposure (36h)</span></div>
-                            <div className="p-property-row"><span>Recovery Time Estimation</span><span className="font-mono text-brand font-semibold">4.5 Hours Post Route Reopen</span></div>
-                        </div>
+                                <div className="profile-metrics-property-list">
+                                    <div className="p-property-row"><span>Production Capacity Status</span><span className="font-semibold">{selectedPlant.production} / {selectedPlant.capacity}</span></div>
+                                    <div className="p-property-row"><span>Active Operating Shift</span><span className="font-mono font-semibold">Shift B - Operational Matrix</span></div>
+                                    <div className="p-property-row"><span>Incoming Freight Shipments</span><span className="font-mono text-brand font-semibold">2 Fleet Vectors Enroute</span></div>
+                                    <div className="p-property-row"><span>Silo Buffer Inventory Level</span><span className="font-semibold text-critical">{selectedPlant.inventoryHealth} Reserve</span></div>
+                                    <div className="p-property-row"><span>Estimated Shutdown Risk</span><span className="font-semibold text-critical">High Risk Exposure (36h)</span></div>
+                                    <div className="p-property-row"><span>Recovery Time Estimation</span><span className="font-mono text-brand font-semibold">4.5 Hours Post Route Reopen</span></div>
+                                </div>
 
-                        <div className="profile-asset-connections-block">
-                            <span className="profile-lbl">Connected Asset Infrastructure</span>
-                            <div className="connections-pills-row">
-                                <span className="conn-pill"><Truck size={10} /> NH-48 Fleet Loop</span>
-                                <span className="conn-pill"><Factory size={10} /> Kiln Grinding Array 1</span>
-                            </div>
-                        </div>
+                                <div className="profile-asset-connections-block">
+                                    <span className="profile-lbl">Connected Asset Infrastructure</span>
+                                    <div className="connections-pills-row">
+                                        <span className="conn-pill"><Truck size={10} /> NH-48 Fleet Loop</span>
+                                        <span className="conn-pill"><Factory size={10} /> Kiln Grinding Array 1</span>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -446,9 +429,9 @@ export default function PlantsInventory() {
                 </div>
                 <div className="pi-insights-fluid-grid">
                     {aiInsights.map((insight, idx) => (
-                        <div key={idx} className={`pi-insight-action-card rank-${insight.priority.toLowerCase()}`}>
+                        <div key={idx} className={`pi-insight-action-card rank-${insight.priority ? insight.priority.toLowerCase() : ''}`}>
                             <div className="insight-card-top-header-row">
-                                <span className={`insight-priority-pill tag-${insight.priority.toLowerCase()}`}>
+                                <span className={`insight-priority-pill tag-${insight.priority ? insight.priority.toLowerCase() : ''}`}>
                                     {insight.priority} Priority
                                 </span>
                                 <span className="insight-agent-identity-txt"><Cpu size={10} /> {insight.agent}</span>
@@ -462,7 +445,7 @@ export default function PlantsInventory() {
                                 <span className="ip-lbl">Prescribed Execution Strategy Action:</span>
                                 <p className="insight-strategy-paragraph-text">{insight.action}</p>
                             </div>
-                            <button className={`insight-execution-trigger btn-${insight.priority.toLowerCase()}`}>
+                            <button className={`insight-execution-trigger btn-${insight.priority ? insight.priority.toLowerCase() : ''}`}>
                                 Authorize Logistics Protocols <ArrowRight size={13} />
                             </button>
                         </div>
