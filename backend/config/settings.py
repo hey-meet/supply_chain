@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     # Application & General Settings
     # ------------------------------------------------------------------
 
-    APP_NAME: str = "Supply Chain Intelligence"
+    APP_NAME: str = "Logistics Autonomous Disruption Monitoring Agent"
     DEBUG: bool = True
     LOG_LEVEL: str = "INFO"
     API_V1_STR: str = "/api/v1"
