@@ -6,6 +6,8 @@ from backend.models.risk import RiskAssessment, RiskAnalysis
 from backend.models.agent_response import AgentResponse
 from backend.models.supply_chain import MatchedSupplier
 from backend.models.enums import MatchReason, RiskCategory, SeverityLevel, BusinessImpact
+from backend.models.news_filter import FilteredNewsCollection
+from backend.models.executive_summary import ExecutiveSummary
 
 
 def test_import_models():
@@ -14,6 +16,8 @@ def test_import_models():
     assert RiskAssessment
     assert RiskAnalysis
     assert MatchedSupplier
+    assert FilteredNewsCollection
+    assert ExecutiveSummary
 
 
 def test_matched_supplier_validation():

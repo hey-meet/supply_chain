@@ -400,3 +400,7 @@ class MitigationPlanningAgent:
             estimated_cost="Uncertain",
             overall_priority=impact_analysis.overall_severity if hasattr(impact_analysis, "overall_severity") else SeverityLevel.HIGH,
         )
+
+
+# Exported agent instance
+mitigation_planning_agent = MitigationPlanningAgent()
