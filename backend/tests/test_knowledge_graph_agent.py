@@ -38,6 +38,7 @@ def test_graph_has_edges():
     summary = agent.summary()
     assert summary["total_edges"] > 0
 
+
 # -----------------------------------------------------------------------
 # Node info
 # -----------------------------------------------------------------------
@@ -75,6 +76,7 @@ def test_get_materials_supplied_by_supplier():
     agent = _build_agent()
     materials = agent.get_materials_supplied_by("SUP-001")
     assert set(materials) == {"MAT-LMS-01", "MAT-COL-02"}
+
 
 # -----------------------------------------------------------------------
 # Supplier <-> plant relationships
@@ -125,6 +127,31 @@ def test_downstream_impact_from_unknown_node_returns_empty():
     assert agent.get_downstream_impact("NOT-A-REAL-NODE") == {}
 
 
+# -----------------------------------------------------------------------
+# New Helper APIs
+# -----------------------------------------------------------------------
+def test_get_affected_entities():
+    agent = _build_agent()
+    assert set(agent.get_affected_materials("SUP-001")) == {"MAT-LMS-01", "MAT-COL-02"}
+    assert set(agent.get_affected_plants("SUP-001")) == {"PLT-001", "PLT-002"}
+    assert set(agent.get_affected_distribution_centers("SUP-001")) == {"DBC-001", "DBC-002"}
+    assert agent.get_affected_warehouses("SUP-001") == []
+    assert agent.get_affected_suppliers("SUP-001") == []
+
+def test_get_alternate_suppliers():
+    agent = _build_agent()
+    alternates = agent.get_alternate_suppliers("SUP-001")
+    assert "SUP-002" in alternates
+
+def test_get_dependency_chain():
+    agent = _build_agent()
+    chain = agent.get_dependency_chain("SUP-001")
+    assert len(chain) > 0
+    assert "source" in chain[0]
+    assert "target" in chain[0]
+    assert "relation" in chain[0]
+
+
 if __name__ == "__main__":
     test_functions = [
         test_graph_builds_expected_node_counts,
@@ -138,6 +165,9 @@ if __name__ == "__main__":
         test_get_distribution_centers_for_plant,
         test_downstream_impact_from_disrupted_supplier,
         test_downstream_impact_from_unknown_node_returns_empty,
+        test_get_affected_entities,
+        test_get_alternate_suppliers,
+        test_get_dependency_chain,
     ]
     for test_fn in test_functions:
         test_fn()
