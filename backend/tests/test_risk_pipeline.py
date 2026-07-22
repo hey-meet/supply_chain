@@ -40,10 +40,6 @@ def main():
     events = agent.extract_key_events(article)
     print(events)
 
-    print("\n[4] Generating summary...")
-    summary = agent.generate_summary(article)
-    print(summary)
-
     print("\n[5] Predicting disruption category...")
     category = agent.identify_disruption(events)
     print(category)
