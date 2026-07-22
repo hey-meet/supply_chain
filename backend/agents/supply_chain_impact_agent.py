@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from backend.models.enums import BusinessImpact, SeverityLevel
 from backend.models.impact import ImpactAnalysis, InventoryImpact, PlantImpact
 from backend.models.risk import RiskAnalysis
-
+from backend.agents.knowledge_graph_agent import knowledge_graph_agent
 logger = logging.getLogger(__name__)
 
 # ============================================================================
@@ -124,12 +124,12 @@ class SupplyChainImpactAgent:
 
     def _load_datasets(self) -> None:
         """Load JSON datasets into memory and build high-performance indexing dictionaries."""
-        self.plants_data = self._load_json("plants.json", primary_key="plants")
-        self.inventory_data = self._load_json("inventory.json", primary_key="inventory")
-        self.suppliers_data = self._load_json("suppliers.json", primary_key="suppliers")
-        self.warehouses_data = self._load_json("warehouses.json", primary_key="warehouses")
-        self.plant_supplier_map = self._load_json("plant_supplier_map.json", primary_key="plant_supplier_mappings")
-        self.material_supplier_map = self._load_json("material_supplier_map.json", primary_key="material_supplier_mappings")
+        self.plants_data = self._load_json("plants/plants.json", primary_key="plants")
+        self.inventory_data = self._load_json("inventory/inventory.json", primary_key="inventory")
+        self.suppliers_data = self._load_json("suppliers/suppliers.json", primary_key="suppliers")
+        self.warehouses_data = self._load_json("warehouses/warehouses.json", primary_key="warehouses")
+        self.plant_supplier_map = self._load_json("relationships/plant_supplier_map.json", primary_key="plant_supplier_mappings")
+        self.material_supplier_map = self._load_json("relationships/material_supplier_map.json", primary_key="material_supplier_mappings")
 
         # Index Plants
         for p in self.plants_data:
@@ -580,3 +580,9 @@ class SupplyChainImpactAgent:
             estimated_production_loss_percent=loss_pct,
             reasoning=reasoning
         )
+
+
+# Exported agent instance
+supply_chain_impact_agent = SupplyChainImpactAgent(
+    knowledge_graph_agent=knowledge_graph_agent
+)
