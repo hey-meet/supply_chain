@@ -17,6 +17,7 @@ from backend.api.routes.incident import router as incident_router
 from backend.api.routes.supply_chain import router as supply_chain_router
 from backend.api.routes.decision_center import router as decision_center_router
 from backend.api.routes.report import router as report_router
+from backend.api.routes.dashboard import router as dashboard_router
 # SINGLE INITIALIZATION: Router defined once at the top (Fixes reviewer/Meet notes)
 router = APIRouter()
 
@@ -32,6 +33,7 @@ router.include_router(incident_router)
 router.include_router(supply_chain_router)
 router.include_router(decision_center_router)
 router.include_router(report_router)
+router.include_router(dashboard_router)
 
 @router.get("/status", response_model=SystemStatusResponse)
 async def get_system_status():
