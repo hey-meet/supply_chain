@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 # CONFIGURABLE CONSTANTS & THRESHOLDS
 # ============================================================================
 
-DEFAULT_DATA_DIR = Path("backend/data")
+DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 # Inventory operational days thresholds for production loss risk tiers
 THRESHOLD_DAYS_VERY_HIGH = 2.0
