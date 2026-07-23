@@ -6,6 +6,7 @@ from backend.models.risk import RiskAnalysis, RiskAssessment, RiskCategory
 from backend.models.search import SearchResult
 from backend.prompts.risk_classifier import build_risk_classification_prompt
 from backend.services.llm_client import LLMClient
+from backend.services.supplier_matching import find_known_suppliers
 
 logger = logging.getLogger(__name__)
 
@@ -129,12 +130,24 @@ class RiskClassificationAgent:
                 f"Failed to generate AI risk assessment: {exc}"
             ) from exc
 
-        # 3. Construct and return final Pydantic model response
+        # 3. Execute supplier matching (fail-safe enhancement)
+        matched_suppliers = []
+        try:
+            matched_suppliers = find_known_suppliers(assessment)
+        except Exception as err:
+            logger.warning(
+                "Supplier matching failed for article %r: %s. Continuing with empty matched_suppliers.",
+                article.title,
+                err,
+            )
+
+        # 4. Construct and return final Pydantic model response
         return RiskAnalysis(
             news_id=str(article.url),
             headline=article.title,
             published_date=published_date,
             assessment=assessment,
+            matched_suppliers=matched_suppliers,
         )
 
     def classify_risks(self, articles: list[SearchResult]) -> list[RiskAnalysis]:

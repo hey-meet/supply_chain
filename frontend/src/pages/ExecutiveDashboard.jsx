@@ -18,57 +18,54 @@ import {
     ArrowRight,
     RefreshCw
 } from 'lucide-react';
+import { getDashboardData } from '../services/dashboardService';
 import '../styles/executive-dashboard.css';
 
-const kpiData = [
-    { id: 1, title: 'Supply Chain Health', value: '95%', type: 'circular', status: 'success', trend: '+1.2%', up: true, icon: Activity },
-    { id: 2, title: 'Active Incidents', value: '8', type: 'badge', status: 'critical', trend: '+2 today', up: true, icon: AlertTriangle },
-    { id: 3, title: 'Plants Online', value: '6 / 7', type: 'text', status: 'success', trend: 'Normal', up: true, icon: Factory },
-    { id: 4, title: 'Inventory Health', value: '84%', type: 'text', status: 'warning', trend: '-2.4%', up: false, icon: Package },
-    { id: 5, title: 'Critical Routes', value: '12', type: 'text', status: 'orange', trend: '+3 critical', up: true, icon: Route },
-    { id: 6, title: 'Affected Suppliers', value: '5', type: 'text', status: 'critical', trend: '+1 new', up: true, icon: Users }
-];
-
-const newsIntelligence = [
-    { id: 1, severity: 'critical', title: 'Port of Houston Intermittent Rail Gridlock', source: 'Reuters Logistics', time: '14 mins ago', confidence: '98%', location: 'Houston Hub', summary: 'Severe weather events combined with equipment failures have created an operational logjam, impacting all inbound container freight destined for Midwest distribution points.' },
-    { id: 2, severity: 'warning', title: 'Limestone Quarry Delays Near Plant B', source: 'Internal Telemetry', time: '32 mins ago', confidence: '94%', location: 'Region 4', summary: 'Unscheduled hydraulic crusher maintenance has restricted raw rock output to 60% capacity. Buffer stock is currently mitigating downstream impacts.' },
-    { id: 3, severity: 'critical', title: 'Regional Flash Flooding Cuts Off Route 10', source: 'NOAA Weather Advisory', time: '1 hr ago', confidence: '99%', location: 'Sector Southwest', summary: 'Flash floods have overwhelmed the lower overpass infrastructure on Route 10, requiring immediate rerouting of all class-8 cement bulk carriers.' },
-    { id: 4, severity: 'warning', title: 'Coal Spot Prices Surge by 14% Nationally', source: 'Bloomberg Energy', time: '2 hrs ago', confidence: '96%', location: 'Global Markets', summary: 'Sudden export restrictions coupled with localized grid spikes have driven solid fuel raw costs upward, threatening margins across thermal-heavy kilns.' },
-    { id: 5, severity: 'success', title: 'Alternative Rail Segment Reopened Safely', source: 'BNSF Dispatch', time: '3 hrs ago', confidence: '97%', location: 'Midwest Corridor', summary: 'Engineering inspections are finalized ahead of schedule. Normal track speeds restored for secondary clinker distribution trains.' },
-    { id: 6, severity: 'warning', title: 'Supplier Shutdown Threat in Eastern Grid', source: 'Gov Threat Alert', time: '4 hrs ago', confidence: '89%', location: 'Zone East', summary: 'Labor renegotiations have stalled at a primary packaging materials plant. Contingency logistics brokers are being briefed on emergency alternatives.' }
-];
-
-const disruptionMarkers = [
-    { id: 1, type: 'Flood', top: '42%', left: '28%', label: 'R-10 Flood', status: 'critical' },
-    { id: 2, type: 'Road Closure', top: '58%', left: '48%', label: 'Route 44 Closed', status: 'critical' },
-    { id: 3, type: 'Rail Delay', top: '31%', left: '62%', label: 'Houston Rail Block', status: 'warning' },
-    { id: 4, type: 'Port Congestion', top: '72%', left: '76%', label: 'Port Hold', status: 'warning' }
-];
-
-const agentPipeline = [
-    { id: 1, name: 'News Intelligence', status: 'Running', confidence: '98%', time: '1.2s', task: 'Collecting logistics news' },
-    { id: 2, name: 'Supply Chain Impact', status: 'Running', confidence: '96%', time: '0.9s', task: 'Calculating business impact' },
-    { id: 3, name: 'Mitigation Planning', status: 'Ready', confidence: '99%', time: '0.7s', task: 'Generating recommendations' }
-];
-
-const systemTimeline = [
-    { id: 1, time: '14:02:11', event: 'Executive Report Ready', status: 'success', desc: 'Comprehensive disruption response plan compiled and formatted for executive signature.' },
-    { id: 2, time: '14:01:45', event: 'Mitigation Generated', status: 'success', desc: 'AI multi-variable optimization engine finalized alternative sourcing pathways.' },
-    { id: 3, time: '14:00:30', event: 'Inventory Assessment', status: 'warning', desc: 'Automated warehouse queries completed across all localized silos.' },
-    { id: 4, time: '13:58:12', event: 'Supplier Mapping', status: 'success', desc: 'Alternative provider networks cross-referenced against historical lead-times.' }
-];
-
-const aiRecommendations = [
-    { id: 1, priority: 'Critical', title: 'Activate alternate limestone supplier', impact: 'Avoid Plant A shutdown', delay: '2 hours', confidence: '97%', action: 'Transfer inventory from Plant C' },
-    { id: 2, priority: 'High', title: 'Reroute Class-8 carriers to Secondary Bypass', impact: 'Mitigate Route 10 flood', delay: '45 mins', confidence: '94%', action: 'Deploy updated manifests via logistics edge' },
-    { id: 3, priority: 'Medium', title: 'Secure forward energy blocks for Kiln 4', impact: 'Hedging coal price spikes', delay: 'None', confidence: '91%', action: 'Execute automated optionality clauses' },
-    { id: 4, priority: 'Low', title: 'Adjust dispatch pacing for fly ash barges', impact: 'Optimize lock queue wait', delay: '12 hours', confidence: '88%', action: 'Throttle terminal loading rates dynamically' }
-];
+const iconMap = {
+    Activity,
+    AlertTriangle,
+    Factory,
+    Package,
+    Route,
+    Users,
+    Newspaper,
+    Globe,
+    Cpu,
+    CheckCircle2,
+    Clock,
+    FileText,
+    TrendingUp,
+    TrendingDown,
+    ArrowRight,
+    RefreshCw
+};
 
 export default function ExecutiveDashboard() {
     const [timeStr, setTimeStr] = useState('13:01:06');
+    const [dashboardData, setDashboardData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const fetchDashboard = async () => {
+        try {
+            setLoading(true);
+            const response = await getDashboardData();
+            if (response && response.success) {
+                setDashboardData(response.data);
+                setError(null);
+            } else {
+                setError(new Error(response?.message || "Failed to fetch data"));
+            }
+        } catch (err) {
+            setError(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
+        fetchDashboard();
+
         const updateTime = () => {
             const now = new Date();
             setTimeStr(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
@@ -77,6 +74,36 @@ export default function ExecutiveDashboard() {
         const interval = setInterval(updateTime, 1000);
         return () => clearInterval(interval);
     }, []);
+
+    if (loading && !dashboardData) {
+        return (
+            <div className="dashboard-content-scope" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
+                <div className="news-intel-loading">Loading Dashboard Data...</div>
+            </div>
+        );
+    }
+
+    if (error && !dashboardData) {
+        return (
+            <div className="dashboard-content-scope" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '500px', gap: '16px', padding: '40px' }}>
+                <h1 className="page-main-title">Executive Dashboard</h1>
+                <div className="alert-badge critical" style={{ background: 'var(--intel-critical)', color: 'white', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold' }}>NO ACTIVE INVESTIGATION</div>
+                <p style={{ color: 'var(--intel-text-s)', fontSize: '15px', maxWidth: '500px', textAlign: 'center' }}>
+                    No active supply chain risk assessment was found. Please head to the <strong>News Intelligence</strong> tab to execute an incident search query.
+                </p>
+            </div>
+        );
+    }
+
+    const {
+        kpis = [],
+        news_intelligence = [],
+        disruption_markers = [],
+        agent_pipeline = [],
+        system_timeline = [],
+        ai_recommendations = [],
+        metrics = {}
+    } = dashboardData || {};
 
     return (
         <div className="dashboard-content-scope">
@@ -90,6 +117,14 @@ export default function ExecutiveDashboard() {
                         <span className="ts-lbl">Last Updated:</span>
                         <span className="ts-val">{timeStr}</span>
                     </div>
+                    {metrics.graph_execution_time_seconds !== undefined && (
+                        <div className="system-timestamp" style={{ fontSize: '11px', color: 'var(--intel-text-s)', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginTop: '4px' }}>
+                            <span>Graph Exec: {metrics.graph_execution_time_seconds}s | API: {metrics.api_response_time_seconds}s</span>
+                            {metrics.cache_last_updated && (
+                                <span>Cache Updated: {new Date(metrics.cache_last_updated).toLocaleTimeString()}</span>
+                            )}
+                        </div>
+                    )}
                     <div className="system-live-badge">
                         <span className="live-pulse-dot"></span>
                         LIVE MONITORING ACTIVE
@@ -98,8 +133,8 @@ export default function ExecutiveDashboard() {
             </header>
 
             <section className="dashboard-kpi-grid">
-                {kpiData.map((kpi) => {
-                    const Icon = kpi.icon;
+                {kpis.map((kpi) => {
+                    const Icon = iconMap[kpi.icon] || Activity;
                     return (
                         <div key={kpi.id} className="fluid-kpi-card">
                             <div className="kpi-card-header">
@@ -141,14 +176,13 @@ export default function ExecutiveDashboard() {
                             <Newspaper size={16} className="title-icon-sync" />
                             <h2 className="column-heading">Live News Intelligence</h2>
                         </div>
-                        <span className="column-metric-pill">{newsIntelligence.length} Streams</span>
+                        <span className="column-metric-pill">{news_intelligence.length} Streams</span>
                     </div>
                     <div className="column-scrollable-area">
-                        {newsIntelligence.map((news) => (
+                        {news_intelligence.map((news) => (
                             <div key={news.id} className={`feed-item-card severity-${news.severity}`}>
                                 <div className="feed-item-meta">
                                     <span className={`severity-tag level-${news.severity}`}>{news.severity}</span>
-                                    <span className="feed-item-time"><Clock size={10} /> {news.time}</span>
                                 </div>
                                 <h4 className="feed-item-title">{news.title}</h4>
                                 <p className="feed-item-desc">{news.summary}</p>
@@ -176,7 +210,7 @@ export default function ExecutiveDashboard() {
                         <div className="map-dark-overlay"></div>
                         <div className="map-radar-sweep-effect"></div>
 
-                        {disruptionMarkers.map((marker) => (
+                        {disruption_markers.map((marker) => (
                             <div
                                 key={marker.id}
                                 className={`geo-marker-node type-${marker.status}`}
@@ -195,7 +229,7 @@ export default function ExecutiveDashboard() {
                             <span>ORCHESTRATED AI AGENT PIPELINE</span>
                         </div>
                         <div className="pipeline-nodes-row">
-                            {agentPipeline.map((agent, index) => (
+                            {agent_pipeline.map((agent, index) => (
                                 <React.Fragment key={agent.id}>
                                     <div className="pipeline-agent-node">
                                         <div className="agent-node-header">
@@ -210,7 +244,7 @@ export default function ExecutiveDashboard() {
                                             <p className="agent-node-task-text">{agent.task}</p>
                                         </div>
                                     </div>
-                                    {index < agentPipeline.length - 1 && (
+                                    {index < agent_pipeline.length - 1 && (
                                         <div className="pipeline-node-link">
                                             <div className="pipeline-wave-track">
                                                 <span className="pipeline-wave-particle"></span>
@@ -231,10 +265,9 @@ export default function ExecutiveDashboard() {
                             <Activity size={16} className="title-icon-sync" />
                             <h2 className="column-heading">System Activity Timeline</h2>
                         </div>
-                        <button className="timeline-action-refresh" aria-label="Refresh timeline data"><RefreshCw size={12} /></button>
                     </div>
                     <div className="column-scrollable-area padding-left-sm">
-                        {systemTimeline.map((item) => (
+                        {system_timeline.map((item) => (
                             <div key={item.id} className="timeline-row-item">
                                 <div className="timeline-row-aside">
                                     <span className="timeline-row-clock">{item.time}</span>
@@ -262,7 +295,7 @@ export default function ExecutiveDashboard() {
                     <span className="column-metric-pill">DECISION INTEL GENERATED</span>
                 </div>
                 <div className="recommendations-fluid-grid">
-                    {aiRecommendations.map((rec) => (
+                    {ai_recommendations.map((rec) => (
                         <div key={rec.id} className={`recommendation-action-card priority-${rec.priority.toLowerCase()}`}>
                             <div className="recommendation-card-top">
                                 <span className={`rec-priority-badge type-${rec.priority.toLowerCase()}`}>{rec.priority}</span>

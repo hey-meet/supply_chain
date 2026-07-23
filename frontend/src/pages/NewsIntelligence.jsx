@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import '../styles/news-intelligence.css';
 import newsService from "../services/newsService";
+import incidentService from "../services/incidentService";
 
 const IconMap = {
     Radio,
@@ -51,6 +52,9 @@ export default function NewsIntelligence() {
     const [newsData, setNewsData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isSearching, setIsSearching] = useState(false);
+    const [statusMessage, setStatusMessage] = useState(null);
 
     const fetchNewsData = async () => {
         try {
@@ -58,6 +62,7 @@ export default function NewsIntelligence() {
             const response = await newsService.getNewsIntelligence();
             if (response && response.success) {
                 setNewsData(response.data);
+                setError(null);
             } else {
                 setError(new Error(response?.message || "Failed to fetch data"));
             }
@@ -66,6 +71,28 @@ export default function NewsIntelligence() {
         } finally {
             setLoading(false);
             setIsRefreshing(false);
+        }
+    };
+
+    const handleSearch = async () => {
+        if (!searchQuery.trim()) return;
+        setIsSearching(true);
+        setStatusMessage({ type: 'loading', text: 'Executing multi-agent incident classification pipeline...' });
+        
+        try {
+            const result = await incidentService.getIncidentCenter(searchQuery);
+            if (result && result.success) {
+                setStatusMessage({ type: 'success', text: 'Incident successfully classified and supply chain impact simulated.' });
+                setError(null);
+                await fetchNewsData();
+            } else {
+                setStatusMessage({ type: 'error', text: result.message || 'Workflow execution failed.' });
+            }
+        } catch (err) {
+            console.error("News Search error:", err);
+            setStatusMessage({ type: 'error', text: 'Server error encountered during graph execution.' });
+        } finally {
+            setIsSearching(false);
         }
     };
 
@@ -88,7 +115,42 @@ export default function NewsIntelligence() {
     }
 
     if (error && !newsData) {
-        return <div>Error loading News Intelligence.</div>;
+        const message = error.message || "";
+        if (message.includes("pending") || message.includes("Initialize") || message.includes("query")) {
+            return (
+                <div className="news-intel-scope flex-center-pending" style={{ minHeight: '500px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '40px' }}>
+                    <h1 className="intel-page-title">News Intelligence</h1>
+                    <p className="intel-page-subtitle" style={{ marginBottom: '20px' }}>No active incident analysis. Execute a classification query to initialize the supply chain graph.</p>
+                    
+                    <div className="search-container" style={{ maxWidth: '600px', width: '100%' }}>
+                        <input
+                            type="text"
+                            className="search-input"
+                            placeholder="Enter disruption event query (e.g., 'Heavy rainfall Jodhpur monsoons')..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            disabled={isSearching}
+                        />
+                        <button
+                            className="search-button"
+                            onClick={handleSearch}
+                            disabled={isSearching || !searchQuery.trim()}
+                        >
+                            {isSearching ? <RefreshCw size={14} className="rotating" /> : <Search size={14} />}
+                            {isSearching ? "Analyzing..." : "Search & Classify"}
+                        </button>
+                    </div>
+
+                    {statusMessage && (
+                        <div className={`status-banner status-${statusMessage.type}`} style={{ maxWidth: '600px', width: '100%' }}>
+                            {statusMessage.type === 'success' ? <CheckCircle size={16} /> : statusMessage.type === 'error' ? <AlertOctagon size={16} /> : <RefreshCw size={16} className="rotating" />}
+                            <span style={{ marginLeft: '8px' }}>{statusMessage.text}</span>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        return <div className="news-intel-scope flex-center-pending" style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Error loading News Intelligence.</div>;
     }
 
     return (
@@ -122,6 +184,33 @@ export default function NewsIntelligence() {
                     </div>
                 </div>
             </header>
+
+            {/* Interactive News Search Bar */}
+            <div className="search-container">
+                <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Enter disruption event query (e.g., 'Heavy rainfall Jodhpur monsoons')..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    disabled={isSearching}
+                />
+                <button
+                    className="search-button"
+                    onClick={handleSearch}
+                    disabled={isSearching || !searchQuery.trim()}
+                >
+                    {isSearching ? <RefreshCw size={14} className="rotating" /> : <Search size={14} />}
+                    {isSearching ? "Analyzing..." : "Search & Classify"}
+                </button>
+            </div>
+
+            {statusMessage && (
+                <div className={`status-banner status-${statusMessage.type}`}>
+                    {statusMessage.type === 'success' ? <CheckCircle size={16} /> : statusMessage.type === 'error' ? <AlertOctagon size={16} /> : <RefreshCw size={16} className="rotating" />}
+                    <span style={{ marginLeft: '8px' }}>{statusMessage.text}</span>
+                </div>
+            )}
 
             {/* Top KPI Cards Section */}
             <section className="intel-kpi-grid">
