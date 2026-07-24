@@ -5,6 +5,7 @@ import {
     Download, Upload, Save, AlertTriangle, Activity, Settings as SettingsIcon
 } from 'lucide-react';
 import '../styles/settings.css';
+import { getSettingsData, saveSettingsData } from '../services/settingsService';
 
 // --- ENTERPRISE MOCK REGISTRY STACKS ---
 const kpiData = [
@@ -50,6 +51,30 @@ export default function Settings() {
     const [refreshInterval, setRefreshInterval] = useState(5);
     const [alertsEnabled, setAlertsEnabled] = useState(true);
 
+    useEffect(() => {
+        const loadSettings = async () => {
+            try {
+                const response = await getSettingsData();
+                if (response && response.success && response.data) {
+                    const config = response.data;
+                    setAiModel(config.aiModel || 'gpt-4o-cement-v3');
+                    setTemperature(config.temperature ?? 0.15);
+                    setConfidence(config.confidence ?? 0.85);
+                    setMaxTokens(config.maxTokens ?? 8192);
+                    setTimeoutVal(config.timeout ?? 30);
+                    setReasoningMode(config.reasoningMode || 'deep-graph-fallback');
+                    setApiKey(config.apiKey || 'tvly-••••••••••••••••••••A9');
+                    setRefreshInterval(config.refreshInterval ?? 5);
+                    setAlertsEnabled(config.alertsEnabled ?? true);
+                    setEngineState('stable');
+                }
+            } catch (error) {
+                console.error("Failed to load settings from server:", error);
+            }
+        };
+        loadSettings();
+    }, []);
+
     const triggerFieldMutation = (setter, value) => {
         setter(value);
         if (engineState !== 'saving' && engineState !== 'restoring') {
@@ -57,21 +82,41 @@ export default function Settings() {
         }
     };
 
-    const handleSaveChanges = (e) => {
+    const handleSaveChanges = async (e) => {
         e.preventDefault();
         if (engineState === 'stable' || engineState === 'saving' || engineState === 'restoring') return;
 
         setEngineState('saving');
+        try {
+            const payload = {
+                aiModel,
+                temperature,
+                confidence,
+                maxTokens,
+                timeout,
+                reasoningMode,
+                apiKey,
+                refreshInterval,
+                alertsEnabled
+            };
+            const response = await saveSettingsData(payload);
+            if (response && response.success) {
+                const now = new Date();
+                setLastApplied(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }));
+                setEngineState('updated');
 
-        setTimeout(() => {
-            const now = new Date();
-            setLastApplied(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }));
-            setEngineState('updated');
-
-            setTimeout(() => {
-                setEngineState('stable');
-            }, 3000);
-        }, 2000);
+                setTimeout(() => {
+                    setEngineState('stable');
+                }, 3000);
+            } else {
+                setEngineState('unsaved');
+                alert("Failed to save configuration parameters: " + (response?.message || "unknown error"));
+            }
+        } catch (err) {
+            console.error("Failed to save settings:", err);
+            setEngineState('unsaved');
+            alert("API endpoint encountered an error while saving settings.");
+        }
     };
 
     const handleResetDefaults = () => {
@@ -81,12 +126,36 @@ export default function Settings() {
             setTemperature(0.15);
             setConfidence(0.85);
             setMaxTokens(8192);
-            setEngineState('stable');
+            setTimeoutVal(30);
+            setReasoningMode('deep-graph-fallback');
+            setApiKey('tvly-••••••••••••••••••••A9');
+            setRefreshInterval(5);
+            setAlertsEnabled(true);
+            setEngineState('unsaved');
         }, 1500);
     };
 
-    const handleDiscard = () => {
-        setEngineState('stable');
+    const handleDiscard = async () => {
+        setEngineState('restoring');
+        try {
+            const response = await getSettingsData();
+            if (response && response.success && response.data) {
+                const config = response.data;
+                setAiModel(config.aiModel || 'gpt-4o-cement-v3');
+                setTemperature(config.temperature ?? 0.15);
+                setConfidence(config.confidence ?? 0.85);
+                setMaxTokens(config.maxTokens ?? 8192);
+                setTimeoutVal(config.timeout ?? 30);
+                setReasoningMode(config.reasoningMode || 'deep-graph-fallback');
+                setApiKey(config.apiKey || 'tvly-••••••••••••••••••••A9');
+                setRefreshInterval(config.refreshInterval ?? 5);
+                setAlertsEnabled(config.alertsEnabled ?? true);
+            }
+        } catch (e) {
+            console.error("Failed to reload previous settings:", e);
+        } finally {
+            setEngineState('stable');
+        }
     };
 
     // Calculate dynamic status strings for mechanical monitoring panel
@@ -412,8 +481,8 @@ export default function Settings() {
                 </div>
                 <div className="sc-toolbar-buttons-flex-stack">
                     <button type="button" className="sc-btn-utility-link border-outline" onClick={handleResetDefaults}>Reset Defaults</button>
-                    <button type="button" className="sc-btn-utility-link border-outline"><Download size={13} /> Export Configuration</button>
-                    <button type="button" className="sc-btn-utility-link border-outline"><Upload size={13} /> Import Patch</button>
+                    <button type="button" className="sc-btn-utility-link border-outline" onClick={() => alert("Action has no backend implementation. Export function is disabled.")} disabled><Download size={13} /> Export Configuration</button>
+                    <button type="button" className="sc-btn-utility-link border-outline" onClick={() => alert("Action has no backend implementation. Import function is disabled.")} disabled><Upload size={13} /> Import Patch</button>
 
                     <button
                         type="button"

@@ -1,4 +1,4 @@
-// SupplyChainNetwork.jsx
+// --- SupplyChainNetwork.jsx ---
 import React, { useState, useEffect } from 'react';
 
 import {
@@ -68,25 +68,22 @@ const TwinNode = ({ data }) => {
             </div>
             <div className="twin-node-body">
                 <div className="node-data-row">
-                    <span className="node-lbl">Material:</span>
-                    <span className="node-val truncate">{data.material}</span>
+                    <span className="nd-lbl">Core Feedstock:</span>
+                    <span className="nd-val">{data.material}</span>
                 </div>
                 <div className="node-data-row">
-                    <span className="node-lbl">Status:</span>
-                    <span className={`node-status-txt text-${data.health}`}>{data.status}</span>
+                    <span className="nd-lbl">Operating Status:</span>
+                    <span className={`nd-val color-${data.health}`}>{data.status}</span>
                 </div>
-            </div>
-            <div className="node-health-bar-container">
-                <span className={`node-health-fill bg-${data.health}`}></span>
             </div>
             <Handle type="source" position={Position.Bottom} className="flow-handle" />
         </div>
     );
 };
 
-const nodeTypes = { twinNode: TwinNode };
-
-function UsersPlaceholder(props) { return <Layers {...props} />; }
+const nodeTypes = {
+    twinNode: TwinNode
+};
 
 export default function SupplyChainNetwork() {
     const [liveSync, setLiveSync] = useState('14:17:02');
@@ -102,27 +99,32 @@ export default function SupplyChainNetwork() {
                 setLoading(true);
                 setError(null);
                 const response = await networkService.getSupplyChainNetwork();
-                const fetchedData = response.data;
+                if (response && response.success) {
+                    const fetchedData = response.data;
 
-                // Process nodes to attach corresponding Lucide icon components if string provided
-                if (fetchedData && fetchedData.nodes) {
-                    fetchedData.nodes = fetchedData.nodes.map((node) => ({
-                        ...node,
-                        data: {
-                            ...node.data,
-                            icon: typeof node.data.icon === 'string' ? (iconMap[node.data.icon] || Layers) : node.data.icon
-                        }
-                    }));
-                }
+                    // Process nodes to attach corresponding Lucide icon components if string provided
+                    if (fetchedData && fetchedData.nodes) {
+                        fetchedData.nodes = fetchedData.nodes.map((node) => ({
+                            ...node,
+                            data: {
+                                ...node.data,
+                                icon: typeof node.data.icon === 'string' ? (iconMap[node.data.icon] || Layers) : node.data.icon
+                            }
+                        }));
+                    }
 
-                setNetworkData(fetchedData);
+                    setNetworkData(fetchedData);
+                    setError(null);
 
-                if (fetchedData && fetchedData.nodes && fetchedData.nodes.length > 0) {
-                    setSelectedNode(fetchedData.nodes[0].data);
+                    if (fetchedData && fetchedData.nodes && fetchedData.nodes.length > 0) {
+                        setSelectedNode(fetchedData.nodes[0].data);
+                    }
+                } else {
+                    setError(new Error(response?.message || "Failed to load supply chain network digital twin."));
                 }
             } catch (err) {
                 console.error("Failed to fetch supply chain network data:", err);
-                setError(err?.message || "Failed to load supply chain network digital twin.");
+                setError(err);
             } finally {
                 setLoading(false);
             }
@@ -147,16 +149,28 @@ export default function SupplyChainNetwork() {
 
     if (loading) {
         return (
-            <div className="twin-page-scope flex-center" style={{ minHeight: '400px' }}>
-                <p>Loading Supply Chain Digital Twin Network...</p>
+            <div className="twin-page-scope flex-center" style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <p style={{ color: 'var(--intel-text-s)' }}>Loading Supply Chain Digital Twin Network...</p>
             </div>
         );
     }
 
-    if (error) {
+    if (error && (!networkData || !networkData.nodes)) {
+        const message = error.message || "";
+        if (message.includes("pending") || message.includes("Initialize") || message.includes("query") || message.includes("execute") || message.includes("first")) {
+            return (
+                <div className="twin-page-scope flex-center-pending" style={{ minHeight: '500px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '40px' }}>
+                    <h1 className="twin-page-title">Supply Chain Digital Twin</h1>
+                    <div className="alert-badge critical" style={{ background: 'var(--intel-critical)', color: 'white', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold' }}>NO ACTIVE SIMULATION</div>
+                    <p style={{ color: 'var(--intel-text-s)', fontSize: '15px', maxWidth: '500px', textAlign: 'center', marginTop: '10px' }}>
+                        No active supply chain simulation found. Please head to the <strong>News Intelligence</strong> tab to execute an incident search query.
+                    </p>
+                </div>
+            );
+        }
         return (
-            <div className="twin-page-scope flex-center" style={{ minHeight: '400px' }}>
-                <p className="text-critical">Error: {error}</p>
+            <div className="twin-page-scope flex-center" style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <p className="text-critical">Error: {message}</p>
             </div>
         );
     }
@@ -166,6 +180,7 @@ export default function SupplyChainNetwork() {
     const nodes = networkData?.nodes ?? [];
     const edges = networkData?.edges ?? [];
     const aiActionPlans = networkData?.ai_action_plans ?? [];
+    const bottomMetrics = networkData?.bottom_metrics ?? {};
 
     return (
         <div className="twin-page-scope">
@@ -196,133 +211,140 @@ export default function SupplyChainNetwork() {
             {/* Top 6 KPI Rows */}
             <section className="twin-kpi-grid">
                 {kpiData.map((kpi) => {
-                    const Icon = typeof kpi.icon === 'string' ? (iconMap[kpi.icon] || UsersPlaceholder) : (kpi.icon || UsersPlaceholder);
+                    const Icon = typeof kpi.icon === 'string' ? (iconMap[kpi.icon] || Layers) : (kpi.icon || Layers);
                     return (
                         <div key={kpi.id} className="twin-kpi-card">
-                            <div className="twin-kpi-header">
-                                <span className={`twin-kpi-icon-box color-${kpi.status}`}>
+                            <div className="kpi-header-flex">
+                                <span className={`kpi-icon-wrapper color-${kpi.status}`}>
                                     <Icon size={16} />
                                 </span>
-                                <span className="twin-kpi-trend-txt">{kpi.trend}</span>
+                                <span className={`kpi-trend-lbl text-${kpi.status}`}>{kpi.trend}</span>
                             </div>
-                            <div className="twin-kpi-body">
-                                <h3 className="twin-kpi-card-title">{kpi.title}</h3>
-                                <span className="twin-kpi-value-text">{kpi.value}</span>
+                            <div className="kpi-meta-block">
+                                <span className="kpi-lbl">{kpi.title}</span>
+                                <h3 className="kpi-val-text">{kpi.value}</h3>
                             </div>
                         </div>
                     );
                 })}
             </section>
 
-            {/* Main Framework Columns */}
-            <section className="twin-workspace-layout-grid">
+            {/* Main Interactive Diagram Grid */}
+            <section className="twin-diagram-workspace-grid">
 
-                {/* Left Side: Network Infrastructure Health Cards */}
-                <div className="twin-side-column column-left">
-                    <div className="column-header-row">
-                        <h2 className="column-section-heading">Network Health Matrix</h2>
+                {/* Left Side: ReactFlow Canvas Frame */}
+                <div className="twin-diagram-container">
+                    <div className="diagram-header-overlay">
+                        <span className="dh-lbl">Enterprise Spatial Digital Twin Canvas</span>
+                        <span className="dh-helper-txt">Use wheel to zoom. Click node to inspect details.</span>
                     </div>
-                    <div className="side-column-content-stack">
-                        {networkHealthCards.map((card) => (
-                            <div key={card.id} className="infra-status-card-item">
-                                <div className="infra-card-top">
-                                    <div className="infra-title-flex">
-                                        <span className={`infra-status-dot bg-${card.status}`}></span>
-                                        <h4 className="infra-card-label">{card.label}</h4>
-                                    </div>
-                                    <span className="infra-card-value font-mono">{card.val}</span>
-                                </div>
-                                <div className="infra-progress-track">
-                                    <span className={`infra-progress-bar fill-${card.status}`} style={{ width: `${card.pct}%` }}></span>
-                                </div>
-                                <p className="infra-card-description">{card.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Center Canvas: Live Map Flow Engine */}
-                <div className="twin-center-visualization-column">
-                    <div className="column-header-row transparent-bg">
-                        <h2 className="column-section-heading">Live Supply Chain Graph Twin</h2>
-                    </div>
-
-                    <div className="react-flow-canvas-viewport">
+                    <div style={{ width: '100%', height: '100%', minHeight: '400px' }}>
                         <ReactFlow
                             nodes={nodes}
                             edges={edges}
                             nodeTypes={nodeTypes}
                             onNodeClick={handleNodeClick}
                             fitView
-                            zoomOnScroll={false}
-                            preventScrolling={true}
-                            nodesConnectable={false}
-                            nodesDraggable={false}
+                            maxZoom={1.5}
+                            minZoom={0.5}
+                            proOptions={{ hideAttribution: true }}
                         >
-                            <Background color="#D1D5D8" gap={16} size={1} />
-                            <Controls showZoom={true} showInteractive={false} className="twin-canvas-controls" />
+                            <Background color="#ECEFF1" gap={16} size={1} />
+                            <Controls showInteractive={false} className="rf-controls-panel" />
                         </ReactFlow>
-
-                        {/* Network Legend Canvas Overlay */}
-                        <div className="twin-canvas-legend-box">
-                            <h5 className="legend-main-title">Network Flow Legend</h5>
-                            <div className="legend-items-grid">
-                                <div className="legend-cell"><span className="legend-dot bg-success"></span><span>Healthy Node</span></div>
-                                <div className="legend-cell"><span className="legend-dot bg-warning"></span><span>Warning Node</span></div>
-                                <div className="legend-cell"><span className="legend-dot bg-critical"></span><span>Critical Risk</span></div>
-                                <div className="legend-cell"><span className="legend-line edge-healthy"></span><span>Material Flow</span></div>
-                                <div className="legend-cell"><span className="legend-line edge-alternative-dashed"></span><span>Alternative Path</span></div>
-                                <div className="legend-cell"><span className="legend-line edge-transfer-blue"></span><span>Inventory Transfer</span></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Node Interaction Details Subpanel Context View */}
-                    <div className="node-interaction-details-subpanel">
-                        <div className="subpanel-header">
-                            <span className="subpanel-title-lbl">Selected Asset Inspection Profile:</span>
-                            <h3 className="subpanel-asset-name">{selectedNode ? selectedNode.name : 'Select a Node above'}</h3>
-                        </div>
-                        {selectedNode ? (
-                            <div className="subpanel-metrics-grid">
-                                <div className="subpanel-cell"><span className="sc-lbl">Location Coordinates</span><span className="sc-val">{selectedNode.location} Sector</span></div>
-                                <div className="subpanel-cell"><span className="sc-lbl">Operational Status</span><span className={`sc-val text-${selectedNode.health} font-semibold`}>{selectedNode.status}</span></div>
-                                <div className="sc-long-cell"><span className="sc-lbl">Assigned Supply Material Cargo Linkage</span><span className="sc-val text-brand font-semibold">{selectedNode.material}</span></div>
-                            </div>
-                        ) : (
-                            <p className="subpanel-fallback-text">Click any node profile configuration inside the Digital Twin canvas matrix map above to execute targeted system telemetry readings.</p>
-                        )}
                     </div>
                 </div>
 
-                {/* Right Side: Prescriptive AI Actions Grid Layout */}
-                <div className="twin-side-column column-right">
-                    <div className="column-header-row">
-                        <h2 className="column-section-heading">AI Mitigation Action Plans</h2>
+                {/* Right Column Sidebar Panels */}
+                <div className="twin-sidebar-column">
+
+                    {/* Node Inspection Details Profiler */}
+                    <div className="twin-sidebar-card">
+                        <div className="column-header-row">
+                            <h2 className="column-section-heading">Active Node Inspector</h2>
+                        </div>
+                        <div className="node-profile-body">
+                            {selectedNode ? (
+                                <>
+                                    <div className="np-header-block">
+                                        <h3 className="np-title">{selectedNode.name}</h3>
+                                        <span className="np-loc"><Globe size={11} /> {selectedNode.location} Node Profile</span>
+                                    </div>
+                                    <div className="np-properties-list">
+                                        <div className="np-prop-row"><span>Material Focus Allocation</span><strong className="text-brand">{selectedNode.material}</strong></div>
+                                        <div className="np-prop-row"><span>Logistics Output Health</span><span className={`np-status-lbl color-${selectedNode.health}`}>{selectedNode.status}</span></div>
+                                        <div className="np-prop-row"><span>Silo Buffer Horizon</span><span className="font-mono">8.8 Operating Days</span></div>
+                                        <div className="np-prop-row"><span>Connected Supply Vectors</span><span>4 Active Routes Mapped</span></div>
+                                    </div>
+                                    <div className="np-connections-block-pills">
+                                        <span className="connections-lbl">Connected Corridors</span>
+                                        <div className="connections-flex-pills-row">
+                                            <span className="conn-pill-item"><Truck size={10} /> Gujarat Rail Bypass</span>
+                                            <span className="conn-pill-item"><Route size={10} /> State Line bypass</span>
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <p style={{ color: 'var(--intel-text-s)', textAlign: 'center', padding: '20px' }}>Select any graph node from the digital twin canvas to inspect live telemetry.</p>
+                            )}
+                        </div>
                     </div>
-                    <div className="side-column-content-stack">
-                        {aiActionPlans.map((plan) => (
-                            <div key={plan.id} className={`action-plan-recommendation-card type-${plan.priority ? plan.priority.toLowerCase() : ''}`}>
-                                <div className="plan-card-top-row">
-                                    <span className={`plan-priority-tag tag-${plan.priority ? plan.priority.toLowerCase() : ''}`}>{plan.priority} Priority</span>
-                                    <span className="plan-agent-owner"><Cpu size={10} /> {plan.agent}</span>
+
+                    {/* Network Segment Health Metrics */}
+                    <div className="twin-sidebar-card">
+                        <div className="column-header-row">
+                            <h2 className="column-section-heading">Network Segment Health</h2>
+                        </div>
+                        <div className="segment-health-cards-stack">
+                            {networkHealthCards.map((card) => (
+                                <div key={card.id} className="segment-health-card-item">
+                                    <div className="sh-header-row">
+                                        <span className="sh-lbl-title">{card.label}</span>
+                                        <strong className={`sh-val-pct text-${card.status}`}>{card.val}</strong>
+                                    </div>
+                                    <div className="sh-progress-track-frame">
+                                        <span className={`sh-progress-fill-element fill-${card.status}`} style={{ width: `${card.pct}%` }}></span>
+                                    </div>
+                                    <span className="sh-desc-txt">{card.desc}</span>
                                 </div>
-                                <h3 className="plan-card-action-title">{plan.action}</h3>
-                                <div className="plan-card-parameters-grid">
-                                    <div className="plan-param-cell"><span className="pp-lbl">Est. Delay</span><span className="pp-val color-crit font-mono">{plan.delay}</span></div>
-                                    <div className="plan-param-cell"><span className="pp-lbl">Overhead Variance</span><span className="pp-val font-mono">{plan.cost}</span></div>
-                                </div>
-                                <div className="plan-card-impact-statement">
-                                    <span className="pp-lbl">Targeted Impact Direction:</span>
-                                    <p className="plan-impact-text-paragraph">{plan.impact}</p>
-                                </div>
-                                <div className="plan-card-footer-metrics">
-                                    <span>Confidence rating: <strong>{plan.conf}</strong></span>
-                                    <span>Target: <strong>{plan.time}</strong></span>
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
+
+                    {/* AI Mitigation Action Plans List */}
+                    <div className="twin-sidebar-card border-none bg-none shadow-none">
+                        <div className="column-header-row">
+                            <h2 className="column-section-heading">AI Mitigation Action Plans</h2>
+                        </div>
+                        <div className="side-column-content-stack">
+                            {aiActionPlans.length > 0 ? (
+                                aiActionPlans.map((plan) => (
+                                    <div key={plan.id} className={`action-plan-recommendation-card type-${plan.priority ? plan.priority.toLowerCase() : ''}`}>
+                                        <div className="plan-card-top-row">
+                                            <span className={`plan-priority-tag tag-${plan.priority ? plan.priority.toLowerCase() : ''}`}>{plan.priority} Priority</span>
+                                            <span className="plan-agent-owner"><Cpu size={10} /> {plan.agent}</span>
+                                        </div>
+                                        <h3 className="plan-card-action-title">{plan.action}</h3>
+                                        <div className="plan-card-parameters-grid">
+                                            <div className="plan-param-cell"><span className="pp-lbl">Est. Delay</span><span className="pp-val color-crit font-mono">{plan.delay}</span></div>
+                                            <div className="plan-param-cell"><span className="pp-lbl">Overhead Variance</span><span className="pp-val font-mono">{plan.cost}</span></div>
+                                        </div>
+                                        <div className="plan-card-impact-statement">
+                                            <span className="pp-lbl">Targeted Impact Direction:</span>
+                                            <p className="plan-impact-text-paragraph">{plan.impact}</p>
+                                        </div>
+                                        <div className="plan-card-footer-metrics">
+                                            <span>Confidence rating: <strong>{plan.conf}</strong></span>
+                                            <span>Target: <strong>{plan.time}</strong></span>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div style={{ color: 'var(--intel-text-s)', textAlign: 'center', padding: '16px' }}>No active action plans compiled.</div>
+                            )}
+                        </div>
+                    </div>
+
                 </div>
 
             </section>
@@ -338,27 +360,27 @@ export default function SupplyChainNetwork() {
                 <div className="summary-metrics-fluid-row">
                     <div className="summary-metric-block-cell">
                         <span className="sm-lbl">Current Network Transfers</span>
-                        <span className="sm-val-text color-brand">4 Automated Plans Active</span>
+                        <span className="sm-val-text color-brand">{bottomMetrics.network_transfers || "N/A"}</span>
                     </div>
                     <div className="summary-metric-block-cell">
                         <span className="sm-lbl">Materials In Transit Volume</span>
-                        <span className="sm-val-text">1,450 Tons Bulk Cargo</span>
+                        <span className="sm-val-text">{bottomMetrics.materials_in_transit || "N/A"}</span>
                     </div>
                     <div className="summary-metric-block-cell">
                         <span className="sm-lbl">Active Inventory Redistribution</span>
-                        <span className="sm-val-text">2 Rail Corridors Engaged</span>
+                        <span className="sm-val-text">{bottomMetrics.inventory_redistribution || "N/A"}</span>
                     </div>
                     <div className="summary-metric-block-cell">
                         <span className="sm-lbl">Delayed Shipments Tracked</span>
-                        <span className="sm-val-text color-crit font-mono">3 Freight Vectors Blocked</span>
+                        <span className="sm-val-text color-crit font-mono">{bottomMetrics.delayed_shipments || "N/A"}</span>
                     </div>
                     <div className="summary-metric-block-cell">
                         <span className="sm-lbl">Estimated Network Recovery Time</span>
-                        <span className="sm-val-text font-mono">2.5 Hours Calculated</span>
+                        <span className="sm-val-text font-mono">{bottomMetrics.network_recovery_time || "N/A"}</span>
                     </div>
                     <div className="summary-metric-block-cell">
                         <span className="sm-lbl">Business Continuity Index Rating</span>
-                        <span className="sm-val-text color-success font-semibold">94.8% System Load Stability</span>
+                        <span className="sm-val-text color-success font-semibold">{bottomMetrics.continuity_index || "N/A"}</span>
                     </div>
                 </div>
             </section>

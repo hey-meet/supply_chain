@@ -1182,4 +1182,52 @@
     background-color: #E8F0FE;
     color: #1A73E8;
     border: 1px solid #D2E3FC;
+}
+
+/* Custom Investigate/Analysis Button Styling */
+.investigate-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: var(--intel-brand);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--intel-transition);
+    width: 100%;
+    margin-top: 12px;
+}
+
+.investigate-btn:hover {
+    background-color: #2D3D4E;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.investigate-btn:disabled {
+    background-color: var(--intel-text-s);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Stepper Stepping Node Animation & Styling */
+.pipeline-stage-node.active-glow {
+    box-shadow: 0 0 15px rgba(26, 115, 232, 0.25);
+    border-color: var(--intel-info);
+}
+
+.stage-status-indicator.success {
+    color: var(--intel-success) !important;
+}
+
+.stage-status-indicator.running {
+    color: var(--intel-info) !important;
+}
+
+.stage-status-indicator.pending {
+    color: var(--intel-text-s) !important;
 }

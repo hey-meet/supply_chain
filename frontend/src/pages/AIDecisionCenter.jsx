@@ -1,4 +1,4 @@
-// AIDecisionCenter.jsx
+// --- AIDecisionCenter.jsx ---
 import React, { useState, useEffect } from 'react';
 import {
     Cpu, ShieldAlert, Zap, Layers, RefreshCw, CheckCircle2,
@@ -31,10 +31,15 @@ export default function AIDecisionCenter() {
                 setLoading(true);
                 setError(null);
                 const response = await aiService.getAIDecisionCenter();
-                setAiData(response.data);
+                if (response && response.success) {
+                    setAiData(response.data);
+                    setError(null);
+                } else {
+                    setError(new Error(response?.message || "Failed to load AI decision orchestration data."));
+                }
             } catch (err) {
                 console.error("Failed to fetch AI decision center data:", err);
-                setError(err?.message || "Failed to load AI decision orchestration data.");
+                setError(err);
             } finally {
                 setLoading(false);
             }
@@ -51,18 +56,34 @@ export default function AIDecisionCenter() {
         return () => clearInterval(timer);
     }, []);
 
+    const handleAuthorize = (actionTitle) => {
+        alert(`Action has no backend implementation. Optimization protocol execution for: "${actionTitle}" is disabled.`);
+    };
+
     if (loading) {
         return (
-            <div className="adc-content-scope flex-center" style={{ minHeight: '400px' }}>
-                <p>Loading AI Decision Center orchestration framework...</p>
+            <div className="adc-content-scope flex-center" style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <p style={{ color: 'var(--intel-text-s)' }}>Loading AI Decision Center orchestration framework...</p>
             </div>
         );
     }
 
-    if (error) {
+    if (error && (!aiData || !aiData.agents)) {
+        const message = error.message || "";
+        if (message.includes("pending") || message.includes("Initialize") || message.includes("query") || message.includes("execute") || message.includes("first")) {
+            return (
+                <div className="adc-content-scope flex-center-pending" style={{ minHeight: '500px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '40px' }}>
+                    <h1 className="adc-page-title">AI Decision Center</h1>
+                    <div className="alert-badge critical" style={{ background: 'var(--intel-critical)', color: 'white', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold' }}>NO ACTIVE DECISION</div>
+                    <p style={{ color: 'var(--intel-text-s)', fontSize: '15px', maxWidth: '500px', textAlign: 'center', marginTop: '10px' }}>
+                        No active decision orchestration workspace. Please head to the <strong>News Intelligence</strong> tab to execute an incident search query.
+                    </p>
+                </div>
+            );
+        }
         return (
-            <div className="adc-content-scope flex-center" style={{ minHeight: '400px' }}>
-                <p className="text-critical">Error: {error}</p>
+            <div className="adc-content-scope flex-center" style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <p className="text-critical">Error: {message}</p>
             </div>
         );
     }
@@ -73,6 +94,7 @@ export default function AIDecisionCenter() {
     const systemMetrics = aiData?.system_metrics ?? [];
     const queueItems = aiData?.queue_items ?? [];
     const timelineStages = aiData?.timeline_stages ?? [];
+    const latestPrescription = aiData?.latest_prescription;
 
     return (
         <div className="adc-content-scope">
@@ -229,15 +251,19 @@ export default function AIDecisionCenter() {
                     <div className="adc-monitor-queues-subpanel">
                         <h4 className="adc-subpanel-heading-title">System Ingestion & Resolution Queues</h4>
                         <div className="adc-queue-elements-stack">
-                            {queueItems.map((item) => (
-                                <div key={item.id} className={`adc-queue-item-card variant-${item.type}`}>
-                                    <div className="adc-queue-item-top">
-                                        <span className="adc-queue-tag">{item.type} token</span>
-                                        <span className="adc-queue-id font-mono">{item.id}</span>
+                            {queueItems.length > 0 ? (
+                                queueItems.map((item) => (
+                                    <div key={item.id} className={`adc-queue-item-card variant-${item.type}`}>
+                                        <div className="adc-queue-item-top">
+                                            <span className="adc-queue-tag">{item.type} token</span>
+                                            <span className="adc-queue-id font-mono">{item.id}</span>
+                                        </div>
+                                        <p className="adc-queue-label-text">{item.label}</p>
                                     </div>
-                                    <p className="adc-queue-label-text">{item.label}</p>
-                                </div>
-                            ))}
+                                ))
+                            ) : (
+                                <div style={{ color: 'var(--intel-text-s)', padding: '16px', textAlign: 'center' }}>No active queue logs.</div>
+                            )}
                         </div>
                     </div>
                 </aside>
@@ -281,30 +307,53 @@ export default function AIDecisionCenter() {
                     <h2 className="adc-section-title">Latest Autonomous Executive Prescription</h2>
                 </div>
 
-                <div className="adc-recommendation-master-card">
-                    <div className="adc-recommendation-header-grid">
-                        <div className="adc-rec-cell"><span className="adc-r-lbl">Priority Level</span><span className="adc-rec-badge-pill variant-critical"><AlertTriangle size={11} /> Critical Priority</span></div>
-                        <div className="adc-rec-cell"><span className="adc-r-lbl">Business Blast Radius Impact</span><span className="adc-rec-val font-semibold color-brand">Avoid Plant A Clinker Shutdown Completely</span></div>
-                        <div className="adc-rec-cell"><span className="adc-r-lbl">Estimated Network Delay</span><span className="adc-rec-val font-mono color-critical">+2 hours net variance</span></div>
-                        <div className="adc-rec-cell"><span className="adc-r-lbl">Operational Execution Cost</span><span className="adc-rec-val font-mono font-semibold">$4,820 structural buffer</span></div>
-                        <div className="adc-rec-cell text-right"><span className="adc-r-lbl">Orchestration Confidence</span><span className="adc-rec-val font-semibold color-success">96.4% safe margin</span></div>
-                    </div>
+                {latestPrescription ? (
+                    <div className="adc-recommendation-master-card">
+                        <div className="adc-recommendation-header-grid">
+                            <div className="adc-rec-cell"><span className="adc-r-lbl">Priority Level</span><span className={`adc-rec-badge-pill variant-${latestPrescription.priority?.toLowerCase() || 'critical'}`}><AlertTriangle size={11} /> {latestPrescription.priority} Priority</span></div>
+                            <div className="adc-rec-cell"><span className="adc-r-lbl">Business Blast Radius Impact</span><span className="adc-rec-val font-semibold color-brand">{latestPrescription.impact}</span></div>
+                            <div className="adc-rec-cell"><span className="adc-r-lbl">Estimated Network Delay</span><span className="adc-rec-val font-mono color-critical">{latestPrescription.delay}</span></div>
+                            <div className="adc-rec-cell"><span className="adc-r-lbl">Operational Execution Cost</span><span className="adc-rec-val font-mono font-semibold">{latestPrescription.cost}</span></div>
+                            <div className="adc-rec-cell text-right"><span className="adc-r-lbl">Orchestration Confidence</span><span className="adc-rec-val font-semibold color-success">{latestPrescription.confidence} safe margin</span></div>
+                        </div>
 
-                    <div className="adc-prescribed-strategy-action-block">
-                        <span className="adc-r-lbl">Prescribed Sourcing Optimization Strategy Action Directive:</span>
-                        <p className="adc-prescribed-action-paragraph">
-                            Transfer 1,200 T Limestone from Plant C reserves via secondary rail segment bypass loops.
-                            Simultaneously activate alternative solid fuel contract terms with emergency Rajasthan Quarry suppliers
-                            to hedge spot energy margin variance scales across the grinding complex.
-                        </p>
-                    </div>
+                        <div className="adc-prescribed-strategy-action-block">
+                            <span className="adc-r-lbl">Prescribed Sourcing Optimization Strategy Action Directive:</span>
+                            <p className="adc-prescribed-action-paragraph">{latestPrescription.action}</p>
+                        </div>
 
-                    <div className="adc-recommendation-sub-parameters-grid">
-                        <div className="adc-sub-param-card"><h5>Alternative Sourcing Nodes</h5><p>Rajasthan Quarry Emergency Framework Contract</p></div>
-                        <div className="adc-sub-param-card"><h5>Alternative Routing Protocols</h5><p>Rail segment bypass segment loop via terminal port waiting lanes</p></div>
-                        <div className="adc-sub-param-card"><h5>Inventory Allocation Shifts</h5><p>1,200 T Limestone bulk cargo buffer relocation</p></div>
+                        <div className="adc-recommendation-sub-parameters-grid">
+                            <div className="adc-sub-param-card"><h5>Alternative Sourcing Nodes</h5><p>STANDBY EMERGENCY CONTRACT DEPLOYED</p></div>
+                            <div className="adc-sub-param-card"><h5>Alternative Routing Protocols</h5><p>DYNAMIC TRANSIT CORRIDOR REROUTED</p></div>
+                            <div className="adc-sub-param-card"><h5>Inventory Allocation Shifts</h5><p>RAW MATERIAL BUFFER REALLOCATION PLAN ACTIVE</p></div>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
+                            <button
+                                className="adc-prescribed-action-button"
+                                style={{
+                                    background: 'var(--intel-brand)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    padding: '8px 16px',
+                                    cursor: 'pointer',
+                                    fontWeight: 'semibold',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                                onClick={() => handleAuthorize(latestPrescription.impact)}
+                            >
+                                Authorize Protocol Optimization <ArrowRight size={14} />
+                            </button>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="adc-recommendation-master-card flex-center" style={{ padding: '24px', color: 'var(--intel-text-s)', textAlign: 'center' }}>
+                        No autonomous executive prescription generated.
+                    </div>
+                )}
             </section>
 
         </div>

@@ -1,4 +1,4 @@
-// IncidentCenter.jsx
+// --- IncidentCenter.jsx ---
 import React, { useState, useEffect } from 'react';
 import {
     ShieldAlert,
@@ -49,10 +49,15 @@ export default function IncidentCenter() {
                 setLoading(true);
                 setError(null);
                 const response = await incidentService.getIncidentCenter();
-                setIncidentData(response.data);
+                if (response && response.success) {
+                    setIncidentData(response.data);
+                    setError(null);
+                } else {
+                    setError(new Error(response?.message || "Failed to load incident investigation details."));
+                }
             } catch (err) {
                 console.error("Failed to fetch incident center data:", err);
-                setError(err?.message || "Failed to load incident investigation data.");
+                setError(err);
             } finally {
                 setLoading(false);
             }
@@ -69,18 +74,38 @@ export default function IncidentCenter() {
         return () => clearInterval(timer);
     }, []);
 
+    const handleAuthorize = () => {
+        alert("Action has no backend implementation. Sourcing protocol authorization is disabled.");
+    };
+
+    const handleReject = () => {
+        alert("Action has no backend implementation. Mitigation plan rejection is disabled.");
+    };
+
     if (loading) {
         return (
-            <div className="incident-center-scope flex-center" style={{ minHeight: '400px' }}>
-                <p>Loading Incident Investigation Center...</p>
+            <div className="incident-center-scope flex-center" style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <p style={{ color: 'var(--intel-text-s)' }}>Loading Incident Investigation Center...</p>
             </div>
         );
     }
 
-    if (error) {
+    if (error && (!incidentData || !incidentData.incident_meta)) {
+        const message = error.message || "";
+        if (message.includes("pending") || message.includes("Initialize") || message.includes("query") || message.includes("execute") || message.includes("first")) {
+            return (
+                <div className="incident-center-scope flex-center-pending" style={{ minHeight: '500px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '40px' }}>
+                    <h1 className="ic-page-title">Incident Investigation Center</h1>
+                    <div className="alert-badge critical" style={{ background: 'var(--intel-critical)', color: 'white', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold' }}>NO ACTIVE INVESTIGATION</div>
+                    <p style={{ color: 'var(--intel-text-s)', fontSize: '15px', maxWidth: '500px', textAlign: 'center', marginTop: '10px' }}>
+                        No active incident under investigation. Please head to the <strong>News Intelligence</strong> tab to execute an incident search query.
+                    </p>
+                </div>
+            );
+        }
         return (
-            <div className="incident-center-scope flex-center" style={{ minHeight: '400px' }}>
-                <p className="text-critical">Error: {error}</p>
+            <div className="incident-center-scope flex-center" style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <p className="text-critical">Error: {message}</p>
             </div>
         );
     }
@@ -91,6 +116,16 @@ export default function IncidentCenter() {
     const timelineSteps = incidentData?.timeline_steps ?? [];
     const impactCards = incidentData?.impact_cards ?? [];
     const progressStages = incidentData?.progress_stages ?? [];
+
+    // Extract dynamic mitigation step metrics
+    const mitigationStep = timelineSteps.find(step => step.id === 3);
+    const mitigationRecommendation = mitigationStep?.reasoning || "Authorize dynamic route redirection and allocate alternative suppliers.";
+    const targetedImpact = incidentMeta.originalHeadline ? `Avoid shut down of affected assets` : "Minimize raw material sourcing disruption";
+    const delayVariance = mitigationStep?.metrics?.estDelay || "N/A";
+    const overheadCost = mitigationStep?.metrics?.estCost || "N/A";
+    const altSupplier = mitigationStep?.metrics?.alternate || "N/A";
+    const routingVector = mitigationStep?.metrics?.route || "N/A";
+    const confidenceScore = incidentMeta.confidence || "95%";
 
     return (
         <div className="incident-center-scope">
@@ -104,7 +139,7 @@ export default function IncidentCenter() {
                 <div className="ic-header-right">
                     <div className="ic-timestamp-group">
                         <span className="ic-ts-lbl">System Time:</span>
-                        <span className="ic-ts-val">{liveTime}</span>
+                        <span className="ic-ts-val font-mono">{liveTime}</span>
                     </div>
                     <div className={`ic-status-capsule ${incidentMeta.severity?.toLowerCase() || 'critical'}`}>
                         <span className={`ic-status-indicator-dot ${incidentMeta.severity?.toLowerCase() || 'critical'}`}></span>
@@ -172,10 +207,8 @@ export default function IncidentCenter() {
                                 <span className="report-author-brand">Reuters Logistics Ingestion</span>
                                 <span className="report-time-ago">Detected {incidentMeta.detectedTime}</span>
                             </div>
-                            <h3 className="report-main-headline">NH-48 Freight Transit Halted Near Valsad Border Post Following Severe Regional Weather Damage</h3>
-                            <p className="report-main-body">
-                                Torrential rainfall lines have triggered swift water accumulation and micro-landslides along primary infrastructure sectors. State highways confirm immediate roadblocks for heavy commercial vehicle configurations until structural engineers complete assessments.
-                            </p>
+                            <h3 className="report-main-headline">{incidentMeta.originalHeadline}</h3>
+                            <p className="report-main-body">{incidentMeta.originalBody}</p>
                         </div>
 
                         <div className="extracted-entities-wrapper">
@@ -199,9 +232,9 @@ export default function IncidentCenter() {
                                                 <span className="src-time-label"><Clock size={10} /> {src.time}</span>
                                             </div>
                                         </div>
-                                        <div className="src-metrics-block">
-                                            <span className="src-reliability-score font-mono">{src.reliability} Trust</span>
-                                            <span className="src-verification-badge status-complete">{src.status}</span>
+                                        <div className="src-score-block">
+                                            <span className="src-score-val">{src.reliability} Reliability</span>
+                                            <span className="src-status-pill">{src.status}</span>
                                         </div>
                                     </div>
                                 ))}
@@ -210,103 +243,89 @@ export default function IncidentCenter() {
                     </div>
                 </div>
 
-                {/* Center Panel: AI Investigation Timeline Flow */}
-                <div className="ic-workspace-column column-center-timeline">
+                {/* Center Panel: Chain Blast Radius Analysis */}
+                <div className="ic-workspace-column column-center-blast">
                     <div className="column-head-wrapper">
-                        <h2 className="column-section-title">AI Investigation Timeline</h2>
+                        <h2 className="column-section-title">Chain Blast Radius Analysis</h2>
                     </div>
 
-                    <div className="investigation-vertical-timeline">
-                        {timelineSteps.map((step) => (
-                            <div key={step.id} className={`investigation-timeline-card-row ${step.active ? 'active-step-glow' : ''}`}>
-                                <div className="timeline-aside-node-track">
-                                    <div className={`timeline-step-node-circle ${step.active ? 'active-node-pulse' : 'completed-node'}`}>
-                                        {step.id}
-                                    </div>
-                                    <div className="timeline-track-connector-line"></div>
-                                </div>
-
-                                <div className="timeline-card-content-surface">
-                                    <div className="timeline-card-header-flex">
-                                        <h3 className="timeline-step-title">{step.title}</h3>
-                                        <span className="timeline-agent-owner-label"><Cpu size={11} /> {step.agent}</span>
-                                    </div>
-
-                                    <div className="timeline-step-metrics-grid">
-                                        {step.metrics && Object.entries(step.metrics).map(([key, val]) => (
-                                            <div key={key} className="step-metric-badge-box">
-                                                <span className="sm-badge-lbl">{key.replace(/([A-Z])/g, ' $1').toUpperCase()}</span>
-                                                <span className="sm-badge-val truncate">{val}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    <div className="timeline-step-reasoning-block">
-                                        <span className="step-reasoning-label">Agent Analytical Reasoning:</span>
-                                        <p className="step-reasoning-paragraph">{step.reasoning}</p>
-                                    </div>
-
-                                    {step.active && (
-                                        <div className="step-live-processing-bar">
-                                            <span className="live-processing-fill-line"></span>
+                    <div className="ic-card-body-container">
+                        <div className="impact-grid-cards">
+                            {impactCards.map((card) => {
+                                const CardIcon = iconMap[card.icon] || FileText;
+                                return (
+                                    <div key={card.id} className={`impact-measure-card status-${card.status}`}>
+                                        <div className="card-top-header">
+                                            <span className={`card-icon-badge ${card.status}`}>
+                                                <CardIcon size={14} />
+                                            </span>
+                                            <span className="card-lbl-title">{card.title}</span>
                                         </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+                                        <h4 className="card-impact-magnitude">{card.count}</h4>
+                                        <p className="card-impact-desc">{card.desc}</p>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
 
-                {/* Right Panel: Business Impact Analysis */}
-                <div className="ic-workspace-column column-right-impact">
+                {/* Right Panel: Resolution Pipeline Stages */}
+                <div className="ic-workspace-column column-right-pipeline">
                     <div className="column-head-wrapper">
-                        <h2 className="column-section-title">Business Impact Analysis</h2>
+                        <h2 className="column-section-title">Agentic Investigation Output</h2>
                     </div>
 
-                    <div className="compact-impact-cards-stack">
-                        {impactCards.map((card) => {
-                            const Icon = typeof card.icon === 'string' ? (iconMap[card.icon] || ShieldAlert) : (card.icon || ShieldAlert);
-                            return (
-                                <div key={card.id} className="compact-impact-card-item">
-                                    <div className="cic-top-row">
-                                        <div className="cic-title-flex">
-                                            <span className={`cic-icon-wrapper color-${card.status}`}>
-                                                <Icon size={14} />
-                                            </span>
-                                            <h4 className="cic-card-heading">{card.title}</h4>
-                                        </div>
-                                        <span className={`cic-count-label status-${card.status}`}>{card.count}</span>
+                    <div className="ic-card-body-container pipeline-vertical-scroller">
+                        <div className="pipeline-steps-timeline">
+                            {timelineSteps.map((step, idx) => (
+                                <div key={step.id} className={`pipeline-step-node-card ${step.active ? 'active-highlight' : ''}`}>
+                                    <div className="step-card-header">
+                                        <h4 className="step-card-title-lbl">{step.title}</h4>
+                                        <span className="step-agent-tag"><Cpu size={10} /> {step.agent}</span>
                                     </div>
-                                    <p className="cic-card-description">{card.desc}</p>
+                                    <div className="step-metrics-strip-row">
+                                        {Object.entries(step.metrics || {}).map(([key, val]) => (
+                                            <div key={key} className="step-metric-cell">
+                                                <span className="sm-lbl">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                                <span className="sm-val font-mono">{val}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="step-reasoning-textbox">
+                                        <span className="textbox-title-tag">Agent Reason Logic:</span>
+                                        <p className="textbox-paragraph-content">{step.reasoning}</p>
+                                    </div>
+                                    {idx < timelineSteps.length - 1 && (
+                                        <div className="step-vertical-connector-line"></div>
+                                    )}
                                 </div>
-                            );
-                        })}
+                            ))}
+                        </div>
                     </div>
                 </div>
 
             </section>
 
-            {/* Bottom Section: Progress Workflow */}
-            <section className="ic-progress-workflow-section">
-                <div className="workflow-horizontal-flow-row">
-                    {progressStages.map((stage, index) => (
+            {/* Bottom Progress Tracker Breadcrumbs */}
+            <section className="ic-progress-milestones-bar">
+                <div className="milestones-flex-line">
+                    {progressStages.map((stage, idx) => (
                         <React.Fragment key={stage.id}>
-                            <div className={`workflow-stage-node-box ${stage.active ? 'current-active-glow' : ''}`}>
-                                <div className="stage-node-circle-icon">
-                                    {stage.status === 'Complete' ? <CheckCircle2 size={16} className="color-success" /> : stage.active ? <Clock size={16} className="color-warning" /> : <HelpCircle size={16} className="color-text-s" />}
+                            <div className={`milestone-node-element ${stage.active ? 'active-pulse' : ''} ${stage.status === 'Complete' ? 'state-complete' : 'state-pending'}`}>
+                                <div className="node-circle-indicator">
+                                    {stage.status === 'Complete' ? <CheckCircle2 size={14} /> : <HelpCircle size={14} />}
                                 </div>
-                                <div className="stage-node-meta-labels">
-                                    <h4 className="stage-node-name-text">{stage.name}</h4>
-                                    <span className="stage-node-agent-owner truncate">{stage.agent}</span>
-                                    <span className="stage-node-timestamp font-mono">{stage.time}</span>
+                                <div className="node-meta-block-text">
+                                    <span className="node-step-lbl">{stage.name}</span>
+                                    <span className="node-agent-name"><Cpu size={9} /> {stage.agent}</span>
+                                    <span className="node-time-stamp font-mono">{stage.time}</span>
                                 </div>
                             </div>
-
-                            {index < progressStages.length - 1 && (
-                                <div className="workflow-connector-wave-bar">
-                                    <svg className="workflow-wave-svg-element" viewBox="0 0 100 20" preserveAspectRatio="none">
-                                        <path className="workflow-wave-bg-track" d="M 0 10 Q 25 2, 50 10 T 100 10" />
-                                        <path className={`workflow-wave-active-fill ${stage.status === 'Complete' ? 'filled-complete' : stage.active ? 'filling-active' : ''}`} d="M 0 10 Q 25 2, 50 10 T 100 10" />
+                            {idx < progressStages.length - 1 && (
+                                <div className={`milestone-segment-line ${stage.status === 'Complete' ? 'state-complete' : 'state-pending'}`}>
+                                    <svg width="100%" height="2" preserveAspectRatio="none">
+                                        <line x1="0" y1="1" x2="100%" y2="1" strokeDasharray={stage.status !== 'Complete' ? "4 4" : "0"} strokeWidth="2" />
                                     </svg>
                                 </div>
                             )}
@@ -330,45 +349,43 @@ export default function IncidentCenter() {
 
                     <div className="eds-core-recommendation-alert-box">
                         <span className="eds-alert-action-label">IMMEDIATE MANDATORY STRATEGY ACTION REQUIRED:</span>
-                        <p className="eds-alert-action-text">
-                            Authorize dynamic redirection of fleet segment Bravo to Alternative Quarry Hub 7 (Rajasthan sector) via Bypass State Line 14 protocols to intercept full feedstock supply collapse at Plant A.
-                        </p>
+                        <p className="eds-alert-action-text">{mitigationRecommendation}</p>
                     </div>
 
                     <div className="eds-mitigation-parameters-grid">
                         <div className="eds-parameter-cell">
                             <span className="ed-cell-lbl">Targeted Business Impact</span>
-                            <span className="ed-cell-val highlight-brand">Avoid Complete Plant A Grinding Line Shutdown</span>
+                            <span className="ed-cell-val highlight-brand">{targetedImpact}</span>
                         </div>
                         <div className="eds-parameter-cell">
                             <span className="ed-cell-lbl">Estimated Transit Pacing Variance</span>
-                            <span className="ed-cell-val highlight-warning">+2.5 Hours Additional Cycle Time</span>
+                            <span className="ed-cell-val highlight-warning">{delayVariance} Additional Cycle Time</span>
                         </div>
                         <div className="eds-parameter-cell">
                             <span className="ed-cell-lbl">Calculated Operational Overhead cost</span>
-                            <span className="ed-cell-val highlight-warning">$14,200 Net Variance Allocation</span>
+                            <span className="ed-cell-val highlight-warning">{overheadCost} Net Variance Allocation</span>
                         </div>
                         <div className="eds-parameter-cell">
                             <span className="ed-cell-lbl">Prescribed Alternative Supplier Node</span>
-                            <span className="ed-cell-val font-semibold">Quarry Hub 7 Cluster (Rajasthan Industrial Block)</span>
+                            <span className="ed-cell-val font-semibold">{altSupplier}</span>
                         </div>
                         <div className="eds-parameter-cell">
                             <span className="ed-cell-lbl">Rerouted Transport Routing Vector</span>
-                            <span className="ed-cell-val font-semibold">Bypass Route State Line 14 Loop Area</span>
+                            <span className="ed-cell-val font-semibold">{routingVector}</span>
                         </div>
                         <div className="eds-parameter-cell">
                             <span className="ed-cell-lbl">Silo Raw Inventory Transfer Plan</span>
-                            <span className="ed-cell-val font-semibold">Reallocate 400 Tons Inbound Clinker Bulk Mix Load</span>
+                            <span className="ed-cell-val font-semibold">Reallocate inbound raw material bulk mixes</span>
                         </div>
                     </div>
 
                     <div className="eds-decision-action-footer-row">
                         <div className="eds-confidence-assurance-label">
-                            Mitigation Optimization Engine Assurance Level Rating: <strong>97% Confidence Matrix Score</strong>
+                            Mitigation Optimization Engine Assurance Level Rating: <strong>{confidenceScore} Confidence Matrix Score</strong>
                         </div>
                         <div className="eds-action-buttons-group">
-                            <button className="eds-btn-reject-action">Reject Plan</button>
-                            <button className="eds-btn-approve-action">
+                            <button className="eds-btn-reject-action" onClick={handleReject}>Reject Plan</button>
+                            <button className="eds-btn-approve-action" onClick={handleAuthorize}>
                                 Authorize Mitigation Protocols <ArrowRight size={14} />
                             </button>
                         </div>
