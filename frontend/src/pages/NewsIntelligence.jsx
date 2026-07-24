@@ -49,11 +49,19 @@ const defaultPipelineIcons = [Database, Search, Layers, CheckSquare, FileCheck];
 export default function NewsIntelligence() {
     const [timeStr, setTimeStr] = useState('13:25:28');
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [newsData, setNewsData] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [newsData, setNewsData] = useState(() => {
+        const saved = localStorage.getItem('daily_news_intelligence_scan');
+        return saved ? JSON.parse(saved) : null;
+    });
+    const [loading, setLoading] = useState(() => {
+        const saved = localStorage.getItem('daily_news_intelligence_scan');
+        return saved ? false : true;
+    });
     const [error, setError] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
+    const [isScanning, setIsScanning] = useState(false);
+    const [scanStage, setScanStage] = useState(0);
+    const [autoRefresh, setAutoRefresh] = useState(true);
     const [statusMessage, setStatusMessage] = useState(null);
 
     const fetchNewsData = async () => {
@@ -61,26 +69,76 @@ export default function NewsIntelligence() {
             setIsRefreshing(true);
             const response = await newsService.getNewsIntelligence();
             if (response && response.success) {
-                setNewsData(response.data);
+                setNewsData(prev => {
+                    const merged = {
+                        ...prev,
+                        ...response.data,
+                        news_feed: prev?.news_feed || response.data.news_feed,
+                        last_scan: prev?.last_scan || response.data.last_scan
+                    };
+                    localStorage.setItem('daily_news_intelligence_scan', JSON.stringify(merged));
+                    return merged;
+                });
                 setError(null);
             } else {
-                setError(new Error(response?.message || "Failed to fetch data"));
+                if (!newsData) {
+                    setError(new Error(response?.message || "Failed to fetch data"));
+                }
             }
         } catch (err) {
-            setError(err);
+            if (!newsData) {
+                setError(err);
+            }
         } finally {
             setLoading(false);
             setIsRefreshing(false);
         }
     };
 
-    const handleSearch = async () => {
-        if (!searchQuery.trim()) return;
+    const handleScan = async () => {
+        setIsScanning(true);
+        setScanStage(0);
+        setStatusMessage({ type: 'loading', text: 'Executing autonomous multi-agent daily news intelligence scan...' });
+        
+        const timer = setInterval(() => {
+            setScanStage((prev) => {
+                if (prev < 3) return prev + 1;
+                clearInterval(timer);
+                return prev;
+            });
+        }, 1200);
+
+        try {
+            const response = await newsService.scanTodayNews();
+            if (response && response.success) {
+                setScanStage(3);
+                setTimeout(() => {
+                    setNewsData(response.data);
+                    localStorage.setItem('daily_news_intelligence_scan', JSON.stringify(response.data));
+                    setStatusMessage({ type: 'success', text: 'Daily supply chain intelligence scan completed successfully.' });
+                    setError(null);
+                    setIsScanning(false);
+                    clearInterval(timer);
+                }, 1000);
+            } else {
+                setStatusMessage({ type: 'error', text: response?.message || 'Daily news scan failed.' });
+                setIsScanning(false);
+                clearInterval(timer);
+            }
+        } catch (err) {
+            console.error("News scan error:", err);
+            setStatusMessage({ type: 'error', text: 'Server error encountered during news scan.' });
+            setIsScanning(false);
+            clearInterval(timer);
+        }
+    };
+
+    const handleAnalyzeImpact = async (headline) => {
         setIsSearching(true);
-        setStatusMessage({ type: 'loading', text: 'Executing multi-agent incident classification pipeline...' });
+        setStatusMessage({ type: 'loading', text: `Initiating LangGraph impact analysis for: "${headline}"...` });
         
         try {
-            const result = await incidentService.getIncidentCenter(searchQuery);
+            const result = await incidentService.getIncidentCenter(headline);
             if (result && result.success) {
                 setStatusMessage({ type: 'success', text: 'Incident successfully classified and supply chain impact simulated.' });
                 setError(null);
@@ -89,7 +147,7 @@ export default function NewsIntelligence() {
                 setStatusMessage({ type: 'error', text: result.message || 'Workflow execution failed.' });
             }
         } catch (err) {
-            console.error("News Search error:", err);
+            console.error("News search error:", err);
             setStatusMessage({ type: 'error', text: 'Server error encountered during graph execution.' });
         } finally {
             setIsSearching(false);
@@ -106,43 +164,140 @@ export default function NewsIntelligence() {
         return () => clearInterval(interval);
     }, []);
 
+    useEffect(() => {
+        if (!autoRefresh) return;
+        
+        const interval = setInterval(() => {
+            if (!isScanning && !isSearching && !isRefreshing) {
+                fetchNewsData();
+            }
+        }, 300000); // 5 minutes
+        return () => clearInterval(interval);
+    }, [autoRefresh, isScanning, isSearching, isRefreshing]);
+
     const handleManualRefresh = () => {
         fetchNewsData();
+    };
+
+    const severityCounts = {
+        CRITICAL: 0,
+        HIGH: 0,
+        MEDIUM: 0,
+        LOW: 0
+    };
+    if (newsData?.news_feed) {
+        newsData.news_feed.forEach(n => {
+            const sev = (n.severity || 'MEDIUM').toUpperCase();
+            if (severityCounts[sev] !== undefined) {
+                severityCounts[sev]++;
+            } else {
+                severityCounts[sev] = (severityCounts[sev] || 0) + 1;
+            }
+        });
+    }
+
+    const LoadingStages = ({ currentStage }) => {
+        const stages = [
+            { name: 'Searching', desc: 'Searching online logistics and supply chain channels...' },
+            { name: 'Filtering', desc: 'Filtering raw articles for cement supply chain relevance...' },
+            { name: 'Classification', desc: 'Running AI-powered risk classification...' },
+            { name: 'Intelligence Ready', desc: 'Structuring autonomous intelligence stream...' }
+        ];
+
+        return (
+            <div className="pipeline-horizontal-box" style={{ maxWidth: '800px', width: '100%', padding: '32px', background: 'var(--intel-card)', borderRadius: 'var(--intel-radius)', border: '1px solid var(--intel-border)', boxShadow: 'var(--intel-shadow)', marginTop: '24px' }}>
+                <h3 style={{ textAlign: 'center', marginBottom: '24px', color: 'var(--intel-brand)', fontWeight: 600 }}>Autonomous Scan Pipeline Progress</h3>
+                <div className="pipeline-flow-row" style={{ display: 'flex', justifyContent: 'space-between', position: 'relative' }}>
+                    {stages.map((stage, idx) => {
+                        const isComplete = idx < currentStage;
+                        const isActive = idx === currentStage;
+                        
+                        return (
+                            <React.Fragment key={stage.name}>
+                                <div className={`pipeline-stage-node ${isActive ? 'active-glow' : ''}`} style={{ flex: 1, opacity: isComplete || isActive ? 1 : 0.4 }}>
+                                    <div className="stage-icon-circle" style={{
+                                        backgroundColor: isComplete ? 'var(--intel-success)' : isActive ? 'var(--intel-info)' : 'var(--intel-text-s)',
+                                        color: 'white',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        width: '32px',
+                                        height: '32px',
+                                        borderRadius: '50%',
+                                        margin: '0 auto 8px'
+                                    }}>
+                                        {isComplete ? <CheckCircle size={16} /> : <Activity size={16} className={isActive ? 'rotating' : ''} />}
+                                    </div>
+                                    <h4 className="stage-node-title" style={{ fontSize: '13px', fontWeight: 'bold', margin: '4px 0' }}>{stage.name}</h4>
+                                    <span className={`stage-status-indicator ${isComplete ? 'success' : isActive ? 'running' : 'pending'}`} style={{
+                                        fontSize: '11px',
+                                        fontWeight: 600,
+                                        color: isComplete ? 'var(--intel-success)' : isActive ? 'var(--intel-info)' : 'var(--intel-text-s)'
+                                    }}>
+                                        {isComplete ? 'Complete' : isActive ? 'Active' : 'Pending'}
+                                    </span>
+                                    <p style={{ fontSize: '11px', color: 'var(--intel-text-s)', marginTop: '8px', lineHeight: '1.2' }}>{stage.desc}</p>
+                                </div>
+                                
+                                {idx < stages.length - 1 && (
+                                    <div style={{
+                                        flex: '0 0 40px',
+                                        height: '2px',
+                                        backgroundColor: isComplete ? 'var(--intel-success)' : 'var(--intel-border)',
+                                        alignSelf: 'center',
+                                        marginTop: '-30px',
+                                        position: 'relative',
+                                        zIndex: 1
+                                    }}></div>
+                                )}
+                            </React.Fragment>
+                        );
+                    })}
+                </div>
+            </div>
+        );
     };
 
     if (loading && !newsData) {
         return <div className="news-intel-loading">Loading...</div>;
     }
 
+    if (isScanning) {
+        return (
+            <div className="news-intel-scope flex-center-pending" style={{ minHeight: '500px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
+                <h1 className="intel-page-title">Today's Supply Chain Intelligence</h1>
+                <p className="intel-page-subtitle">Autonomous news crawler active. Processing live pipeline stages...</p>
+                <LoadingStages currentStage={scanStage} />
+                {statusMessage && (
+                    <div className="status-banner status-loading" style={{ maxWidth: '800px', width: '100%', marginTop: '20px' }}>
+                        <RefreshCw size={16} className="rotating" />
+                        <span style={{ marginLeft: '8px' }}>{statusMessage.text}</span>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
     if (error && !newsData) {
         const message = error.message || "";
-        if (message.includes("pending") || message.includes("Initialize") || message.includes("query")) {
+        if (message.includes("pending") || message.includes("Initialize") || message.includes("query") || message.includes("Scan")) {
             return (
                 <div className="news-intel-scope flex-center-pending" style={{ minHeight: '500px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '40px' }}>
-                    <h1 className="intel-page-title">News Intelligence</h1>
-                    <p className="intel-page-subtitle" style={{ marginBottom: '20px' }}>No active incident analysis. Execute a classification query to initialize the supply chain graph.</p>
+                    <h1 className="intel-page-title">Today's Supply Chain Intelligence</h1>
+                    <p className="intel-page-subtitle" style={{ marginBottom: '20px' }}>No active news scan. Trigger the autonomous intelligence monitor to scan today's supply chain news.</p>
                     
-                    <div className="search-container" style={{ maxWidth: '600px', width: '100%' }}>
-                        <input
-                            type="text"
-                            className="search-input"
-                            placeholder="Enter disruption event query (e.g., 'Heavy rainfall Jodhpur monsoons')..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            disabled={isSearching}
-                        />
-                        <button
-                            className="search-button"
-                            onClick={handleSearch}
-                            disabled={isSearching || !searchQuery.trim()}
-                        >
-                            {isSearching ? <RefreshCw size={14} className="rotating" /> : <Search size={14} />}
-                            {isSearching ? "Analyzing..." : "Search & Classify"}
-                        </button>
-                    </div>
+                    <button
+                        className="search-button"
+                        onClick={handleScan}
+                        disabled={isScanning || isSearching}
+                        style={{ padding: '12px 24px', fontSize: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                    >
+                        <Activity size={16} />
+                        Scan Today's News
+                    </button>
 
                     {statusMessage && (
-                        <div className={`status-banner status-${statusMessage.type}`} style={{ maxWidth: '600px', width: '100%' }}>
+                        <div className={`status-banner status-${statusMessage.type}`} style={{ maxWidth: '600px', width: '100%', marginTop: '20px' }}>
                             {statusMessage.type === 'success' ? <CheckCircle size={16} /> : statusMessage.type === 'error' ? <AlertOctagon size={16} /> : <RefreshCw size={16} className="rotating" />}
                             <span style={{ marginLeft: '8px' }}>{statusMessage.text}</span>
                         </div>
@@ -156,53 +311,85 @@ export default function NewsIntelligence() {
     return (
         <div className="news-intel-scope">
 
-            {/* Page Header Area */}
-            <header className="intel-header-block">
-                <div className="intel-header-left">
-                    <h1 className="intel-page-title">News Intelligence</h1>
-                    <p className="intel-page-subtitle">Real-time AI-powered logistics news monitoring and disruption intelligence.</p>
-                </div>
-                <div className="intel-header-right">
-                    <div className="intel-source-pill">
-                        <Network size={14} />
-                        <span>568 Connected Sources</span>
+            {/* Enterprise Monitoring Console */}
+            <div className="intel-monitoring-console" style={{
+                background: 'var(--intel-card)',
+                border: '1px solid var(--intel-border)',
+                borderRadius: 'var(--intel-radius)',
+                padding: '24px',
+                marginBottom: '24px',
+                boxShadow: 'var(--intel-shadow)',
+                width: '100%'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px' }}>
+                    <div>
+                        <h1 className="intel-page-title" style={{ margin: 0, fontSize: '24px' }}>Today's Supply Chain Intelligence</h1>
+                        <span style={{ fontSize: '13px', color: 'var(--intel-text-s)', fontWeight: 500 }}>
+                            {new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        </span>
                     </div>
-                    <div className="intel-refresh-group">
-                        <span className="intel-ts-lbl">Last Refresh:</span>
-                        <span className="intel-ts-val">{timeStr}</span>
-                        <button
-                            className={`intel-refresh-btn ${isRefreshing ? 'rotating' : ''}`}
-                            onClick={handleManualRefresh}
-                            aria-label="Refresh intelligence data"
-                        >
-                            <RefreshCw size={14} />
-                        </button>
-                    </div>
-                    <div className="intel-live-badge">
-                        <span className="intel-pulse-dot"></span>
-                        AI INGESTION ACTIVE
-                    </div>
-                </div>
-            </header>
+                    
+                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <div style={{ textAlign: 'right' }}>
+                            <span style={{ display: 'block', fontSize: '10px', color: 'var(--intel-text-s)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Last Scan</span>
+                            <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--intel-text-p)' }}>
+                                {newsData?.last_scan ? newsData.last_scan : '--:-- --'}
+                            </span>
+                        </div>
+                        
+                        <div style={{ width: '1px', height: '28px', backgroundColor: 'var(--intel-border)' }}></div>
+                        
+                        <div style={{ textAlign: 'right' }}>
+                            <span style={{ display: 'block', fontSize: '10px', color: 'var(--intel-text-s)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Critical Events</span>
+                            <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--intel-critical)' }}>
+                                {newsData?.news_feed ? newsData.news_feed.filter(n => n.severity === 'CRITICAL' || n.severity === 'HIGH').length : 0}
+                            </span>
+                        </div>
+                        
+                        <div style={{ width: '1px', height: '28px', backgroundColor: 'var(--intel-border)' }}></div>
+                        
+                        <div style={{ textAlign: 'right' }}>
+                            <span style={{ display: 'block', fontSize: '10px', color: 'var(--intel-text-s)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Risk Distribution</span>
+                            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--intel-text-p)', display: 'flex', gap: '6px', marginTop: '2px' }}>
+                                <span style={{ color: 'var(--intel-critical)' }}>C:{severityCounts.CRITICAL || 0}</span>
+                                <span style={{ color: 'var(--intel-warning)' }}>H:{severityCounts.HIGH || 0}</span>
+                                <span style={{ color: 'var(--intel-info)' }}>M:{severityCounts.MEDIUM || 0}</span>
+                                <span style={{ color: 'var(--intel-text-s)' }}>L:{severityCounts.LOW || 0}</span>
+                            </span>
+                        </div>
 
-            {/* Interactive News Search Bar */}
-            <div className="search-container">
-                <input
-                    type="text"
-                    className="search-input"
-                    placeholder="Enter disruption event query (e.g., 'Heavy rainfall Jodhpur monsoons')..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    disabled={isSearching}
-                />
-                <button
-                    className="search-button"
-                    onClick={handleSearch}
-                    disabled={isSearching || !searchQuery.trim()}
-                >
-                    {isSearching ? <RefreshCw size={14} className="rotating" /> : <Search size={14} />}
-                    {isSearching ? "Analyzing..." : "Search & Classify"}
-                </button>
+                        <div style={{ width: '1px', height: '28px', backgroundColor: 'var(--intel-border)' }}></div>
+                        
+                        <div style={{ textAlign: 'right' }}>
+                            <span style={{ display: 'block', fontSize: '10px', color: 'var(--intel-text-s)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Auto Refresh</span>
+                            <span style={{ fontSize: '12px', fontWeight: '700', color: autoRefresh ? 'var(--intel-success)' : 'var(--intel-text-s)', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', marginTop: '2px' }} onClick={() => setAutoRefresh(!autoRefresh)}>
+                                <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: autoRefresh ? 'var(--intel-success)' : 'var(--intel-text-s)' }}></span>
+                                {autoRefresh ? 'Active (5m)' : 'Inactive'}
+                            </span>
+                        </div>
+                        
+                        <div style={{ display: 'flex', gap: '10px', marginLeft: '12px' }}>
+                            <button
+                                className="search-button"
+                                onClick={handleScan}
+                                disabled={isScanning || isSearching}
+                                style={{ padding: '8px 16px', borderRadius: '6px', fontSize: '13px' }}
+                            >
+                                <Activity size={14} />
+                                Scan Today's News
+                            </button>
+                            <button
+                                className="search-button"
+                                onClick={handleManualRefresh}
+                                disabled={isScanning || isRefreshing || isSearching}
+                                style={{ backgroundColor: 'var(--intel-surf)', color: 'var(--intel-brand)', border: '1px solid var(--intel-border)', padding: '8px 12px', borderRadius: '6px' }}
+                                title="Refresh Dashboard Flow"
+                            >
+                                <RefreshCw size={14} className={isRefreshing ? 'rotating' : ''} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {statusMessage && (
@@ -239,58 +426,95 @@ export default function NewsIntelligence() {
             {/* Main Responsive Grid Workspace */}
             <section className="intel-workspace-grid">
 
-                {/* Left Column: Live News Feed */}
+                {/* Left Column: Today's Critical Supply Chain Events */}
                 <div className="intel-column column-feed">
                     <div className="intel-column-head">
-                        <h2 className="intel-column-title">Live News Feed</h2>
+                        <h2 className="intel-column-title">Today's Critical Supply Chain Events</h2>
                         <span className="intel-count-badge">Streaming Live</span>
                     </div>
                     <div className="intel-scroll-container">
-                        {newsData?.news_feed?.map((news) => (
-                            <div key={news.id} className="intel-report-card">
-                                <div className="report-card-top">
-                                    <div className="report-publisher-row">
-                                        <div className="publisher-avatar">{news.initials}</div>
-                                        <div className="publisher-meta">
-                                            <h4 className="publisher-name">{news.publisher}</h4>
-                                            <span className="report-time"><Clock size={11} /> {news.time}</span>
+                        {newsData?.news_feed && newsData.news_feed.length > 0 ? (
+                            newsData.news_feed.map((news) => (
+                                <div key={news.id} className="intel-report-card" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <div className="report-card-top">
+                                        <div className="report-publisher-row">
+                                            <div className="publisher-avatar">{news.initials}</div>
+                                            <div className="publisher-meta">
+                                                <h4 className="publisher-name">{news.publisher}</h4>
+                                                <span className="report-time"><Clock size={11} /> {news.time}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <span className={`report-severity-badge severity-${news.severity.toLowerCase()}`}>
-                                        {news.severity}
-                                    </span>
-                                </div>
-
-                                <h3 className="report-headline">{news.headline}</h3>
-                                <p className="report-summary">{news.summary}</p>
-
-                                <div className="report-location-row">
-                                    <div className="geo-tag">
-                                        <Globe size={12} />
-                                        <span>{news.country}</span>
-                                    </div>
-                                    {news.state !== 'All' && (
-                                        <div className="geo-tag">
-                                            <MapPin size={12} />
-                                            <span>{news.state}</span>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="report-card-footer">
-                                    <div className="footer-meta-cell">
-                                        <span className="meta-lbl">Detected Entity</span>
-                                        <span className="meta-val truncate">{news.entity}</span>
-                                    </div>
-                                    <div className="footer-meta-cell text-right">
-                                        <span className="meta-lbl">Conf. / Status</span>
-                                        <span className="meta-val fw-bold">
-                                            {news.confidence} <span className="status-dot-separator">•</span> <span className={`status-txt-${news.status.toLowerCase()}`}>{news.status}</span>
+                                        <span className={`report-severity-badge severity-${news.severity.toLowerCase()}`}>
+                                            {news.severity}
                                         </span>
                                     </div>
+
+                                    <h3 className="report-headline">{news.headline}</h3>
+                                    <p className="report-summary">{news.summary}</p>
+
+                                    <div className="report-location-row" style={{ marginTop: '4px' }}>
+                                        <div className="geo-tag">
+                                            <Globe size={12} />
+                                            <span>{news.country}</span>
+                                        </div>
+                                        {news.state !== 'All' && (
+                                            <div className="geo-tag">
+                                                <MapPin size={12} />
+                                                <span>{news.state}</span>
+                                            </div>
+                                        )}
+                                        {news.location && news.location !== 'National Block' && (
+                                            <div className="geo-tag">
+                                                <MapPin size={12} />
+                                                <span>{news.location}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '12px', margin: '8px 0', padding: '10px', background: 'rgba(0,0,0,0.02)', borderRadius: '6px', border: '1px solid var(--intel-border)' }}>
+                                        <div>
+                                            <span style={{ display: 'block', opacity: 0.6, fontSize: '10px', textTransform: 'uppercase', fontWeight: 600 }}>Category</span>
+                                            <span style={{ fontWeight: '600', color: 'var(--intel-text-p)' }}>{news.category?.replace('_', ' ').toUpperCase() || 'GENERAL'}</span>
+                                        </div>
+                                        <div>
+                                            <span style={{ display: 'block', opacity: 0.6, fontSize: '10px', textTransform: 'uppercase', fontWeight: 600 }}>Confidence</span>
+                                            <span style={{ fontWeight: '600', color: 'var(--intel-text-p)' }}>{news.confidence}</span>
+                                        </div>
+                                        <div style={{ gridColumn: 'span 2', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '6px', marginTop: '4px' }}>
+                                            <span style={{ display: 'block', opacity: 0.6, fontSize: '10px', textTransform: 'uppercase', fontWeight: 600 }}>Material Impact</span>
+                                            <span style={{ fontWeight: '600', color: 'var(--intel-critical)' }}>{news.material_impact || 'None'}</span>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        className="investigate-btn"
+                                        onClick={() => handleAnalyzeImpact(news.headline)}
+                                        disabled={isSearching || isScanning}
+                                    >
+                                        {isSearching ? <RefreshCw size={13} className="rotating" /> : <Activity size={13} />}
+                                        {isSearching ? "Running Analysis..." : "Run Impact Analysis"}
+                                    </button>
                                 </div>
+                            ))
+                        ) : (
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: '40px',
+                                background: 'var(--intel-card)',
+                                borderRadius: 'var(--intel-radius-sm)',
+                                border: '1px solid var(--intel-border)',
+                                color: 'var(--intel-text-s)',
+                                textAlign: 'center',
+                                minHeight: '200px'
+                            }}>
+                                <CheckCircle size={32} style={{ color: 'var(--intel-success)', marginBottom: '12px' }} />
+                                <h4 style={{ fontWeight: 'bold', color: 'var(--intel-text-p)', marginBottom: '4px' }}>All Clear</h4>
+                                <p style={{ fontSize: '13px' }}>No supply chain disruptions detected today.</p>
                             </div>
-                        ))}
+                        )}
                     </div>
                 </div>
 
@@ -318,9 +542,8 @@ export default function NewsIntelligence() {
                                                 <span className="detail-row-txt font-mono fw-bold">{stage.count}</span>
                                                 <span className="detail-row-txt text-secondary">{stage.time}</span>
                                             </div>
-                                            <div className="stage-task-hover">
-                                                <span className="task-lbl">Directive:</span>
-                                                <p className="task-desc">{stage.task}</p>
+                                            <div className="stage-node-details" style={{ marginTop: '4px' }}>
+                                                <span style={{ fontSize: '10px', color: 'var(--intel-text-s)', fontStyle: 'italic' }}>{stage.task}</span>
                                             </div>
                                         </div>
 
