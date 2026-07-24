@@ -1,10 +1,12 @@
+from pathlib import Path
+
 from backend.prompts.prompt_loader import PromptLoader
 
 
 class PromptManager:
     """Handles loading and rendering prompt templates."""
 
-    def __init__(self, template_dir: str):
+    def __init__(self, template_dir: str | Path):
         self.loader = PromptLoader(template_dir)
         self._cache: dict[str, str] = {}
 
@@ -39,7 +41,10 @@ class PromptManager:
         return prompt
 
 
+# Module-relative template directory
+TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
+
 # Singleton instance used across the application
 prompt_manager = PromptManager(
-    template_dir="backend/prompts/templates"
+    template_dir=TEMPLATE_DIR
 )

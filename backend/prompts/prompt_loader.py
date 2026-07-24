@@ -4,8 +4,9 @@ from pathlib import Path
 class PromptLoader:
     """Loads prompt templates from the templates directory."""
 
-    def __init__(self, template_dir: str):
-        self.template_dir = Path(template_dir)
+    def __init__(self, template_dir: str | Path):
+        # Convert to an absolute path to avoid working-directory issues
+        self.template_dir = Path(template_dir).resolve()
 
     def load(self, template_name: str) -> str:
         """Load a prompt template from disk."""
