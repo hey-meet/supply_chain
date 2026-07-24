@@ -187,10 +187,14 @@ class RiskClassificationAgent:
             try:
                 return datetime.fromisoformat(raw_date.replace("Z", "+00:00"))
             except ValueError:
-                logger.warning(
-                    "Could not parse published_date %r — defaulting to current UTC time.",
-                    raw_date,
-                )
+                try:
+                    import email.utils
+                    return email.utils.parsedate_to_datetime(raw_date)
+                except (ValueError, IndexError, TypeError):
+                    logger.warning(
+                        "Could not parse published_date %r — defaulting to current UTC time.",
+                        raw_date,
+                    )
         else:
             logger.warning(
                 "Article has no published_date — defaulting to current UTC time."
