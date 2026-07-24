@@ -6,6 +6,7 @@ from backend.models.risk import RiskAnalysis, RiskAssessment, RiskCategory
 from backend.models.search import SearchResult
 from backend.prompts.risk_classifier import build_risk_classification_prompt
 from backend.services.llm_client import LLMClient
+from backend.services.supplier_matching import find_known_suppliers
 
 logger = logging.getLogger(__name__)
 
@@ -97,30 +98,6 @@ class RiskClassificationAgent:
 
         return RiskCategory.OTHER
 
-    def generate_summary(self, article: SearchResult) -> str:
-        """
-        Generate a polished, concise summary using the LLM.
-        Falls back to extracting the first two sentences on failure.
-        """
-        if not article.content.strip():
-            return ""
-
-        prompt = (
-            "Summarize the following news article in 2-3 clear, polished sentences. "
-            "Focus specifically on any supply chain disruptions, risks, or relevant business impacts.\n\n"
-            f"Title: {article.title}\n"
-            f"Content: {article.content}\n\n"
-            "Return ONLY the summary text, with no extra formatting."
-        )
-        
-        try:
-            summary = self.llm.generate(prompt)
-            return summary.strip()
-        except Exception as exc:
-            logger.warning("LLM summary generation failed: %s. Falling back to basic extraction.", exc)
-            events = self.extract_key_events(article)
-            return " ".join(events[:2]) if events else ""
-
     def classify_risk(self, article: SearchResult) -> RiskAnalysis:
         """
         Extract features, run LLM-powered risk analysis, and return a validated 
@@ -153,12 +130,24 @@ class RiskClassificationAgent:
                 f"Failed to generate AI risk assessment: {exc}"
             ) from exc
 
-        # 3. Construct and return final Pydantic model response
+        # 3. Execute supplier matching (fail-safe enhancement)
+        matched_suppliers = []
+        try:
+            matched_suppliers = find_known_suppliers(assessment)
+        except Exception as err:
+            logger.warning(
+                "Supplier matching failed for article %r: %s. Continuing with empty matched_suppliers.",
+                article.title,
+                err,
+            )
+
+        # 4. Construct and return final Pydantic model response
         return RiskAnalysis(
             news_id=str(article.url),
             headline=article.title,
             published_date=published_date,
             assessment=assessment,
+            matched_suppliers=matched_suppliers,
         )
 
     def classify_risks(self, articles: list[SearchResult]) -> list[RiskAnalysis]:
@@ -183,13 +172,11 @@ class RiskClassificationAgent:
     def _build_context(self, article: SearchResult, published_date: datetime) -> dict:
         """Extract lightweight, structured context for token savings."""
         events = self.extract_key_events(article)
-        summary = self.generate_summary(article)
         predicted_category = self.identify_disruption(events)
 
         return {
             "headline": article.title,
             "published_date": published_date.isoformat(),
-            "summary": summary,
             "events": events,
             "predicted_category": predicted_category.value,
         }
