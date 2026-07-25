@@ -10,6 +10,15 @@ const newsService = {
             throw error;
         }
     },
+    async scanTodayNews() {
+        try {
+            const response = await apiClient.get("/api/news/scan");
+            return response.data;
+        } catch (error) {
+            console.error("Failed to execute daily news scan:", error);
+            throw error;
+        }
+    },
 };
 
 export default newsService;

@@ -1,4 +1,4 @@
-// ExecutiveReports.jsx
+// --- ExecutiveReports.jsx ---
 import React, { useState, useEffect } from 'react';
 import {
     FileText, AlertTriangle, Clock, ThumbsUp, ChevronRight, Download,
@@ -23,22 +23,26 @@ export default function ExecutiveReports() {
     const [reportData, setReportData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedReportId, setSelectedReportId] = useState('REP-2026-NX48');
+    const [selectedReportId, setSelectedReportId] = useState('');
 
     const fetchExecutiveReports = async () => {
         try {
             setLoading(true);
             setError(null);
             const response = await reportService.getExecutiveReports();
-            setReportData(response.data);
-
-            // Automatically select the first report from history if available
-            if (response?.data?.report_history && response.data.report_history.length > 0) {
-                setSelectedReportId(response.data.report_history[0].id);
+            if (response && response.success) {
+                setReportData(response.data);
+                setError(null);
+                // Automatically select the first report from history if available
+                if (response.data?.report_history && response.data.report_history.length > 0) {
+                    setSelectedReportId(response.data.report_history[0].id);
+                }
+            } else {
+                setError(new Error(response?.message || "Failed to load executive reports from service."));
             }
         } catch (err) {
             console.error('Failed to fetch executive reports:', err);
-            setError(err.response?.data?.message || err.message || 'Failed to load executive reports from service.');
+            setError(err);
         } finally {
             setLoading(false);
         }
@@ -47,6 +51,67 @@ export default function ExecutiveReports() {
     useEffect(() => {
         fetchExecutiveReports();
     }, []);
+
+    // Print A4 Document to PDF
+    const handleExportPDF = () => {
+        window.print();
+    };
+
+    // Export report document as markdown
+    const handleExportMarkdown = (selectedReport) => {
+        if (!selectedReport) return;
+        const element = document.createElement("a");
+        const file = new Blob([
+            `# ${selectedReport.title}\n\n`,
+            `**Report ID:** ${selectedReport.id}\n`,
+            `**Date:** ${selectedReport.date}\n`,
+            `**Incident:** ${selectedReport.incident}\n`,
+            `**Severity:** ${selectedReport.severity}\n\n`,
+            `## Executive Summary\n${selectedReport.summary}\n\n`,
+            `## Business Impact\n`,
+            `- Operational: ${selectedReport.business_impact?.operational}\n`,
+            `- Financial: ${selectedReport.business_impact?.financial}\n`,
+            `- Production: ${selectedReport.business_impact?.production}\n`,
+            `- Continuity: ${selectedReport.business_impact?.continuity}\n\n`,
+            `## Sourcing Vector\n`,
+            `- Primary Hub: ${selectedReport.sourcing_vector?.[0]?.hub}\n`,
+            `- Material Core: ${selectedReport.sourcing_vector?.[0]?.material}\n`,
+            `- Disruption Context: ${selectedReport.sourcing_vector?.[0]?.impact}\n`,
+            `- Alternate Node: ${selectedReport.sourcing_vector?.[0]?.alternate}\n\n`,
+            `## Sourcing Mitigation Plan\n`,
+            selectedReport.mitigation_bullets?.map((bullet, idx) => `${idx + 1}. ${bullet}`).join('\n')
+        ], { type: 'text/markdown' });
+        element.href = URL.createObjectURL(file);
+        element.download = `${selectedReport.id}.md`;
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    };
+
+    // Copy summary snippet to clipboard
+    const handleShareReport = (selectedReport) => {
+        if (!selectedReport) return;
+        navigator.clipboard.writeText(selectedReport.summary);
+        alert("Report summary copied to clipboard!");
+    };
+
+    const handleDownloadPayload = (row) => {
+        const element = document.createElement("a");
+        const file = new Blob([JSON.stringify(row, null, 2)], { type: 'application/json' });
+        element.href = URL.createObjectURL(file);
+        element.download = `${row.id}_payload.json`;
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    };
+
+    const handleDuplicateReport = () => {
+        alert("Action has no backend implementation. Duplicate report function is disabled.");
+    };
+
+    const handleShareVector = () => {
+        alert("Action has no backend implementation. Share vector function is disabled.");
+    };
 
     // --- RENDER LOADING STATE ---
     if (loading) {
@@ -61,13 +126,25 @@ export default function ExecutiveReports() {
     }
 
     // --- RENDER ERROR STATE ---
-    if (error) {
+    if (error && (!reportData || !reportData.report_history)) {
+        const message = error.message || "";
+        if (message.includes("pending") || message.includes("Initialize") || message.includes("query") || message.includes("execute") || message.includes("first")) {
+            return (
+                <div className="er-content-scope flex-center-pending" style={{ minHeight: '500px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '40px' }}>
+                    <h1 className="er-page-title">Executive Reports</h1>
+                    <div className="alert-badge critical" style={{ background: 'var(--intel-critical)', color: 'white', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold' }}>NO ACTIVE REPORT</div>
+                    <p style={{ color: 'var(--intel-text-s)', fontSize: '15px', maxWidth: '500px', textAlign: 'center', marginTop: '10px' }}>
+                        No active reports compiled. Please head to the <strong>News Intelligence</strong> tab to execute an incident search query.
+                    </p>
+                </div>
+            );
+        }
         return (
             <div className="er-content-scope">
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '400px', gap: '1rem', textAlign: 'center' }}>
                     <AlertCircle className="text-critical" size={40} />
                     <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Failed to Load Reports</h3>
-                    <p style={{ color: 'var(--text-secondary, #64748b)', maxWidth: '480px' }}>{error}</p>
+                    <p style={{ color: 'var(--text-secondary, #64748b)', maxWidth: '480px' }}>{message}</p>
                     <button className="er-btn-action-trigger primary-brand" onClick={fetchExecutiveReports} style={{ width: 'auto', padding: '0.5rem 1.25rem' }}>
                         <RefreshCw size={14} /> <span>Retry Request</span>
                     </button>
@@ -82,6 +159,8 @@ export default function ExecutiveReports() {
     const timelineActivity = reportData?.timeline_activity ?? [];
     const reportHistory = reportData?.report_history ?? [];
 
+    const selectedReport = reportHistory.find(r => r.id === selectedReportId) || reportHistory[0];
+
     return (
         <div className="er-content-scope">
 
@@ -95,7 +174,7 @@ export default function ExecutiveReports() {
                     <div className="er-header-pill">
                         <Clock size={13} />
                         <span className="er-pill-lbl">Latest Update:</span>
-                        <span className="er-pill-val font-mono">10:37:43</span>
+                        <span className="er-pill-val font-mono">{selectedReport?.creationTime ? selectedReport.creationTime.split(' ')[1] : '10:37:43'}</span>
                     </div>
                     <div className="er-header-pill">
                         <span className="er-status-dot-active"></span>
@@ -104,7 +183,7 @@ export default function ExecutiveReports() {
                     </div>
                     <div className="er-header-pill font-semibold text-brand">
                         <Shield size={13} />
-                        <span>{reportMeta?.confidence || '96.4%'} AI Conf</span>
+                        <span>{selectedReport?.confidence || reportMeta?.confidence || '96.4%'} AI Conf</span>
                     </div>
                 </div>
             </header>
@@ -145,34 +224,30 @@ export default function ExecutiveReports() {
                         <div className="er-doc-header-block">
                             <div className="er-doc-title-meta">
                                 <span className="er-doc-tag-priority">BOARD-LEVEL DISRUPTION DISPATCH</span>
-                                <h2 className="er-doc-main-heading">STRATEGIC RISK & MITIGATION REPORT</h2>
+                                <h2 className="er-doc-main-heading">{selectedReport?.title || 'STRATEGIC RISK & MITIGATION REPORT'}</h2>
                                 <p className="er-doc-sub-text">Evaluation of structural transit bottlenecks and inventory re-allocation protocols.</p>
                             </div>
                             <div className="er-doc-id-stamp">
-                                <span className="font-mono font-semibold text-brand">{selectedReportId}</span>
+                                <span className="font-mono font-semibold text-brand">{selectedReport?.id || selectedReportId}</span>
                             </div>
                         </div>
 
                         {/* Executive Summary Section */}
                         <section className="er-doc-content-section">
                             <h3 className="er-doc-section-title-heading">I. Executive Summary</h3>
-                            <p className="er-doc-paragraph-text">
-                                Autonomous supply chain analytics clusters have detected structural disruptions on the NH-48 logistics vector via localized flash flooding.
-                                Immediate structural impacts are projected across the Western Grinding Complex (Plant A).
-                                This document outlines immediate mitigation protocols, emergency quarry sourcing contracts, and rail transport bypass allocation to sustain baseline clinker processing.
-                            </p>
+                            <p className="er-doc-paragraph-text">{selectedReport?.summary}</p>
                         </section>
 
                         {/* Incident Summary Technical Section */}
                         <section className="er-doc-content-section">
                             <h3 className="er-doc-section-title-heading">II. Incident Diagnostic Summary</h3>
                             <div className="er-doc-key-value-grid columns-3">
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Incident ID</span><p className="font-mono">INC-2026-FL08</p></div>
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Severity Rank</span><p className="text-critical font-semibold">Critical / Tier 1 Risk</p></div>
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Geographic Node</span><p>Gujarat East Corridor</p></div>
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Detection Datetime</span><p className="font-mono">2026-07-17 10:32:15</p></div>
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Orchestration Phase</span><p className="text-warning font-semibold">Mitigation Deployment Active</p></div>
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Affected Network Vector</span><p>NH-48 Fleet Loop Bypass</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Incident ID</span><p className="font-mono">{selectedReport?.diagnostic?.incident_id}</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Severity Rank</span><p className={`${(selectedReport?.diagnostic?.severity || '').includes('Critical') ? 'text-critical' : 'text-warning'} font-semibold`}>{selectedReport?.diagnostic?.severity}</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Geographic Node</span><p>{selectedReport?.diagnostic?.location}</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Detection Datetime</span><p className="font-mono">{selectedReport?.diagnostic?.date}</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Orchestration Phase</span><p className="text-warning font-semibold">{selectedReport?.diagnostic?.phase}</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Affected Network Vector</span><p>{selectedReport?.diagnostic?.vector}</p></div>
                             </div>
                         </section>
 
@@ -182,19 +257,19 @@ export default function ExecutiveReports() {
                             <div className="er-doc-key-value-grid columns-2">
                                 <div className="er-doc-kv-cell">
                                     <span className="er-doc-lbl">Operational Constraint Impact</span>
-                                    <p>Limestone bulk cargo haulage vector completely obstructed. Inbound pipeline latency scales by +36 hours until structural water recedes.</p>
+                                    <p>{selectedReport?.business_impact?.operational}</p>
                                 </div>
                                 <div className="er-doc-kv-cell">
                                     <span className="er-doc-lbl">Financial Impact Vector</span>
-                                    <p>Estimated structural loss exposure capped at $42,500 without intervention. Prescribed mitigation reduces downstream asset exposure to negligible spot variance.</p>
+                                    <p>{selectedReport?.business_impact?.financial}</p>
                                 </div>
                                 <div className="er-doc-kv-cell">
                                     <span className="er-doc-lbl">Production Yield Impact</span>
-                                    <p>Plant A clinker raw mill buffer drawdown down to 1.5 days. Risks complete operational stoppage if backup sourcing is delayed past the 24-hour safety threshold.</p>
+                                    <p>{selectedReport?.business_impact?.production}</p>
                                 </div>
                                 <div className="er-doc-kv-cell">
                                     <span className="er-doc-lbl">Business Continuity Index</span>
-                                    <p>Alternate inter-modal nodes retain 94% network resilience capacity. Strategic reserve triggers are fully operational across peripheral kilns.</p>
+                                    <p>{selectedReport?.business_impact?.continuity}</p>
                                 </div>
                             </div>
                         </section>
@@ -203,14 +278,14 @@ export default function ExecutiveReports() {
                         <section className="er-doc-content-section">
                             <h3 className="er-doc-section-title-heading">IV. Affected Plant Infrastructure Nodes</h3>
                             <div className="er-doc-key-value-grid columns-2">
-                                <div className="er-doc-kv-cell border-left-critical">
-                                    <h4 className="er-doc-node-title">Plant A - Western Grinding Complex</h4>
-                                    <div className="er-doc-node-details"><span className="text-critical font-semibold">Critical Risk Exposure</span> | Buffer: 1.5 Days Remaining</div>
-                                </div>
-                                <div className="er-doc-kv-cell border-left-success">
-                                    <h4 className="er-doc-node-title">Plant C - Southern Port Terminal</h4>
-                                    <div className="er-doc-node-details"><span className="text-success font-semibold">Nominal Baseline</span> | Strategic Surplus: 10 Days Buffer</div>
-                                </div>
+                                {selectedReport?.affected_plants?.map((plant, idx) => (
+                                    <div key={idx} className={`er-doc-kv-cell border-left-${plant.status.includes('Critical') ? 'critical' : 'success'}`}>
+                                        <h4 className="er-doc-node-title">{plant.name}</h4>
+                                        <div className="er-doc-node-details">
+                                            <span className={`${plant.status.includes('Critical') ? 'text-critical' : 'text-success'} font-semibold`}>{plant.status}</span> | {plant.buffer}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </section>
 
@@ -228,18 +303,14 @@ export default function ExecutiveReports() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td className="font-semibold text-brand">Valsad Quarry Hub</td>
-                                            <td>Limestone Bulk</td>
-                                            <td className="text-critical font-semibold">Complete Sourcing Obstruction</td>
-                                            <td className="text-success font-semibold">Rajasthan Emergency Quarry</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="font-semibold text-brand">NTPC Cluster Node</td>
-                                            <td>Fly Ash Matrix</td>
-                                            <td className="text-success">Minor Route Flow Latency</td>
-                                            <td>Baseline Retained</td>
-                                        </tr>
+                                        {selectedReport?.sourcing_vector?.map((row, idx) => (
+                                            <tr key={idx}>
+                                                <td className="font-semibold text-brand">{row.hub}</td>
+                                                <td>{row.material}</td>
+                                                <td className="text-critical font-semibold">{row.impact}</td>
+                                                <td className="text-success font-semibold">{row.alternate}</td>
+                                            </tr>
+                                        ))}
                                     </tbody>
                                 </table>
                             </div>
@@ -249,10 +320,10 @@ export default function ExecutiveReports() {
                         <section className="er-doc-content-section">
                             <h3 className="er-doc-section-title-heading">VI. Silo Inventory & Buffer Analysis</h3>
                             <div className="er-doc-key-value-grid columns-4">
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Current Stock Balance</span><p className="font-mono">6,200 T</p></div>
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Safety Stock Target</span><p className="font-mono text-secondary">15,000 T</p></div>
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Remaining Operating Horizon</span><p className="text-critical font-semibold">1.5 Days</p></div>
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Critical Material Flag</span><p className="text-critical font-semibold">Limestone</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Current Stock Balance</span><p className="font-mono">{selectedReport?.silo_inventory?.stock}</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Safety Stock Target</span><p className="font-mono text-secondary">{selectedReport?.silo_inventory?.safety}</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Remaining Operating Horizon</span><p className="text-critical font-semibold">{selectedReport?.silo_inventory?.horizon}</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Critical Material Flag</span><p className="text-critical font-semibold">{selectedReport?.silo_inventory?.material}</p></div>
                             </div>
                         </section>
 
@@ -260,10 +331,10 @@ export default function ExecutiveReports() {
                         <section className="er-doc-content-section">
                             <h3 className="er-doc-section-title-heading">VII. Financial Impact & Sourcing Cost Analysis</h3>
                             <div className="er-doc-key-value-grid columns-4">
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Estimated Baseline Loss</span><p className="font-mono">$42,500</p></div>
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Recovery Cycle Cost</span><p className="font-mono">$8,400</p></div>
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Mitigation Structural Cost</span><p className="font-mono">$4,820</p></div>
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Net Saved Value Matrix</span><p className="text-success font-semibold font-mono">+$29,280</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Estimated Baseline Loss</span><p className="font-mono">{selectedReport?.financial_analysis?.baseline_loss}</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Recovery Cycle Cost</span><p className="font-mono">{selectedReport?.financial_analysis?.recovery_cost}</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Mitigation Structural Cost</span><p className="font-mono">{selectedReport?.financial_analysis?.mitigation_cost}</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Net Saved Value Matrix</span><p className="text-success font-semibold font-mono">{selectedReport?.financial_analysis?.net_saved}</p></div>
                             </div>
                         </section>
 
@@ -271,9 +342,9 @@ export default function ExecutiveReports() {
                         <section className="er-doc-content-section">
                             <h3 className="er-doc-section-title-heading">VIII. Network Delay & Logistics Latency Profiling</h3>
                             <div className="er-doc-key-value-grid columns-3">
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Expected Transit Latency</span><p className="font-mono">+45 mins cycle</p></div>
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Recovery Window Time</span><p className="font-mono">4.5 Hours Post-Drain</p></div>
-                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Affected Fleet Deliveries</span><p className="font-semibold text-brand">2 Freight Vectors</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Expected Transit Latency</span><p className="font-mono">{selectedReport?.logistics_latency?.latency}</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Recovery Window Time</span><p className="font-mono">{selectedReport?.logistics_latency?.recovery_window}</p></div>
+                                <div className="er-doc-kv-cell"><span className="er-doc-lbl">Affected Fleet Deliveries</span><p className="font-semibold text-brand">{selectedReport?.logistics_latency?.deliveries}</p></div>
                             </div>
                         </section>
 
@@ -281,20 +352,13 @@ export default function ExecutiveReports() {
                         <section className="er-doc-content-section">
                             <h3 className="er-doc-section-title-heading">IX. Autonomous Sourcing Mitigation Plan</h3>
                             <div className="er-doc-mitigation-bullet-stack">
-                                <div className="er-doc-bullet-item">
-                                    <strong>Immediate Strategic Action Directive:</strong> Deploy real-time route rerouting sequence parameters to inbound clinker freight vehicles before local junction saturation checkpoints.
-                                </div>
-                                <div className="er-doc-bullet-item">
-                                    <strong>Inter-Modal Inventory Transfer Protocol:</strong> Relocate 1,200 T Limestone bulk cargo reserves from the Plant C Southern Terminal surplus using active secondary rail loop allocations.
-                                </div>
-                                <div className="er-doc-bullet-item">
-                                    <strong>Alternative Routing Protocol:</strong> Activate the immediate out-of-band bypass loop via the NH-48 peripheral logistics link to bypass broken infrastructure vectors.
-                                </div>
-                                <div className="er-doc-bullet-item">
-                                    <strong>Backup Sourcing Activation:</strong> Execute emergency standby contract terms with secondary Rajasthan Quarry nodes to bridge raw mill requirements.
-                                </div>
+                                {selectedReport?.mitigation_bullets?.map((bullet, idx) => (
+                                    <div key={idx} className="er-doc-bullet-item">
+                                        <strong>Directive Action Step {idx + 1}:</strong> {bullet}
+                                    </div>
+                                ))}
                                 <div className="er-doc-bullet-item er-highlight-box">
-                                    <strong>Autonomous Agent Recommendation:</strong> Authorize inter-modal rail transfer immediately. Sourcing cost metrics confirm this as the optimal matrix solution to avoid structural clinker drawdown stop conditions while containing spot premium costs.
+                                    <strong>Autonomous Agent Recommendation:</strong> {selectedReport?.summary}
                                 </div>
                             </div>
                         </section>
@@ -303,11 +367,11 @@ export default function ExecutiveReports() {
                         <footer className="er-doc-footer-signature-area">
                             <div className="er-doc-footer-row">
                                 <span className="er-signature-lbl">Orchestration Pool Authorization:</span>
-                                <span className="er-signature-val font-semibold">{reportMeta?.generatedBy}</span>
+                                <span className="er-signature-val font-semibold">{selectedReport?.author || reportMeta?.generatedBy}</span>
                             </div>
                             <div className="er-doc-footer-row split">
-                                <div><span className="er-signature-lbl">Generation Datetime:</span> <span className="font-mono er-signature-val">{reportMeta?.creationTime}</span></div>
-                                <div><span className="er-signature-lbl">Autonomous Confidence:</span> <span className="font-mono text-success er-signature-val">{reportMeta?.confidence}</span></div>
+                                <div><span className="er-signature-lbl">Generation Datetime:</span> <span className="font-mono er-signature-val">{selectedReport?.creationTime || reportMeta?.creationTime}</span></div>
+                                <div><span className="er-signature-lbl">Autonomous Confidence:</span> <span className="font-mono text-success er-signature-val">{selectedReport?.confidence || reportMeta?.confidence}</span></div>
                             </div>
                         </footer>
 
@@ -321,14 +385,14 @@ export default function ExecutiveReports() {
                     <div className="er-sidebar-widget-card">
                         <h3 className="er-widget-card-title">Report Meta Profile</h3>
                         <div className="er-meta-properties-stack">
-                            <div className="er-property-row"><span>Report ID Identification</span><strong className="font-mono text-brand">{reportMeta?.id}</strong></div>
-                            <div className="er-property-row"><span>System Generation Core</span><span className="er-txt-truncate">{reportMeta?.generatedBy}</span></div>
-                            <div className="er-property-row"><span>Creation Compiled Time</span><span className="font-mono">{reportMeta?.creationTime}</span></div>
-                            <div className="er-property-row"><span>Report Build Version</span><span className="font-mono">{reportMeta?.version}</span></div>
-                            <div className="er-property-row"><span>AI Model Confidence</span><strong className="font-mono text-success">{reportMeta?.confidence}</strong></div>
-                            <div className="er-property-row"><span>Board Approval Status</span><span className="er-badge-status status-success">{reportMeta?.status}</span></div>
-                            <div className="er-property-row"><span>Enterprise Disruption Rank</span><span className="er-badge-status status-critical">{reportMeta?.priority}</span></div>
-                            <div className="er-property-row"><span>Estimated Reading Time</span><span>{reportMeta?.readingTime}</span></div>
+                            <div className="er-property-row"><span>Report ID Identification</span><strong className="font-mono text-brand">{selectedReport?.id}</strong></div>
+                            <div className="er-property-row"><span>System Generation Core</span><span className="er-txt-truncate">{selectedReport?.author || reportMeta?.generatedBy}</span></div>
+                            <div className="er-property-row"><span>Creation Compiled Time</span><span className="font-mono">{selectedReport?.creationTime || reportMeta?.creationTime}</span></div>
+                            <div className="er-property-row"><span>Report Build Version</span><span className="font-mono">{selectedReport?.version || reportMeta?.version}</span></div>
+                            <div className="er-property-row"><span>AI Model Confidence</span><strong className="font-mono text-success">{selectedReport?.confidence || reportMeta?.confidence}</strong></div>
+                            <div className="er-property-row"><span>Board Approval Status</span><span className="er-badge-status status-success">{selectedReport?.status || reportMeta?.status}</span></div>
+                            <div className="er-property-row"><span>Enterprise Disruption Rank</span><span className="er-badge-status status-critical">{selectedReport?.priority || reportMeta?.priority}</span></div>
+                            <div className="er-property-row"><span>Estimated Reading Time</span><span>{selectedReport?.readingTime || reportMeta?.readingTime}</span></div>
                         </div>
                     </div>
 
@@ -354,16 +418,16 @@ export default function ExecutiveReports() {
                     <div className="er-sidebar-widget-card">
                         <h3 className="er-widget-card-title">Corporate Export Center</h3>
                         <div className="er-export-actions-grid-layout">
-                            <button className="er-btn-action-trigger primary-brand">
+                            <button className="er-btn-action-trigger primary-brand" onClick={handleExportPDF}>
                                 <FileDown size={14} /> <span>Export Board PDF</span>
                             </button>
-                            <button className="er-btn-action-trigger secondary-outline">
+                            <button className="er-btn-action-trigger secondary-outline" onClick={() => handleExportMarkdown(selectedReport)}>
                                 <FileText size={14} /> <span>Export Markdown</span>
                             </button>
                             <button className="er-btn-action-trigger secondary-outline" onClick={fetchExecutiveReports}>
                                 <RefreshCw size={14} /> <span>Regenerate Analysis</span>
                             </button>
-                            <button className="er-btn-action-trigger secondary-outline">
+                            <button className="er-btn-action-trigger secondary-outline" onClick={() => handleShareReport(selectedReport)}>
                                 <Share2 size={14} /> <span>Share Report Pipeline</span>
                             </button>
                         </div>
@@ -439,13 +503,13 @@ export default function ExecutiveReports() {
                                             <button className="er-table-btn-icon-link" title="View Document Preview" onClick={() => setSelectedReportId(row.id)}>
                                                 <Eye size={13} />
                                             </button>
-                                            <button className="er-table-btn-icon-link" title="Download Payload Bundle">
+                                            <button className="er-table-btn-icon-link" title="Download Payload Bundle" onClick={() => handleDownloadPayload(row)}>
                                                 <Download size={13} />
                                             </button>
-                                            <button className="er-table-btn-icon-link" title="Duplicate Constraints Structure">
+                                            <button className="er-table-btn-icon-link" title="Duplicate Constraints Structure" onClick={handleDuplicateReport}>
                                                 <Copy size={13} />
                                             </button>
-                                            <button className="er-table-btn-icon-link" title="Share Enterprise Vector">
+                                            <button className="er-table-btn-icon-link" title="Share Enterprise Vector" onClick={handleShareVector}>
                                                 <Share2 size={13} />
                                             </button>
                                         </div>
