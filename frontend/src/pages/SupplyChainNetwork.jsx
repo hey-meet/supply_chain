@@ -5,7 +5,6 @@ import {
     ReactFlow,
     Background,
     Controls,
-    MarkerType,
     Handle,
     Position
 } from '@xyflow/react';
@@ -54,9 +53,12 @@ const iconMap = {
 // Custom Node Component
 const TwinNode = ({ data }) => {
     const Icon = typeof data.icon === 'function' ? data.icon : (iconMap[data.icon] || Layers);
+    const isSupplier = data.node_type === 'supplier';
+    const isCustomer = data.node_type === 'customer';
+    
     return (
         <div className={`twin-node-card status-${data.health}`}>
-            <Handle type="target" position={Position.Top} className="flow-handle" />
+            {!isSupplier && <Handle type="target" position={Position.Left} className="flow-handle" />}
             <div className="twin-node-header">
                 <span className={`node-icon-wrapper color-${data.health}`}>
                     <Icon size={14} />
@@ -67,16 +69,68 @@ const TwinNode = ({ data }) => {
                 </div>
             </div>
             <div className="twin-node-body">
-                <div className="node-data-row">
-                    <span className="nd-lbl">Core Feedstock:</span>
-                    <span className="nd-val">{data.material}</span>
-                </div>
-                <div className="node-data-row">
-                    <span className="nd-lbl">Operating Status:</span>
-                    <span className={`nd-val color-${data.health}`}>{data.status}</span>
-                </div>
+                {data.node_type === 'supplier' && (
+                    <>
+                        <div className="node-data-row">
+                            <span className="nd-lbl">Daily Cap:</span>
+                            <span className="nd-val">{data.capacity}</span>
+                        </div>
+                        <div className="node-data-row">
+                            <span className="nd-lbl">Reliability:</span>
+                            <span className="nd-val text-brand" style={{ color: 'var(--tw-brand)' }}>{data.reliability}</span>
+                        </div>
+                    </>
+                )}
+                {data.node_type === 'material' && (
+                    <>
+                        <div className="node-data-row">
+                            <span className="nd-lbl">Criticality:</span>
+                            <span className="nd-val text-brand" style={{ color: 'var(--tw-brand)' }}>{data.criticality}</span>
+                        </div>
+                        <div className="node-data-row">
+                            <span className="nd-lbl">Monthly Req:</span>
+                            <span className="nd-val">{data.monthly_req}</span>
+                        </div>
+                    </>
+                )}
+                {data.node_type === 'plant' && (
+                    <>
+                        <div className="node-data-row">
+                            <span className="nd-lbl">Capacity:</span>
+                            <span className="nd-val">{data.capacity}</span>
+                        </div>
+                        <div className="node-data-row">
+                            <span className="nd-lbl">Utilization:</span>
+                            <span className="nd-val text-brand" style={{ color: 'var(--tw-brand)' }}>{data.utilization}</span>
+                        </div>
+                    </>
+                )}
+                {data.node_type === 'distribution_center' && (
+                    <>
+                        <div className="node-data-row">
+                            <span className="nd-lbl">Dispatch Cap:</span>
+                            <span className="nd-val">{data.capacity}</span>
+                        </div>
+                        <div className="node-data-row">
+                            <span className="nd-lbl">Operating Status:</span>
+                            <span className={`nd-val color-${data.health}`} style={{ fontSize: '9px', fontWeight: 'bold' }}>{data.status}</span>
+                        </div>
+                    </>
+                )}
+                {data.node_type === 'customer' && (
+                    <>
+                        <div className="node-data-row">
+                            <span className="nd-lbl">Demand Vol:</span>
+                            <span className="nd-val">{data.capacity}</span>
+                        </div>
+                        <div className="node-data-row">
+                            <span className="nd-lbl">Demand Coverage:</span>
+                            <span className="nd-val text-success" style={{ fontSize: '9px', fontWeight: 'bold' }}>{data.status}</span>
+                        </div>
+                    </>
+                )}
             </div>
-            <Handle type="source" position={Position.Bottom} className="flow-handle" />
+            {!isCustomer && <Handle type="source" position={Position.Right} className="flow-handle" />}
         </div>
     );
 };
@@ -188,8 +242,8 @@ export default function SupplyChainNetwork() {
             {/* Header Viewport Block */}
             <header className="twin-header-block">
                 <div className="twin-header-left">
-                    <h1 className="twin-page-title">Supply Chain Digital Twin</h1>
-                    <p className="twin-page-subtitle">Real-time AI visualization of the enterprise supply chain network.</p>
+                    <h1 className="twin-page-title">Supply Chain Network</h1>
+                    <p className="twin-page-subtitle">Real-time enterprise spatial digital twin layout visualization.</p>
                 </div>
                 <div className="twin-header-right">
                     <div className="twin-sync-pill">
@@ -199,7 +253,7 @@ export default function SupplyChainNetwork() {
                     </div>
                     <div className="twin-assets-badge">
                         <Network size={13} />
-                        <span>128 Connected Assets</span>
+                        <span>18 Mapped Grid Assets</span>
                     </div>
                     <div className="twin-status-tag-active">
                         <span className="twin-pulse-core"></span>
@@ -208,21 +262,21 @@ export default function SupplyChainNetwork() {
                 </div>
             </header>
 
-            {/* Top 6 KPI Rows */}
-            <section className="twin-kpi-grid">
+            {/* Top KPI Summary Grid */}
+            <section className="twin-kpi-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginBottom: '24px' }}>
                 {kpiData.map((kpi) => {
                     const Icon = typeof kpi.icon === 'string' ? (iconMap[kpi.icon] || Layers) : (kpi.icon || Layers);
                     return (
-                        <div key={kpi.id} className="twin-kpi-card">
-                            <div className="kpi-header-flex">
-                                <span className={`kpi-icon-wrapper color-${kpi.status}`}>
+                        <div key={kpi.id} className="twin-kpi-card" style={{ padding: '16px', backgroundColor: 'var(--tw-card)', border: '1px solid var(--tw-border)', borderRadius: '12px' }}>
+                            <div className="kpi-header-flex" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                <span className={`kpi-icon-wrapper color-${kpi.status}`} style={{ width: '28px', height: '28px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: kpi.status === 'success' ? 'rgba(112, 140, 114, 0.15)' : 'rgba(200, 166, 82, 0.15)' }}>
                                     <Icon size={16} />
                                 </span>
-                                <span className={`kpi-trend-lbl text-${kpi.status}`}>{kpi.trend}</span>
+                                <span className={`kpi-trend-lbl text-${kpi.status}`} style={{ fontSize: '11px', fontWeight: '600' }}>{kpi.trend}</span>
                             </div>
-                            <div className="kpi-meta-block">
-                                <span className="kpi-lbl">{kpi.title}</span>
-                                <h3 className="kpi-val-text">{kpi.value}</h3>
+                            <div className="kpi-meta-block" style={{ marginTop: '12px', textAlign: 'left' }}>
+                                <span className="kpi-lbl" style={{ fontSize: '13px', color: 'var(--tw-text-s)' }}>{kpi.title}</span>
+                                <h3 className="kpi-val-text" style={{ fontSize: '24px', margin: '4px 0 0 0', fontWeight: '700' }}>{kpi.value}</h3>
                             </div>
                         </div>
                     );
@@ -230,15 +284,16 @@ export default function SupplyChainNetwork() {
             </section>
 
             {/* Main Interactive Diagram Grid */}
-            <section className="twin-diagram-workspace-grid">
+            <section className="twin-diagram-workspace-grid" style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '24px', width: '100%', alignItems: 'stretch' }}>
 
                 {/* Left Side: ReactFlow Canvas Frame */}
-                <div className="twin-diagram-container">
-                    <div className="diagram-header-overlay">
-                        <span className="dh-lbl">Enterprise Spatial Digital Twin Canvas</span>
-                        <span className="dh-helper-txt">Use wheel to zoom. Click node to inspect details.</span>
+                <div className="twin-diagram-container" style={{ position: 'relative', border: '1px solid var(--tw-border)', borderRadius: '18px', overflow: 'hidden', height: '560px', minHeight: '560px', backgroundColor: '#fafafa' }}>
+                    <div className="diagram-header-overlay" style={{ padding: '12px 16px', borderBottom: '1px solid var(--tw-border)', backgroundColor: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span className="dh-lbl" style={{ fontWeight: '700', fontSize: '13px', color: 'var(--tw-brand)' }}>Enterprise Spatial Digital Twin Canvas</span>
+                        <span className="dh-helper-txt" style={{ fontSize: '11px', color: 'var(--tw-text-s)' }}>Select any graph node from the digital twin canvas to inspect live telemetry.</span>
                     </div>
-                    <div style={{ width: '100%', height: '100%', minHeight: '400px' }}>
+
+                    <div style={{ width: '100%', height: 'calc(100% - 44px)', minHeight: '400px' }}>
                         <ReactFlow
                             nodes={nodes}
                             edges={edges}
@@ -249,72 +304,118 @@ export default function SupplyChainNetwork() {
                             minZoom={0.5}
                             proOptions={{ hideAttribution: true }}
                         >
-                            <Background color="#ECEFF1" gap={16} size={1} />
-                            <Controls showInteractive={false} className="rf-controls-panel" />
+                            <Background color="#ECEFF1" gap={16} size={1.2} />
+                            <Controls showInteractive={false} className="rf-controls-panel" style={{ bottom: '20px', right: '20px', left: 'auto' }} />
                         </ReactFlow>
                     </div>
                 </div>
 
                 {/* Right Column Sidebar Panels */}
-                <div className="twin-sidebar-column">
+                <div className="twin-sidebar-column" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
                     {/* Node Inspection Details Profiler */}
-                    <div className="twin-sidebar-card">
-                        <div className="column-header-row">
-                            <h2 className="column-section-heading">Active Node Inspector</h2>
+                    <div className="twin-sidebar-card" style={{ backgroundColor: 'var(--tw-card)', border: '1px solid var(--tw-border)', borderRadius: '18px', padding: '20px', boxShadow: 'var(--tw-shadow)', textAlign: 'left' }}>
+                        <div className="column-header-row" style={{ borderBottom: '1px solid var(--tw-border)', paddingBottom: '10px', marginBottom: '16px' }}>
+                            <h2 className="column-section-heading" style={{ fontSize: '18px', fontWeight: '700', color: 'var(--tw-brand)' }}>Active Telemetry Inspector</h2>
                         </div>
                         <div className="node-profile-body">
                             {selectedNode ? (
                                 <>
-                                    <div className="np-header-block">
-                                        <h3 className="np-title">{selectedNode.name}</h3>
-                                        <span className="np-loc"><Globe size={11} /> {selectedNode.location} Node Profile</span>
+                                    <div className="np-header-block" style={{ marginBottom: '16px' }}>
+                                        <h3 className="np-title" style={{ margin: '0 0 4px 0', fontSize: '15px', fontWeight: '700', color: 'var(--tw-text-p)' }}>{selectedNode.name}</h3>
+                                        <span className="np-loc" style={{ fontSize: '11px', color: 'var(--tw-text-s)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Globe size={11} /> {selectedNode.location} Node Profile</span>
                                     </div>
-                                    <div className="np-properties-list">
-                                        <div className="np-prop-row"><span>Material Focus Allocation</span><strong className="text-brand">{selectedNode.material}</strong></div>
-                                        <div className="np-prop-row"><span>Logistics Output Health</span><span className={`np-status-lbl color-${selectedNode.health}`}>{selectedNode.status}</span></div>
-                                        <div className="np-prop-row"><span>Silo Buffer Horizon</span><span className="font-mono">8.8 Operating Days</span></div>
-                                        <div className="np-prop-row"><span>Connected Supply Vectors</span><span>4 Active Routes Mapped</span></div>
-                                    </div>
-                                    <div className="np-connections-block-pills">
-                                        <span className="connections-lbl">Connected Corridors</span>
-                                        <div className="connections-flex-pills-row">
-                                            <span className="conn-pill-item"><Truck size={10} /> Gujarat Rail Bypass</span>
-                                            <span className="conn-pill-item"><Route size={10} /> State Line bypass</span>
+                                    <div className="np-properties-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}>
+                                            <span>Asset Class Type</span>
+                                            <strong className="text-brand" style={{ textTransform: 'uppercase', color: 'var(--tw-brand)' }}>{selectedNode.node_type?.replace('_', ' ')}</strong>
+                                        </div>
+                                        <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}>
+                                            <span>Operating Health</span>
+                                            <span className={`np-status-lbl color-${selectedNode.health}`} style={{ fontWeight: 'bold', color: selectedNode.health === 'critical' ? 'var(--tw-critical)' : (selectedNode.health === 'warning' ? 'var(--tw-warning)' : 'var(--tw-success)') }}>{selectedNode.health?.toUpperCase()}</span>
+                                        </div>
+                                        
+                                        {/* Conditional properties based on type */}
+                                        {selectedNode.node_type === 'supplier' && (
+                                            <>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Sourced Feedstock</span><strong>{selectedNode.material}</strong></div>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Daily Output Cap</span><strong>{selectedNode.capacity}</strong></div>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Supplier Reliability</span><strong className="text-brand" style={{ color: 'var(--tw-brand)' }}>{selectedNode.reliability}</strong></div>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Transit Lead Time</span><span>{selectedNode.lead_time}</span></div>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Preferred Transport</span><span>{selectedNode.transport}</span></div>
+                                            </>
+                                        )}
+                                        
+                                        {selectedNode.node_type === 'material' && (
+                                            <>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Criticality Level</span><strong className="text-brand" style={{ color: 'var(--tw-brand)' }}>{selectedNode.criticality}</strong></div>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Monthly Requirement</span><strong>{selectedNode.monthly_req}</strong></div>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Associated Feedstock</span><span>{selectedNode.material}</span></div>
+                                            </>
+                                        )}
+                                        
+                                        {selectedNode.node_type === 'plant' && (
+                                            <>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Manufacturing Focus</span><strong>{selectedNode.material}</strong></div>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Daily Kiln Capacity</span><strong>{selectedNode.capacity}</strong></div>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Asset Utilization</span><strong className="text-brand" style={{ color: 'var(--tw-brand)' }}>{selectedNode.utilization}</strong></div>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Active Production Lines</span><span>{selectedNode.lines}</span></div>
+                                            </>
+                                        )}
+                                        
+                                        {selectedNode.node_type === 'distribution_center' && (
+                                            <>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Material Dispatched</span><strong>{selectedNode.material}</strong></div>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Dispatch Capacity</span><strong>{selectedNode.capacity}</strong></div>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Supported Markets</span><span style={{ fontSize: '11px', textAlign: 'right' }}>{selectedNode.regions}</span></div>
+                                            </>
+                                        )}
+                                        
+                                        {selectedNode.node_type === 'customer' && (
+                                            <>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Commercial Demand</span><strong>{selectedNode.capacity}</strong></div>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Served Areas</span><span style={{ fontSize: '11px', textAlign: 'right' }}>{selectedNode.regions}</span></div>
+                                                <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid var(--tw-bg-p)', paddingBottom: '6px' }}><span>Demand Coverage</span><span className="text-success">{selectedNode.status}</span></div>
+                                            </>
+                                        )}
+                                        
+                                        <div className="np-prop-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', paddingTop: '4px' }}>
+                                            <span>Operational Status</span>
+                                            <span style={{ fontWeight: 'bold', color: selectedNode.health === 'critical' ? 'var(--tw-critical)' : (selectedNode.health === 'warning' ? 'var(--tw-warning)' : 'var(--tw-success)') }}>{selectedNode.status}</span>
                                         </div>
                                     </div>
                                 </>
                             ) : (
-                                <p style={{ color: 'var(--intel-text-s)', textAlign: 'center', padding: '20px' }}>Select any graph node from the digital twin canvas to inspect live telemetry.</p>
+                                <p style={{ color: 'var(--intel-text-s)', textAlign: 'center', padding: '20px', fontSize: '12.5px' }}>Select any graph node from the digital twin canvas to inspect live telemetry.</p>
                             )}
                         </div>
                     </div>
 
                     {/* Network Segment Health Metrics */}
-                    <div className="twin-sidebar-card">
-                        <div className="column-header-row">
-                            <h2 className="column-section-heading">Network Segment Health</h2>
+                    <div className="twin-sidebar-card" style={{ backgroundColor: 'var(--tw-card)', border: '1px solid var(--tw-border)', borderRadius: '18px', padding: '20px', boxShadow: 'var(--tw-shadow)' }}>
+                        <div className="column-header-row" style={{ borderBottom: '1px solid var(--tw-border)', paddingBottom: '10px', marginBottom: '16px', textAlign: 'left' }}>
+                            <h2 className="column-section-heading" style={{ fontSize: '18px', fontWeight: '700', color: 'var(--tw-brand)' }}>Network Segment Health</h2>
                         </div>
-                        <div className="segment-health-cards-stack">
+                        <div className="segment-health-cards-stack" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                             {networkHealthCards.map((card) => (
-                                <div key={card.id} className="segment-health-card-item">
-                                    <div className="sh-header-row">
-                                        <span className="sh-lbl-title">{card.label}</span>
-                                        <strong className={`sh-val-pct text-${card.status}`}>{card.val}</strong>
+                                <div key={card.id} className="segment-health-card-item" style={{ textAlign: 'left' }}>
+                                    <div className="sh-header-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
+                                        <span className="sh-lbl-title" style={{ fontWeight: '600' }}>{card.label}</span>
+                                        <strong className={`sh-val-pct text-${card.status}`} style={{ color: card.status === 'critical' ? 'var(--tw-critical)' : (card.status === 'warning' ? 'var(--tw-warning)' : 'var(--tw-success)') }}>{card.val}</strong>
                                     </div>
-                                    <div className="sh-progress-track-frame">
-                                        <span className={`sh-progress-fill-element fill-${card.status}`} style={{ width: `${card.pct}%` }}></span>
+                                    <div className="sh-progress-track-frame" style={{ width: '100%', height: '5px', backgroundColor: 'var(--tw-surf)', borderRadius: '3px', overflow: 'hidden', marginBottom: '6px' }}>
+                                        <span className={`sh-progress-fill-element fill-${card.status}`} style={{ display: 'block', height: '100%', width: `${card.pct}%`, backgroundColor: card.status === 'critical' ? 'var(--tw-critical)' : (card.status === 'warning' ? 'var(--tw-warning)' : 'var(--tw-success)') }}></span>
                                     </div>
-                                    <span className="sh-desc-txt">{card.desc}</span>
+                                    <span className="sh-desc-txt" style={{ fontSize: '11px', color: 'var(--tw-text-s)' }}>{card.desc}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
 
                     {/* AI Mitigation Action Plans List */}
-                    <div className="twin-sidebar-card border-none bg-none shadow-none">
-                        <div className="column-header-row">
-                            <h2 className="column-section-heading">AI Mitigation Action Plans</h2>
+                    <div className="twin-sidebar-card border-none bg-none shadow-none" style={{ textAlign: 'left' }}>
+                        <div className="column-header-row" style={{ borderBottom: '1px solid var(--tw-border)', paddingBottom: '10px', marginBottom: '16px' }}>
+                            <h2 className="column-section-heading" style={{ fontSize: '18px', fontWeight: '700', color: 'var(--tw-brand)' }}>AI Mitigation Action Plans</h2>
                         </div>
                         <div className="side-column-content-stack">
                             {aiActionPlans.length > 0 ? (
@@ -340,7 +441,7 @@ export default function SupplyChainNetwork() {
                                     </div>
                                 ))
                             ) : (
-                                <div style={{ color: 'var(--intel-text-s)', textAlign: 'center', padding: '16px' }}>No active action plans compiled.</div>
+                                <div style={{ color: 'var(--intel-text-s)', textAlign: 'center', padding: '16px', fontSize: '12px' }}>No active action plans compiled.</div>
                             )}
                         </div>
                     </div>
@@ -350,11 +451,11 @@ export default function SupplyChainNetwork() {
             </section>
 
             {/* Bottom Section Component Panels */}
-            <section className="twin-bottom-flow-summary-panel">
-                <div className="column-header-row no-margin border-none">
-                    <div className="bottom-title-wrapper-flex">
+            <section className="twin-bottom-flow-summary-panel" style={{ marginTop: '32px', backgroundColor: 'var(--tw-card)', border: '1px solid var(--tw-border)', borderRadius: '18px', padding: '24px', boxShadow: 'var(--tw-shadow)' }}>
+                <div className="column-header-row no-margin border-none" style={{ textAlign: 'left', borderBottom: 'none', marginBottom: '0' }}>
+                    <div className="bottom-title-wrapper-flex" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <ShieldCheck size={16} className="color-brand" />
-                        <h2 className="column-section-heading">Autonomous Material Redistribution & Operational Balance Metrics</h2>
+                        <h2 className="column-section-heading" style={{ fontSize: '18px', fontWeight: '700', color: 'var(--tw-brand)' }}>Autonomous Material Redistribution & Operational Balance Metrics</h2>
                     </div>
                 </div>
                 <div className="summary-metrics-fluid-row">

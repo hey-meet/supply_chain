@@ -588,65 +588,476 @@ def transform_supply_chain(state: dict) -> dict:
     impact = impact_list[0] if impact_list else None
     mitigation = mitigation_list[0] if mitigation_list else None
 
-    if not risk:
-        return {"success": False, "message": "Graph pending.", "data": {}}
+    # Helper function to load data JSONs dynamically
+    import json
+    from pathlib import Path
+    
+    def load_db_json(relative_path: str) -> dict:
+        data_dir = Path(__file__).resolve().parent.parent / "data"
+        full_path = data_dir / relative_path
+        if not full_path.exists():
+            logger.warning("Data file not found: %s", full_path)
+            return {}
+        with open(full_path, "r", encoding="utf-8") as f:
+            return json.load(f)
 
-    nodes = [
-        {
-            "id": "sup-1",
+    # Load dynamic configurations
+    suppliers_list = load_db_json("suppliers/suppliers.json").get("suppliers", [])
+    materials_list = load_db_json("materials/materials.json").get("materials", [])
+    plants_list = load_db_json("plants/plants.json").get("plants", [])
+    dcs_list = load_db_json("distribution/distribution_centers.json").get("distribution_centers", [])
+
+    # Turn lists into dict mappings for easy reference
+    supplier_nodes_info = {}
+    for s in suppliers_list:
+        supplier_nodes_info[s["supplier_id"]] = {
+            "name": s["supplier_name"],
+            "location": f"{s['city']}, {s['state']}",
+            "material": " & ".join([m.split("-")[-1] for m in s.get("materials", [])]), 
+            "capacity": f"{int(s['daily_supply_capacity_tons']):,} Tons/day" if s.get("daily_supply_capacity_tons") else "N/A",
+            "reliability": f"{s['reliability_score']}%" if s.get("reliability_score") else "N/A",
+            "lead_time": f"{s['lead_time_days']} Days" if s.get("lead_time_days") else "N/A",
+            "transport": s.get("preferred_transport", "Road"),
+            "icon": "Layers"
+        }
+
+    material_nodes_info = {}
+    for m in materials_list:
+        if m["material_id"] not in ["MAT-LMS-01", "MAT-GYP-03", "MAT-COL-02", "MAT-FLA-04"]:
+            continue
+        material_nodes_info[m["material_id"]] = {
+            "name": f"{m['material_name']} Feedstock",
+            "location": m.get("storage_method", "Storage Silo"),
+            "material": m["material_name"],
+            "criticality": m["criticality"].capitalize(),
+            "monthly_req": f"{int(m.get('minimum_storage_days', 10) * 10000):,} Tons",
+            "icon": "Layers"
+        }
+    if "MAT-LMS-01" in material_nodes_info:
+        material_nodes_info["MAT-LMS-01"]["monthly_req"] = "250,000 Tons"
+    if "MAT-GYP-03" in material_nodes_info:
+        material_nodes_info["MAT-GYP-03"]["monthly_req"] = "12,000 Tons"
+    if "MAT-COL-02" in material_nodes_info:
+        material_nodes_info["MAT-COL-02"]["monthly_req"] = "45,000 Tons"
+    if "MAT-FLA-04" in material_nodes_info:
+        material_nodes_info["MAT-FLA-04"]["monthly_req"] = "35,000 Tons"
+
+    plant_nodes_info = {}
+    for p in plants_list:
+        plant_nodes_info[p["plant_id"]] = {
+            "name": p["plant_name"],
+            "location": f"{p['city']}, {p['state']}",
+            "material": "Clinker Kiln Core",
+            "capacity": f"{int(p['production_capacity_tpd']):,} Tons/day" if p.get("production_capacity_tpd") else "N/A",
+            "utilization": f"{int((p.get('current_daily_production_tpd', 1000) / p.get('production_capacity_tpd', 1200)) * 100)}%",
+            "lines": f"{len(p.get('production_lines', []))} Active Kilns",
+            "icon": "Factory"
+        }
+
+    dc_nodes_info = {}
+    for d in dcs_list:
+        dc_nodes_info[d["distribution_center_id"]] = {
+            "name": d["distribution_center_name"],
+            "location": f"{d['city']}, {d['state']}",
+            "material": "Packed Cement Bags",
+            "capacity": f"{int(d.get('daily_dispatch_capacity', {}).get('value', 0)):,} Tons/day",
+            "regions": ", ".join(d.get("supported_regions", [])[:2]),
+            "icon": "Package"
+        }
+
+    customer_nodes_info = {
+        "CUST-NCR": {"name": "Northern Demand Hub", "location": "NCR & Punjab Region", "material": "Cement Commercial Demand", "capacity": "10,500 Tons/day Demand", "regions": "Haryana, Punjab, Delhi", "icon": "Globe"},
+        "CUST-WEST": {"name": "Western Demand Hub", "location": "Gujarat & Mumbai Region", "material": "Cement Commercial Demand", "capacity": "14,000 Tons/day Demand", "regions": "Gujarat, Maharashtra", "icon": "Globe"},
+        "CUST-SOUTH": {"name": "Southern Demand Hub", "location": "Bengaluru & Chennai Region", "material": "Cement Commercial Demand", "capacity": "9,500 Tons/day Demand", "regions": "Karnataka, Tamil Nadu, AP", "icon": "Globe"}
+    }
+
+    # Evaluate dynamic simulation states
+    matched_supplier_ids = []
+    if risk:
+        matched_supplier_ids = [s.supplier_id for s in risk.matched_suppliers] if risk.matched_suppliers else []
+        if risk.assessment.affected_suppliers:
+            for s in risk.assessment.affected_suppliers:
+                # Match by name if ID is missing in affected supplier models
+                for sid, info in supplier_nodes_info.items():
+                    if s.name.lower() in info["name"].lower() and sid not in matched_supplier_ids:
+                        matched_supplier_ids.append(sid)
+
+    affected_materials = []
+    if risk and risk.assessment.affected_materials:
+        affected_materials = [m.lower() for m in risk.assessment.affected_materials]
+
+    affected_plants = []
+    if impact and impact.affected_plants:
+        affected_plants = [p.plant_id for p in impact.affected_plants]
+
+    alternate_suppliers = []
+    if mitigation and mitigation.alternate_suppliers:
+        alternate_suppliers = [s.supplier_id for s in mitigation.alternate_suppliers]
+
+    nodes = []
+
+    # 1. Suppliers
+    for idx, (sid, info) in enumerate(supplier_nodes_info.items()):
+        health = "success"
+        status = "Nominal Operations"
+        if sid in matched_supplier_ids:
+            health = "critical"
+            status = "Logistics Obstructed"
+        elif sid in alternate_suppliers:
+            health = "success"
+            status = "Emergency Capacity Engaged"
+
+        nodes.append({
+            "id": sid,
             "type": "twinNode",
-            "position": {"x": 50, "y": 30},
+            "position": {"x": 50, "y": 50 + idx * 130},
             "data": {
-                "name": risk.matched_suppliers[0].supplier_name if risk.matched_suppliers else "Marwar Mining & Minerals Corp.",
-                "location": risk.matched_suppliers[0].state if risk.matched_suppliers else "Rajasthan",
-                "material": "Limestone Raw Bulk",
-                "health": "critical" if risk.matched_suppliers else "success",
-                "status": "Logistics Obstructed" if risk.matched_suppliers else "Optimal Output",
-                "icon": "Layers"
+                "name": info["name"],
+                "location": info["location"],
+                "node_type": "supplier",
+                "material": info["material"],
+                "capacity": info["capacity"],
+                "reliability": info["reliability"],
+                "lead_time": info["lead_time"],
+                "transport": info["transport"],
+                "health": health,
+                "status": status,
+                "icon": info["icon"]
             }
-        },
-        {
-            "id": "sup-2",
+        })
+
+    # 2. Materials
+    for idx, (mid, info) in enumerate(material_nodes_info.items()):
+        health = "success"
+        status = "Stock Buffer Optimal"
+
+        is_affected = False
+        if mid == "MAT-LMS-01" and any("lime" in m for m in affected_materials):
+            is_affected = True
+        elif mid == "MAT-GYP-03" and any("gyp" in m for m in affected_materials):
+            is_affected = True
+        elif mid == "MAT-COL-02" and any("coal" in m for m in affected_materials):
+            is_affected = True
+        elif mid == "MAT-FLA-04" and any("ash" in m for m in affected_materials):
+            is_affected = True
+
+        if is_affected:
+            health = "warning"
+            status = "Inventory Drawdown Alert"
+
+        nodes.append({
+            "id": mid,
             "type": "twinNode",
-            "position": {"x": 320, "y": 30},
+            "position": {"x": 320, "y": 80 + idx * 130},
             "data": {
-                "name": mitigation.alternate_suppliers[0].supplier_name if (mitigation and mitigation.alternate_suppliers) else "Deccan Gypsum & Chemical Aggregates",
-                "location": "Madhya Pradesh",
-                "material": "Backup Raw Material",
+                "name": info["name"],
+                "location": info["location"],
+                "node_type": "material",
+                "material": info["material"],
+                "criticality": info["criticality"],
+                "monthly_req": info["monthly_req"],
+                "health": health,
+                "status": status,
+                "icon": info["icon"]
+            }
+        })
+
+    # 3. Plants
+    for idx, (pid, info) in enumerate(plant_nodes_info.items()):
+        health = "success"
+        status = "Optimal Output"
+        if pid in affected_plants:
+            health = "warning"
+            loss_pct = 15.0
+            if impact and impact.affected_plants:
+                loss_pct = next((p.production_loss_percent for p in impact.affected_plants if p.plant_id == pid), 15.0)
+            status = f"Disrupted: {loss_pct}% Output Drop"
+            if alternate_suppliers:
+                status = "Alternate Sourcing Bypass Active"
+
+        nodes.append({
+            "id": pid,
+            "type": "twinNode",
+            "position": {"x": 590, "y": 120 + idx * 140},
+            "data": {
+                "name": info["name"],
+                "location": info["location"],
+                "node_type": "plant",
+                "material": info["material"],
+                "capacity": info["capacity"],
+                "utilization": info["utilization"],
+                "lines": info["lines"],
+                "health": health,
+                "status": status,
+                "icon": info["icon"]
+            }
+        })
+
+    # 4. Distribution Centers
+    for idx, (dcid, info) in enumerate(dc_nodes_info.items()):
+        health = "success"
+        status = "Nominal Dispatch"
+        connected_plant = "PLT-001" if dcid == "DBC-001" else ("PLT-002" if dcid == "DBC-002" else "PLT-003")
+        if connected_plant in affected_plants:
+            status = "Reduced Upstream Supply Stream"
+
+        nodes.append({
+            "id": dcid,
+            "type": "twinNode",
+            "position": {"x": 860, "y": 120 + idx * 140},
+            "data": {
+                "name": info["name"],
+                "location": info["location"],
+                "node_type": "distribution_center",
+                "material": info["material"],
+                "capacity": info["capacity"],
+                "regions": info["regions"],
+                "health": health,
+                "status": status,
+                "icon": info["icon"]
+            }
+        })
+
+    # 5. Customers
+    for idx, (cid, info) in enumerate(customer_nodes_info.items()):
+        nodes.append({
+            "id": cid,
+            "type": "twinNode",
+            "position": {"x": 1130, "y": 120 + idx * 140},
+            "data": {
+                "name": info["name"],
+                "location": info["location"],
+                "node_type": "customer",
+                "material": info["material"],
+                "capacity": info["capacity"],
+                "regions": info["regions"],
                 "health": "success",
-                "status": "Emergency Capacity Allocated" if mitigation else "Idle Backup",
-                "icon": "Layers"
+                "status": "Nominal Demand Met",
+                "icon": info["icon"]
             }
-        },
-        {
-            "id": "pl-1",
-            "type": "twinNode",
-            "position": {"x": 185, "y": 250},
-            "data": {
-                "name": impact.affected_plants[0].plant_name if (impact and impact.affected_plants) else "BuildCem Integrated Plant",
-                "location": "Jodhpur, Rajasthan",
-                "material": "Clinker Kiln Core",
-                "health": "warning" if (impact and impact.affected_plants) else "success",
-                "status": "Executing Reroute Bypass" if mitigation else "Optimal Output",
-                "icon": "Factory"
-            }
-        }
-    ]
+        })
 
-    edges = [
-        {
-            "id": "e1",
-            "source": "sup-1",
-            "target": "pl-1",
-            "className": "edge-flow-limestone edge-critical" if risk.matched_suppliers else "edge-flow-limestone edge-healthy"
-        },
-        {
-            "id": "e2",
-            "source": "sup-2",
-            "target": "pl-1",
-            "className": "edge-flow-alternative edge-alternative-dashed"
-        }
+    # Compile Edges dynamically with dynamic state mapping
+    edges = []
+
+    # A. Supplier -> Material
+    supplier_material_links = [
+        ("SUP-001", "MAT-LMS-01", "primary"),
+        ("SUP-001", "MAT-COL-02", "primary"),
+        ("SUP-002", "MAT-LMS-01", "backup"),
+        ("SUP-002", "MAT-GYP-03", "primary"),
+        ("SUP-003", "MAT-COL-02", "primary"),
+        ("SUP-003", "MAT-FLA-04", "primary"),
+        ("SUP-004", "MAT-GYP-03", "backup"),
+        ("SUP-004", "MAT-FLA-04", "primary"),
+        ("SUP-005", "MAT-FLA-04", "backup")
     ]
+    for s_id, m_id, role in supplier_material_links:
+        edge_id = f"e-{s_id}-{m_id}"
+        is_disrupted = (s_id in matched_supplier_ids)
+        is_mitigating = (s_id in alternate_suppliers)
+        
+        cname = "edge-flow-inactive"
+        animated = False
+        
+        if not is_disrupted:
+            if role == "primary":
+                cname = "edge-flow-limestone edge-healthy" if m_id == "MAT-LMS-01" else ("edge-flow-coal edge-healthy" if m_id == "MAT-COL-02" else "edge-flow-gypsum edge-healthy")
+                animated = True
+            elif is_mitigating:
+                cname = "edge-recovered"
+                animated = True
+        else:
+            cname = "edge-critical"
+            animated = False
+
+        edges.append({
+            "id": edge_id,
+            "source": s_id,
+            "target": m_id,
+            "className": cname,
+            "animated": animated,
+            "data": {
+                "name": f"Sourcing Vector ({role.capitalize()})",
+                "mode": "Industrial Conveyor / Internal Yard",
+                "distance": "1.2 km Yard Transfer",
+                "time": "Immediate Transit",
+                "capacity": "25,000 Tons/day",
+                "reliability": "99.8%",
+                "cost": "Included in standard contract",
+                "status": "Nominal Sourcing" if not is_disrupted else "Vector Blocked due to Supplier Disruption"
+            }
+        })
+
+    # B. Material -> Plant (Logistics corridors)
+    routes_definitions = {
+        "e-MAT-LMS-01-PLT-001": {
+            "source": "MAT-LMS-01", "target": "PLT-001", "mode": "Rail", 
+            "name": "Rajasthan Limestone Rail Corridor (NH-62 Segment)", 
+            "distance": "260 km", "time": "5.5 Hours", "capacity": "15,000 Tons/day", 
+            "reliability": "94.5%", "cost": "$650/Ton", "material": "Limestone", "type": "primary"
+        },
+        "e-MAT-LMS-01-PLT-001-BYPASS": {
+            "source": "MAT-LMS-01", "target": "PLT-001", "mode": "Road", 
+            "name": "NH-48 Emergency Sourcing Bypass Corridor", 
+            "distance": "380 km (Detour)", "time": "8.5 Hours", "capacity": "8,000 Tons/day", 
+            "reliability": "96.0% (Secured)", "cost": "$820/Ton", "material": "Limestone", "type": "bypass"
+        },
+        "e-MAT-GYP-03-PLT-001": {
+            "source": "MAT-GYP-03", "target": "PLT-001", "mode": "Road", 
+            "name": "Indore-Chittorgarh Highway Route (NH-27)", 
+            "distance": "390 km", "time": "8.0 Hours", "capacity": "4,000 Tons/day", 
+            "reliability": "91.2%", "cost": "$780/Ton", "material": "Gypsum", "type": "primary"
+        },
+        "e-MAT-GYP-03-PLT-002": {
+            "source": "MAT-GYP-03", "target": "PLT-002", "mode": "Road", 
+            "name": "Jabalpur-Satna Gypsum Freight Corridor (NH-30)", 
+            "distance": "170 km", "time": "3.5 Hours", "capacity": "10,000 Tons/day", 
+            "reliability": "95.0%", "cost": "$450/Ton", "material": "Gypsum", "type": "primary"
+        },
+        "e-MAT-COL-02-PLT-002": {
+            "source": "MAT-COL-02", "target": "PLT-002", "mode": "Rail", 
+            "name": "Singrauli Coal Belt Rail Corridor", 
+            "distance": "360 km", "time": "10.5 Hours", "capacity": "12,000 Tons/day", 
+            "reliability": "96.8%", "cost": "$510/Ton", "material": "Coal", "type": "primary"
+        },
+        "e-MAT-FLA-04-PLT-003": {
+            "source": "MAT-FLA-04", "target": "PLT-003", "mode": "Road", 
+            "name": "Vidarbha-Hospet Blending Feed Route (NH-50)", 
+            "distance": "280 km", "time": "6.0 Hours", "capacity": "4,000 Tons/day", 
+            "reliability": "88.5%", "cost": "$700/Ton", "material": "Fly Ash", "type": "primary"
+        }
+    }
+
+    for edge_id, r in routes_definitions.items():
+        is_bypass = (r["type"] == "bypass")
+        is_primary_disrupted = False
+        if r["material"] == "Limestone" and "SUP-001" in matched_supplier_ids:
+            is_primary_disrupted = True
+        elif r["material"] == "Coal" and "SUP-003" in matched_supplier_ids:
+            is_primary_disrupted = True
+
+        cname = "edge-flow-inactive"
+        animated = False
+        status = "NOMINAL"
+        incident_msg = ""
+        mitigation_msg = ""
+
+        if is_bypass:
+            if is_primary_disrupted and alternate_suppliers:
+                cname = "edge-recovered"
+                animated = True
+                status = "ACTIVE DETOUR / REDIRECTED"
+                mitigation_msg = "AI Rerouting triggered via NH-48 Expressway bypass to cover Limestone delivery drops."
+            else:
+                cname = "edge-flow-inactive"
+                animated = False
+                status = "INACTIVE BACKUP"
+        else:
+            if is_primary_disrupted:
+                cname = "edge-critical"
+                animated = False
+                status = "OBSTRUCTED / CLOSED"
+                incident_msg = f"Obstructed by active event: {risk.headline}" if risk else "Obstructed"
+                mitigation_msg = "Alternative rail/road routing recommended by Mitigation Planning Agent."
+            else:
+                animated = True
+                status = "NOMINAL"
+                if r["material"] == "Limestone":
+                    cname = "edge-flow-limestone edge-healthy"
+                elif r["material"] == "Gypsum":
+                    cname = "edge-flow-gypsum edge-healthy"
+                elif r["material"] == "Coal":
+                    cname = "edge-flow-coal edge-healthy"
+                elif r["material"] == "Fly Ash":
+                    cname = "edge-flow-flyash edge-healthy"
+
+        edges.append({
+            "id": edge_id,
+            "source": r["source"],
+            "target": r["target"],
+            "className": cname,
+            "animated": animated,
+            "data": {
+                "name": r["name"],
+                "mode": r["mode"],
+                "distance": r["distance"],
+                "time": r["time"],
+                "capacity": r["capacity"],
+                "reliability": r["reliability"],
+                "cost": r["cost"],
+                "status": status,
+                "incident": incident_msg,
+                "mitigation": mitigation_msg
+            }
+        })
+
+    # C. Plant -> Distribution Center (DC Corridors)
+    plant_dc_links = [
+        ("PLT-001", "DBC-001", "NE-4 Delhi-Mumbai Expressway freight vector", "520 km", "9.5 Hours", "15,000 Tons/day", "98.5%", "$1,100/Ton"),
+        ("PLT-002", "DBC-002", "Satna-Ahmedabad Corridor Freight line", "920 km", "17.5 Hours", "12,000 Tons/day", "94.0%", "$1,950/Ton"),
+        ("PLT-003", "DBC-003", "NH-44 Peninsular Corridor vector", "290 km", "6.0 Hours", "10,000 Tons/day", "96.5%", "$720/Ton")
+    ]
+    for p_id, dc_id, name, dist, time_str, cap, rel, cost in plant_dc_links:
+        edge_id = f"e-{p_id}-{dc_id}"
+        cname = "edge-flow-cement edge-healthy"
+        animated = True
+        status = "NOMINAL"
+        if p_id in affected_plants:
+            status = "UPSTREAM PRODUCTION DROP LIMITATION"
+            cname = "edge-flow-cement edge-warning-dashed"
+            
+        edges.append({
+            "id": edge_id,
+            "source": p_id,
+            "target": dc_id,
+            "className": cname,
+            "animated": animated,
+            "data": {
+                "name": name,
+                "mode": "Road / Bulker Fleet",
+                "distance": dist,
+                "time": time_str,
+                "capacity": cap,
+                "reliability": rel,
+                "cost": cost,
+                "status": status
+            }
+        })
+
+    # D. DC -> Customer (Last-mile demand segments)
+    dc_cust_links = [
+        ("DBC-001", "CUST-NCR", "National Capital Region Bulk Supply", "45 km", "1.5 Hours", "12,000 Tons/day", "99.2%", "$150/Ton"),
+        ("DBC-002", "CUST-WEST", "West-Central Industrial Supply", "120 km", "3.5 Hours", "15,000 Tons/day", "97.8%", "$350/Ton"),
+        ("DBC-003", "CUST-SOUTH", "Peninsular Commercial Hub Supply", "80 km", "2.5 Hours", "10,000 Tons/day", "98.5%", "$280/Ton")
+    ]
+    for dc_id, c_id, name, dist, time_str, cap, rel, cost in dc_cust_links:
+        edge_id = f"e-{dc_id}-{c_id}"
+        edges.append({
+            "id": edge_id,
+            "source": dc_id,
+            "target": c_id,
+            "className": "edge-flow-demand edge-healthy",
+            "animated": True,
+            "data": {
+                "name": name,
+                "mode": "Local Logistics Dumper Trucks",
+                "distance": dist,
+                "time": time_str,
+                "capacity": cap,
+                "reliability": rel,
+                "cost": cost,
+                "status": "NOMINAL"
+            }
+        })
+
+    # AI Decision Overlay values
+    ai_decision_overlay = {
+        "active": True if risk else False,
+        "hazard_detected": risk.assessment.summary if risk else "No hazards active.",
+        "silo_impact": f"Production buffer exposure identified. Inventory drawdown at {[p.plant_name for p in impact.affected_plants] if impact else 'plants'}." if (impact and impact.affected_plants) else "Silo buffer holding within standard operating ranges.",
+        "mitigation_selected": mitigation.executive_recommendation if mitigation else "Continuous nominal scanning active."
+    }
 
     ai_action_plans = []
     if mitigation:
@@ -663,12 +1074,12 @@ def transform_supply_chain(state: dict) -> dict:
                 "time": "Just now"
             })
 
-    affected_count = len(risk.matched_suppliers) if risk else 0
-    alternate_count = len(mitigation.alternate_suppliers) if (mitigation and mitigation.alternate_suppliers) else 0
+    affected_count = len(matched_supplier_ids)
+    alternate_count = len(alternate_suppliers)
     recovery_est = mitigation.recovery_estimate if mitigation else "2.5 Hours"
     
     bottom_metrics = {
-        "network_transfers": f"{alternate_count + 1} Automated Plans Active" if alternate_count > 0 else "1 Baseline Plan Active",
+        "network_transfers": f"{alternate_count} Bypass Routes Engaged" if alternate_count > 0 else "0 Bypass Active (Standard)",
         "materials_in_transit": "1,450 Tons Bulk Cargo" if affected_count > 0 else "3,500 Tons Nominal Flow",
         "inventory_redistribution": "2 Rail Corridors Engaged" if alternate_count > 0 else "0 Corridor Bypass",
         "delayed_shipments": f"{affected_count} Freight Vectors Blocked" if affected_count > 0 else "0 Shipments Delayed",
@@ -677,12 +1088,12 @@ def transform_supply_chain(state: dict) -> dict:
     }
 
     kpis = [
-        {"id": 1, "title": "Node Status Ratio", "value": f"{3 - affected_count} / 3 Healthy", "trend": "Active validation", "status": "success" if affected_count == 0 else "warning", "icon": "CheckCircle2"},
+        {"id": 1, "title": "Node Status Ratio", "value": f"{18 - affected_count} / 18 Healthy", "trend": "Active validation", "status": "success" if affected_count == 0 else "warning", "icon": "CheckCircle2"},
         {"id": 2, "title": "Redundancy Coverage", "value": "100%" if alternate_count > 0 else "N/A", "trend": "Alternative routes mapped", "status": "success", "icon": "Layers"},
     ]
 
     network_health_cards = [
-        {"id": 1, "label": "Material Sourcing Stability", "val": "100%" if affected_count == 0 else "66%", "pct": 100 if affected_count == 0 else 66, "status": "success" if affected_count == 0 else "warning", "desc": "Sourcing nodes continuity check."},
+        {"id": 1, "label": "Material Sourcing Stability", "val": "100%" if affected_count == 0 else "80%", "pct": 100 if affected_count == 0 else 80, "status": "success" if affected_count == 0 else "warning", "desc": "Sourcing nodes continuity check."},
         {"id": 2, "label": "Transit Routing Latency", "val": "+0m" if affected_count == 0 else recovery_est, "pct": 100 if affected_count == 0 else 40, "status": "success" if affected_count == 0 else "critical", "desc": "Live fleet vector delays."}
     ]
 
@@ -695,7 +1106,8 @@ def transform_supply_chain(state: dict) -> dict:
             "ai_action_plans": ai_action_plans,
             "bottom_metrics": bottom_metrics,
             "kpis": kpis,
-            "network_health_cards": network_health_cards
+            "network_health_cards": network_health_cards,
+            "ai_decision_overlay": ai_decision_overlay
         }
     }
 
