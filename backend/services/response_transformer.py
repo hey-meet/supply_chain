@@ -1382,3 +1382,45 @@ def transform_reports(state: dict) -> dict:
             "report_history": report_history
         }
     }
+
+
+def transform_assistant_response(raw_llm_response: str, state: dict) -> dict:
+    """
+    Parses, validates, and transforms raw LLM response into the structured Assistant response.
+    """
+    import json
+    
+    # Clean potential markdown code blocks
+    cleaned = raw_llm_response.replace("```json", "").replace("```", "").strip()
+    
+    try:
+        data = json.loads(cleaned)
+    except Exception as exc:
+        logger.error("Failed to parse assistant raw JSON response: %s. Raw: %r", exc, raw_llm_response)
+        data = {
+            "executive_summary": "Operational briefing compilation failed.",
+            "business_reasoning": f"The assistant was unable to parse the system response correctly. Error details: {exc}",
+            "affected_entities": [],
+            "knowledge_graph_dependencies": [],
+            "recommendations": ["Please execute a new disruption search or daily news scan to re-initialize system cache."],
+            "confidence": "N/A",
+            "sources": ["System Error Handler"]
+        }
+
+    # Ensure all required keys exist with safe defaults
+    response_data = {
+        "executive_summary": data.get("executive_summary") or "Strategic overview is currently unavailable.",
+        "business_reasoning": data.get("business_reasoning") or "Detailed business reasoning is currently unavailable.",
+        "affected_entities": data.get("affected_entities") or [],
+        "knowledge_graph_dependencies": data.get("knowledge_graph_dependencies") or [],
+        "recommendations": data.get("recommendations") or [],
+        "confidence": data.get("confidence") or "N/A",
+        "sources": data.get("sources") or ["Enterprise Operational Context"]
+    }
+    
+    return {
+        "success": True,
+        "message": "Assistant action completed successfully.",
+        "data": response_data
+    }
+
