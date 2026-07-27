@@ -9,6 +9,7 @@ import PlantsInventory from './pages/PlantsInventory';
 import AIDecisionCenter from './pages/AIDecisionCenter';
 import ExecutiveReports from './pages/ExecutiveReports';
 import Settings from './pages/Settings';
+import AIAssistant from './pages/AIAssistant';
 import './App.css';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path="/plants" element={<PlantsInventory />} />
         <Route path="/ai-center" element={<AIDecisionCenter />} />
         <Route path="/reports" element={<ExecutiveReports />} />
+        <Route path="/ai-assistant" element={<AIAssistant />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
     </Routes>

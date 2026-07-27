@@ -6,7 +6,8 @@ import {
 } from 'react-icons/md';
 import {
     RiDashboardLine,
-    RiRobot2Line
+    RiRobot2Line,
+    RiChat3Line
 } from 'react-icons/ri';
 import { FaRegNewspaper } from 'react-icons/fa6';
 import {
@@ -27,6 +28,7 @@ const Sidebar = () => {
         { name: 'Plants & Inventory', path: '/plants', icon: <PiFactoryBold /> },
         { name: 'AI Decision Center', path: '/ai-center', icon: <RiRobot2Line /> },
         { name: 'Executive Reports', path: '/reports', icon: <TbReportAnalytics /> },
+        { name: 'AI Assistant', path: '/ai-assistant', icon: <RiChat3Line /> },
         { name: 'Settings', path: '/settings', icon: <FiSettings /> }
     ];
 
