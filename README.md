@@ -264,7 +264,9 @@ Ensure these are set in `backend/.env`.
 
 A complete demo video should demonstrate:
 
-> ![Demo](./asset/Demo.mp4)
+```bash
+./asset/Demo.mp4
+```
 
 1. Loading the main dashboard and viewing the current cement supply chain network.
 2. Initiating a scan for recent disruptions.
