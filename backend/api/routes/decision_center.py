@@ -101,7 +101,7 @@ async def get_ai_decision_center():
 
 
 @router.post("/action")
-async def execute_assistant_action(payload: AssistantActionRequest):
+def execute_assistant_action(payload: AssistantActionRequest):
     start_time = time.perf_counter()
     action_key = payload.action
     
