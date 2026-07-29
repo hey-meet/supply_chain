@@ -87,20 +87,29 @@ class SearchService:
             logger.error("Failed to load news topics config: %s. Using default fallback query.", e)
             queries = ["cement supply chain logistics disruption heavy rainfall flood strike port congestion closure"]
 
-        # Run Tavily search for each query and collect all articles
+        # Run Tavily search for each query concurrently and collect all articles
+        from concurrent.futures import ThreadPoolExecutor, as_completed
         all_articles = []
         seen_urls = set()
         
-        for q in queries:
+        def fetch_query(q):
             try:
-                search_results = news_agent.fetch_news(query=q, max_results=max_results_per_query)
-                for article in search_results.results:
-                    url = str(article.url)
-                    if url not in seen_urls:
-                        seen_urls.add(url)
-                        all_articles.append(article)
+                return q, news_agent.fetch_news(query=q, max_results=max_results_per_query)
             except Exception as e:
                 logger.error("Failed to fetch news for query %r: %s", q, e)
+                return q, None
+
+        if queries:
+            with ThreadPoolExecutor(max_workers=len(queries)) as executor:
+                futures = {executor.submit(fetch_query, q): q for q in queries}
+                for future in as_completed(futures):
+                    _, search_results = future.result()
+                    if search_results:
+                        for article in search_results.results:
+                            url = str(article.url)
+                            if url not in seen_urls:
+                                seen_urls.add(url)
+                                all_articles.append(article)
                 
         # Limit total articles to filter to avoid performance/cost issues
         raw_collection = NewsCollection(

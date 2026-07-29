@@ -49,7 +49,7 @@ async def get_news_intelligence():
     return response
 
 @router.get("/scan")
-async def scan_today_news():
+def scan_today_news():
     start_time = time.perf_counter()
     try:
         from backend.services.search_service import search_service

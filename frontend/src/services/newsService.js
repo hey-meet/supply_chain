@@ -12,7 +12,8 @@ const newsService = {
     },
     async scanTodayNews() {
         try {
-            const response = await apiClient.get("/api/news/scan");
+            // Override default 60s timeout for the heavy multi-agent scan
+            const response = await apiClient.get("/api/news/scan", { timeout: 180000 });
             return response.data;
         } catch (error) {
             console.error("Failed to execute daily news scan:", error);

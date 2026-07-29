@@ -110,14 +110,27 @@ class NewsFilterAgent:
         articles: list[SearchResult],
     ) -> list[SearchResult]:
         """
-        Filter articles using the News Filter Agent.
+        Filter articles using the News Filter Agent in parallel.
         """
-        relevant_articles: list[SearchResult] = []
+        if not articles:
+            return []
 
-        for article in articles:
-            is_relevant, _ = self.is_relevant(article)
-            if is_relevant:
-                relevant_articles.append(article)
+        from concurrent.futures import ThreadPoolExecutor
+
+        def check_relevance(article):
+            try:
+                is_relevant, _ = self.is_relevant(article)
+                return article, is_relevant
+            except Exception as e:
+                logger.error("Error checking relevance for article %r: %s", article.title, e)
+                return article, True # Fallback: keep article if check fails
+
+        relevant_articles: list[SearchResult] = []
+        with ThreadPoolExecutor(max_workers=min(len(articles), 10)) as executor:
+            results = executor.map(check_relevance, articles)
+            for article, is_relevant in results:
+                if is_relevant:
+                    relevant_articles.append(article)
 
         return relevant_articles
 
