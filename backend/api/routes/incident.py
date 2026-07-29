@@ -15,7 +15,7 @@ router = APIRouter(
 )
 
 @router.get("")
-async def get_incident_center(query: str | None = None):
+def get_incident_center(query: str | None = None):
     start_time = time.perf_counter()
     
     if query:
