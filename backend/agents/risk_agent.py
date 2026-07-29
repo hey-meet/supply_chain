@@ -151,23 +151,28 @@ class RiskClassificationAgent:
         )
 
     def classify_risks(self, articles: list[SearchResult]) -> list[RiskAnalysis]:
-        
-        """Classify risks for a list of articles, returning a list of RiskAnalysis objects.
+        """Classify risks for a list of articles in parallel, returning a list of RiskAnalysis objects.
         Any articles that fail classification will be skipped with a warning."""
-        
-        results: list[RiskAnalysis] = []
- 
-        for article in articles:
+        if not articles:
+            return []
+
+        from concurrent.futures import ThreadPoolExecutor
+
+        def process_article(article):
             try:
-                results.append(self.classify_risk(article))
+                return self.classify_risk(article)
             except Exception as exc:
                 logger.warning(
                     "Skipping article %r — risk classification failed: %s",
                     getattr(article, "url", "<unknown url>"),
                     exc,
                 )
- 
-        return results
+                return None
+
+        with ThreadPoolExecutor(max_workers=min(len(articles), 5)) as executor:
+            analyses = executor.map(process_article, articles)
+            
+        return [r for r in analyses if r is not None]
     
     def _build_context(self, article: SearchResult, published_date: datetime) -> dict:
         """Extract lightweight, structured context for token savings."""
