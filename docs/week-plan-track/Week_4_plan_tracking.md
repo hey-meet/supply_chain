@@ -106,3 +106,33 @@ Day 2 marked the most intensive day of Week 4, delivering across three parallel 
 ### Notes
 
 Day 3 closed the final documentation sprint for Week 4. Moumita delivered a complete, professional project README covering architecture, setup, and feature documentation, accompanied by a comprehensive visual asset library capturing all nine major dashboard interfaces and a full end-to-end demo video. The project is now fully presentation-ready on GitHub, with documentation, screenshots, and demo assets unified under the repository for the final evaluation and demonstration.
+
+## Day 4 - 29/07/2026
+
+### Completed
+
+* **News Intelligence Pipeline Concurrency Enhancement (Meet - commits: `e0869ca`, `feat(news)`):**
+  * Refactored `backend/agents/news_filter_agent.py` to execute article relevance filtering in parallel using `ThreadPoolExecutor` (up to 10 workers), replacing the previous sequential loop and adding per-article error handling with a safe fallback (keep article on failure).
+  * Refactored `backend/services/search_service.py` to run Tavily search queries concurrently using `ThreadPoolExecutor` with `as_completed`, eliminating sequential query execution and significantly reducing total news fetch latency.
+  * Updated `frontend/src/services/newsService.js` to align with improved backend pipeline response characteristics.
+  * Updated `backend/api/routes/news.py` for routing consistency with the enhanced pipeline.
+* **Incident Processing & Frontend Integration Improvement (Meet - commit: `825aa95`, `feat(incident)`):**
+  * Converted `get_incident_center` endpoint in `backend/api/routes/incident.py` from `async def` to `def` (synchronous) to prevent event loop blocking during heavy LangGraph simulation workflows.
+  * Extended `frontend/src/services/incidentService.js` with a dynamic timeout override (180s) for query-triggered incident fetches, preventing premature client-side timeouts during complex disruption scans.
+* **Executive Decision Center Workflow Refinement (Meet - commit: `b0b0e04`, `feat(ai)`):**
+  * Converted `execute_assistant_action` endpoint in `backend/api/routes/decision_center.py` from `async def` to `def` (synchronous) for reliable execution under LLM reasoning workloads.
+  * Extended `frontend/src/services/aiService.js` with a 180s timeout override on AI action requests, ensuring complex multi-step executive copilot responses complete without client-side interruption.
+* **AI Risk Assessment & Classification Logic Enhancement (Meet - commit: `665be3c`, `feat(risk)`):**
+  * Refactored `backend/agents/risk_agent.py` `classify_risks` method to process article risk classification in parallel using `ThreadPoolExecutor` (up to 5 workers), replacing the sequential article loop with concurrent execution and graceful `None`-filtered result aggregation.
+
+### In Progress
+
+* None - all Day 4 backend performance and stability improvements have been successfully committed to main.
+
+### Pending
+
+* None - the project is fully presentation-ready with all backend pipelines, frontend integrations, documentation, and demo assets complete.
+
+### Notes
+
+Day 4 was a focused backend performance and reliability hardening sprint led by Meet. All four commits targeted systemic bottlenecks in the AI pipeline execution model: news article filtering and Tavily search fetches were parallelised with `ThreadPoolExecutor` for significant latency gains; incident and AI action endpoints were converted from async to synchronous to eliminate event loop contention under heavy LangGraph and LLM workloads; and frontend service timeouts were extended to 180s to match backend processing durations. The risk classification agent was similarly parallelised for concurrent article scoring. These improvements collectively raise the robustness and throughput of the live supply chain intelligence platform under real-world demonstration conditions.
